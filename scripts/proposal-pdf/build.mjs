@@ -52,7 +52,7 @@ ${fontFaces}
   --accent:#0f766e; --accent-soft:#e6f4f2; --accent-ink:#0b4f4a;
 }
 @page{ size:A4; margin:18mm 16mm 20mm 16mm; }
-${brief ? "@page{ margin:14mm 16mm; } body{ font-size:10.2pt; line-height:1.85; } h2{ margin:5mm 0 2mm !important; font-size:14pt !important; } li{ margin:0 0 .6mm !important; } table{ margin:2mm 0 3mm !important; } td,th{ padding:1.6mm 3mm !important; }" : "@page :first{ margin:0; }"}
+${brief ? "@page{ margin:14mm 16mm; } body{ font-size:10pt !important; line-height:1.8 !important; } h2{ margin:5mm 0 2mm !important; font-size:14pt !important; } li{ margin:0 0 .6mm !important; } table{ margin:2mm 0 3mm !important; } td,th{ padding:1.6mm 3mm !important; }" : "@page :first{ margin:0; }"}
 *{ box-sizing:border-box; }
 html,body{ margin:0; }
 body{ font-family:Vazirmatn, sans-serif; color:var(--ink); font-size:10.6pt; line-height:1.95; background:#fff; }
@@ -109,7 +109,7 @@ ${brief ? "" : `<section class="cover">
   <div class="brand">خانه ایده · آموزشگاه رباتیک، برنامه‌نویسی و هوش مصنوعی</div>
   <div>
     <h1>پروپوزال پلتفرم هوشمند<br>خانه ایده</h1>
-    <div class="sub">سایت، پنل‌های مدیریت و آموزش، ربات بله و تلگرام، رزرو خودکار وقت، گزارش هوشمند جلسات و بازی کشف علاقه برای بچه‌ها.</div>
+    <div class="sub">سایت، پنل‌های مدیریت و آموزش، ربات بله و تلگرام، رزرو خودکار وقت، گزارش هوشمند جلسات و آزمون ورودی متناسب با سن برای بچه‌ها.</div>
     <div class="pill-row">
       <span class="pill">اتاق کنترل ادمین</span><span class="pill">رزرو خودکار</span><span class="pill">ربات بله و تلگرام</span>
       <span class="pill">گزارش جلسه با ویس</span><span class="pill">سفر کاوشگر</span><span class="pill">۳۲ ایده‌ی تمایز</span>
@@ -117,7 +117,7 @@ ${brief ? "" : `<section class="cover">
   </div>
   <div class="meta">
     <div><b>نام کاری محصول</b>ایده‌یار</div>
-    <div><b>نسخه</b>۰.۳، پیش‌نویس برای بررسی</div>
+    <div><b>نسخه</b>۰.۴، پیش‌نویس برای بررسی</div>
     <div><b>تاریخ</b>مهر ۱۴۰۵</div>
   </div>
 </section>
@@ -144,7 +144,7 @@ await page.goto("file://" + htmlPath, { waitUntil: "load" });
 await page.waitForFunction(() => document.body.dataset.ready, null, { timeout: 30000 });
 console.log("mermaid:", await page.evaluate(() => document.body.dataset.ready));
 await page.evaluate(() => document.fonts.ready);
-const footer = `<div style="width:100%;font-size:8px;color:#71717a;padding:0 16mm;display:flex;justify-content:space-between;font-family:sans-serif;"><span>Khaneye Idea Platform Proposal v0.3</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`;
+const footer = `<div style="width:100%;font-size:8px;color:#71717a;padding:0 16mm;display:flex;justify-content:space-between;font-family:sans-serif;"><span>Khaneye Idea Platform Proposal v0.4</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`;
 if (brief) {
   await page.pdf({ path: outPath, format: "A4", printBackground: true, preferCSSPageSize: true });
   await browser.close();

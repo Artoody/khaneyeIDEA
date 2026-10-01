@@ -1,0 +1,14 @@
+{
+  "name": "proposal-pdf",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs ../../docs/PROPOSAL.md ../../docs/Khaneye-Idea-Proposal.pdf"
+  },
+  "dependencies": {
+    "marked": "^18.0.14",
+    "mermaid": "^12.0.0",
+    "playwright-core": "^1.63.0",
+    "vazirmatn": "^33.0.3"
+  }
+}

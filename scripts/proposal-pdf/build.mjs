@@ -112,7 +112,7 @@ ${brief ? "" : `<section class="cover">
     <div class="sub">سایت، پنل‌های مدیریت و آموزش، ربات بله و تلگرام، رزرو خودکار وقت، گزارش هوشمند جلسات و بازی کشف علاقه برای بچه‌ها.</div>
     <div class="pill-row">
       <span class="pill">اتاق کنترل ادمین</span><span class="pill">رزرو خودکار</span><span class="pill">ربات بله و تلگرام</span>
-      <span class="pill">گزارش جلسه با ویس</span><span class="pill">سفر کاوشگر</span><span class="pill">۳۳ ایده‌ی تمایز</span>
+      <span class="pill">گزارش جلسه با ویس</span><span class="pill">سفر کاوشگر</span><span class="pill">۳۲ ایده‌ی تمایز</span>
     </div>
   </div>
   <div class="meta">

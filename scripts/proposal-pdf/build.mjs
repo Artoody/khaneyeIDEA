@@ -4,13 +4,14 @@ import { marked } from "marked";
 import { chromium } from "playwright-core";
 
 const here = path.dirname(new URL(import.meta.url).pathname);
-const [, , mdPath, outPath] = process.argv;
+const [, , mdPath, outPath, mode] = process.argv;
+const brief = mode === "--brief";
 const nm = path.join(here, "node_modules");
 const fontDir = path.join(nm, "vazirmatn/fonts/webfonts");
 
 let md = fs.readFileSync(mdPath, "utf8");
 // Drop title block (everything before the first horizontal rule); the cover replaces it.
-md = md.slice(md.indexOf("\n---\n") + 5);
+if (!brief) md = md.slice(md.indexOf("\n---\n") + 5);
 
 
 const renderer = new marked.Renderer();
@@ -51,7 +52,7 @@ ${fontFaces}
   --accent:#0f766e; --accent-soft:#e6f4f2; --accent-ink:#0b4f4a;
 }
 @page{ size:A4; margin:18mm 16mm 20mm 16mm; }
-@page :first{ margin:0; }
+${brief ? "@page{ margin:14mm 16mm; } body{ font-size:10.2pt; line-height:1.85; } h2{ margin:5mm 0 2mm !important; font-size:14pt !important; } li{ margin:0 0 .6mm !important; } table{ margin:2mm 0 3mm !important; } td,th{ padding:1.6mm 3mm !important; }" : "@page :first{ margin:0; }"}
 *{ box-sizing:border-box; }
 html,body{ margin:0; }
 body{ font-family:Vazirmatn, sans-serif; color:var(--ink); font-size:10.6pt; line-height:1.95; background:#fff; }
@@ -77,6 +78,7 @@ body{ font-family:Vazirmatn, sans-serif; color:var(--ink); font-size:10.6pt; lin
 
 /* Content */
 h2{ font-size:17pt; font-weight:800; color:var(--accent-ink); margin:12mm 0 4mm; padding-bottom:2.5mm; border-bottom:2px solid var(--accent); break-after:avoid; }
+main > h1{ font-size:22pt; font-weight:900; color:var(--accent-ink); margin:0 0 4mm; padding-bottom:3mm; border-bottom:3px solid var(--accent); }
 h3{ font-size:12.8pt; font-weight:700; color:var(--ink); margin:8mm 0 2mm; break-after:avoid; }
 h3::before{ content:""; display:inline-block; width:2.2mm; height:2.2mm; background:var(--accent); border-radius:1px; margin-left:2.5mm; vertical-align:middle; }
 p{ margin:0 0 3mm; }
@@ -103,26 +105,26 @@ pre.mermaid{ background:none; border:0; padding:0; margin:0; }
 </style>
 </head>
 <body>
-<section class="cover">
+${brief ? "" : `<section class="cover">
   <div class="brand">خانه ایده · آموزشگاه رباتیک، برنامه‌نویسی و هوش مصنوعی</div>
   <div>
     <h1>پروپوزال پلتفرم هوشمند<br>خانه ایده</h1>
     <div class="sub">سایت، پنل‌های مدیریت و آموزش، ربات بله و تلگرام، رزرو خودکار وقت، گزارش هوشمند جلسات و بازی کشف علاقه برای بچه‌ها.</div>
     <div class="pill-row">
       <span class="pill">اتاق کنترل ادمین</span><span class="pill">رزرو خودکار</span><span class="pill">ربات بله و تلگرام</span>
-      <span class="pill">گزارش جلسه با ویس</span><span class="pill">سفر کاوشگر</span><span class="pill">۲۸ ایده‌ی تمایز</span>
+      <span class="pill">گزارش جلسه با ویس</span><span class="pill">سفر کاوشگر</span><span class="pill">۳۳ ایده‌ی تمایز</span>
     </div>
   </div>
   <div class="meta">
     <div><b>نام کاری محصول</b>ایده‌یار</div>
-    <div><b>نسخه</b>۰.۲، پیش‌نویس برای بررسی</div>
+    <div><b>نسخه</b>۰.۳، پیش‌نویس برای بررسی</div>
     <div><b>تاریخ</b>مهر ۱۴۰۵</div>
   </div>
 </section>
 <section class="toc">
   <h2>فهرست</h2>
   <ol>${toc}</ol>
-</section>
+</section>`}
 <main>${body}</main>
 <script src="file://${nm}/mermaid/dist/mermaid.min.js"></script>
 <script>
@@ -142,12 +144,17 @@ await page.goto("file://" + htmlPath, { waitUntil: "load" });
 await page.waitForFunction(() => document.body.dataset.ready, null, { timeout: 30000 });
 console.log("mermaid:", await page.evaluate(() => document.body.dataset.ready));
 await page.evaluate(() => document.fonts.ready);
-const footer = `<div style="width:100%;font-size:8px;color:#71717a;padding:0 16mm;display:flex;justify-content:space-between;font-family:sans-serif;"><span>Khaneye Idea Platform Proposal v0.2</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`;
-await page.pdf({ path: outPath + ".cover.pdf", format: "A4", printBackground: true, preferCSSPageSize: true, pageRanges: "1" });
-await page.pdf({ path: outPath + ".body.pdf", format: "A4", printBackground: true, preferCSSPageSize: true, pageRanges: "2-",
-  displayHeaderFooter: true, headerTemplate: "<span></span>", footerTemplate: footer });
-await browser.close();
-const { execFileSync } = await import("node:child_process");
-execFileSync("pdfunite", [outPath + ".cover.pdf", outPath + ".body.pdf", outPath]);
-fs.unlinkSync(outPath + ".cover.pdf"); fs.unlinkSync(outPath + ".body.pdf");
+const footer = `<div style="width:100%;font-size:8px;color:#71717a;padding:0 16mm;display:flex;justify-content:space-between;font-family:sans-serif;"><span>Khaneye Idea Platform Proposal v0.3</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`;
+if (brief) {
+  await page.pdf({ path: outPath, format: "A4", printBackground: true, preferCSSPageSize: true });
+  await browser.close();
+} else {
+  await page.pdf({ path: outPath + ".cover.pdf", format: "A4", printBackground: true, preferCSSPageSize: true, pageRanges: "1" });
+  await page.pdf({ path: outPath + ".body.pdf", format: "A4", printBackground: true, preferCSSPageSize: true, pageRanges: "2-",
+    displayHeaderFooter: true, headerTemplate: "<span></span>", footerTemplate: footer });
+  await browser.close();
+  const { execFileSync } = await import("node:child_process");
+  execFileSync("pdfunite", [outPath + ".cover.pdf", outPath + ".body.pdf", outPath]);
+  fs.unlinkSync(outPath + ".cover.pdf"); fs.unlinkSync(outPath + ".body.pdf");
+}
 console.log("wrote", outPath);

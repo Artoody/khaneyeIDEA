@@ -4,6 +4,7 @@
 
 - [پروپوزال محصول](docs/PROPOSAL.md)
 - [نسخه‌ی PDF پروپوزال](docs/Khaneye-Idea-Proposal.pdf)
+- [معرفی کوتاه یک‌صفحه‌ای](docs/BRIEF.md) ([PDF](docs/Khaneye-Idea-Brief.pdf))
 
 ساخت دوباره‌ی PDF بعد از ویرایش پروپوزال:
 

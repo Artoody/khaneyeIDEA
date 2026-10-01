@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node build.mjs ../../docs/PROPOSAL.md ../../docs/Khaneye-Idea-Proposal.pdf"
+    "build": "node build.mjs ../../docs/PROPOSAL.md ../../docs/Khaneye-Idea-Proposal.pdf && node build.mjs ../../docs/BRIEF.md ../../docs/Khaneye-Idea-Brief.pdf --brief"
   },
   "dependencies": {
     "marked": "^18.0.14",

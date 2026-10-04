@@ -23,11 +23,30 @@ A 5-second brand intro for the welcome page, built from the logo itself.
 - Film grain prevents gradient banding after compression.
 - Typeface: Geist (SIL Open Font License, see `fonts/LICENSE.txt`).
 
+## Sound design
+
+`sound.py` synthesizes the whole soundtrack from scratch (no samples, no licensing issues) and places every sound on the exact event timeline exported from the scene:
+
+| Visual | Sound |
+|---|---|
+| Idea spark | glassy high glint and a soft falling air ring |
+| Spark splits into four | four rising zips, panned toward each circuit |
+| Traces soldering in | electric crackle that pans along each trace, sparks as tiny crackles |
+| Nodes pop | an A major arpeggio (A, C sharp, E, A), one note per circuit |
+| Power on | riser cut dead into a sub boom with a bright transient and zap; the chord rings once |
+| House glides left | filtered whoosh moving left |
+| Letters and words | soft ticks |
+| Signature node | ping into a warm A add9 bell chord |
+
+Mastered to about -13.5 LUFS integrated, -1 dBTP peak. Note: browsers only autoplay video muted, so on the website sound plays only after the visitor taps a sound toggle.
+
 ## Rebuild
 
 ```bash
 npm i playwright-core   # once, or symlink an existing node_modules
 node render.mjs frames /tmp/intro-frames 120
+node render.mjs events /tmp/intro-frames      # event timeline for audio
+python3 sound.py /tmp/intro-frames/events.json out/idea-house-intro.wav
 ./encode.sh /tmp/intro-frames out
 ```
 

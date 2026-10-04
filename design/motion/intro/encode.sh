@@ -20,3 +20,11 @@ ffmpeg -y -hide_banner -loglevel error -framerate 120 -i "$FRAMES/f%04d.png" \
 # Poster (final frame) for instant first paint
 ffmpeg -y -hide_banner -loglevel error -i "$FRAMES/$(ls "$FRAMES" | tail -1)" -q:v 3 "$OUT/idea-house-intro-poster.jpg"
 ls -la "$OUT"
+
+# Mux the procedural soundtrack (sound.py) if present
+if [ -f "$OUT/idea-house-intro.wav" ]; then
+  ffmpeg -y -hide_banner -loglevel error -i "$OUT/idea-house-intro.mp4" -i "$OUT/idea-house-intro.wav" \
+    -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart "$OUT/tmp.mp4" && mv "$OUT/tmp.mp4" "$OUT/idea-house-intro.mp4"
+  ffmpeg -y -hide_banner -loglevel error -i "$OUT/idea-house-intro.webm" -i "$OUT/idea-house-intro.wav" \
+    -map 0:v -map 1:a -c:v copy -c:a libopus -b:a 128k -shortest "$OUT/tmp.webm" && mv "$OUT/tmp.webm" "$OUT/idea-house-intro.webm"
+fi

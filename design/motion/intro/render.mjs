@@ -28,7 +28,23 @@ async function grab(t, file) {
   fs.writeFileSync(file, Buffer.from(b64, "base64"));
 }
 
-if (mode === "stills") {
+if (mode === "events") {
+  // exact event timeline for sound design (screen x is used for stereo panning)
+  const ev = await page.evaluate(() => {
+    const xf0 = logoXform(0);
+    const paths = PATHS.map((p) => {
+      const a = uToImg(p.pts[0][0], p.pts[0][1]), b = p.node;
+      return { t0: p.t0, t1: p.t1, x0: toScreen(xf0, a[0], a[1])[0], x1: toScreen(xf0, b[0], b[1])[0] };
+    });
+    const sparks = SPARKS.map((s) => {
+      const p = PATHS[s.pi]; const hp = pointAt(p.P, headAt(p, s.tb)); const im = uToImg(hp[0], hp[1]);
+      return { t: s.tb, x: toScreen(logoXform(s.tb), im[0], im[1])[0], size: s.size };
+    });
+    return { W, DURATION, T_PULSE, T_MOVE0, T_MOVE1, T_TEXT, T_ACAD, T_TAG, T_LINE0, T_LINE1,
+      title: TITLE.length, acad: ACAD.length, tagWords: TAG.split(" ").length, lineX: LAY.tx, paths, sparks };
+  });
+  fs.writeFileSync(path.join(outDir, "events.json"), JSON.stringify(ev, null, 1));
+} else if (mode === "stills") {
   const times = rest.length ? rest.map(Number) : [0.3, 0.8, 1.3, 1.8, 2.2, 2.7, 3.2, 3.8, 4.95];
   for (const t of times) await grab(t, path.join(outDir, `t${t.toFixed(2)}.png`));
 } else {

@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Idea House Intro</title>
+<style>
+  @font-face { font-family: Geist; font-weight: 300; src: url("fonts/Geist-Light.woff2") format("woff2"); }
+  @font-face { font-family: Geist; font-weight: 400; src: url("fonts/Geist-Regular.woff2") format("woff2"); }
+  @font-face { font-family: Geist; font-weight: 600; src: url("fonts/Geist-SemiBold.woff2") format("woff2"); }
+  html, body { margin: 0; background: #0b0c10; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+/*
+  Idea House Academy, 5 second intro.
+  Fully deterministic: render(t) draws the frame for time t (seconds),
+  so the same t always produces the same pixels. Frames are captured offline.
+*/
+const W = 1920, H = 1080, DURATION = 5.0;
+const cv = document.getElementById("c");
+const ctx = cv.getContext("2d");
+const L = new OffscreenCanvas(W, H);          // logo layer (for bloom)
+const lx = L.getContext("2d");
+
+// ---------- palette ----------
+const AMBER = [255, 179, 71];
+const HOT = [255, 243, 222];
+const INK = "#0b0c10";
+const TEXT = [238, 239, 242];
+const rgba = (c, a) => `rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
+const mix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+
+// ---------- math ----------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const eOutExpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+const eOutCubic = x => 1 - Math.pow(1 - x, 3);
+const eInOutCubic = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eInOutQuart = x => x < .5 ? 8 * x ** 4 : 1 - Math.pow(-2 * x + 2, 4) / 2;
+const eInOutSine = x => -(Math.cos(Math.PI * x) - 1) / 2;
+const eInCubic = x => x * x * x;
+const spring = x => x <= 0 ? 0 : 1 - Math.exp(-7 * x) * Math.cos(11 * x);
+
+function rng(seed) { // mulberry32
+  return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+
+// ---------- polylines ----------
+function poly(pts, sx = 1) { // lengths measured in display metric (x scaled by sx)
+  const segs = []; let total = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const dx = (pts[i][0] - pts[i - 1][0]) * sx, dy = pts[i][1] - pts[i - 1][1];
+    const l = Math.hypot(dx, dy); segs.push(l); total += l;
+  }
+  return { pts, segs, total };
+}
+function pointAt(p, s) {
+  s = clamp(s, 0, p.total);
+  for (let i = 0; i < p.segs.length; i++) {
+    if (s <= p.segs[i] || i === p.segs.length - 1) {
+      const k = p.segs[i] ? clamp(s / p.segs[i]) : 0;
+      const a = p.pts[i], b = p.pts[i + 1];
+      return [lerp(a[0], b[0], k), lerp(a[1], b[1], k)];
+    }
+    s -= p.segs[i];
+  }
+  return p.pts[p.pts.length - 1];
+}
+function subPath(g, p, s0, s1) { // trace sub polyline [s0, s1] into current path
+  s0 = clamp(s0, 0, p.total); s1 = clamp(s1, 0, p.total);
+  if (s1 <= s0) return false;
+  const a = pointAt(p, s0); g.moveTo(a[0], a[1]);
+  let acc = 0;
+  for (let i = 0; i < p.segs.length; i++) {
+    const e = acc + p.segs[i];
+    if (e > s0 && e < s1) g.lineTo(p.pts[i + 1][0], p.pts[i + 1][1]);
+    acc = e;
+  }
+  const b = pointAt(p, s1); g.lineTo(b[0], b[1]);
+  return true;
+}
+
+// ---------- logo geometry (decoded from the 512px brand mark) ----------
+// Traces live in "u space" (x / 1.24): the mark is a 45 degree circuit house,
+// stretched 1.24x horizontally. Nodes are true circles in image space.
+const SX = 1.24, STROKE = 22, NODE_R = 19.5;
+const LOGO_C = [228.5, 213.5];               // bbox centre of the mark (image px)
+const LOGO_SIZE = [343, 305];
+const PATHS = [
+  { pts: [[324, 212.5], [71.9, 212.5], [202.6, 81.8]], node: [251.2, 81.8], t0: 0.62, dur: 1.05, clipEave: true },
+  { pts: [[208, 119], [264.1, 175.5], [163.4, 175.5]], node: [202.6, 175.0], t0: 0.86, dur: 0.92 },
+  { pts: [[106.9, 212.5], [106.9, 347], [289.5, 347]], node: [359.0, 346.6], t0: 0.98, dur: 0.95 },
+  { pts: [[261.3, 212.5], [261.3, 304], [145.8, 304]], node: [180.8, 303.6], t0: 1.12, dur: 0.86 },
+].map(p => ({ ...p, P: poly(p.pts, SX) }));
+PATHS.forEach(p => { p.t1 = p.t0 + p.dur; });
+
+// ---------- timeline ----------
+const T_PULSE = 1.98;              // power-on pulse through the circuit
+const T_MOVE0 = 2.32, T_MOVE1 = 3.18;
+const T_TEXT = 2.62, T_ACAD = 2.86, T_TAG = 3.36, T_LINE0 = 3.52, T_LINE1 = 4.18;
+
+// ---------- layout (computed after fonts load) ----------
+const C0 = [960, 540], S0 = 1.56, S1 = 1.2;
+const GAP = 84;
+let LAY = null;
+const F_TITLE = '600 128px Geist', F_ACAD = '300 128px Geist', F_TAG = '400 36px Geist';
+const TITLE = "Idea House", ACAD = "Academy", TAG = "Where ideas become robots.";
+function layout() {
+  ctx.letterSpacing = "-5px";
+  ctx.font = F_TITLE; const wT = ctx.measureText(TITLE).width;
+  ctx.font = F_ACAD; const wA = ctx.measureText(ACAD).width;
+  ctx.letterSpacing = "0px";
+  ctx.font = F_TAG; const wG = ctx.measureText(TAG).width;
+  const textW = Math.max(wT, wA, wG);
+  const logoW = LOGO_SIZE[0] * S1;
+  const groupW = logoW + GAP + textW;
+  const left = (W - groupW) / 2;
+  const P1 = [left + logoW / 2, 540];
+  const tx = left + logoW + GAP;
+  // vertical rhythm: title cap-top aligned near logo top, tagline near logo bottom
+  const top = 540 - LOGO_SIZE[1] * S1 / 2;
+  LAY = { P1, tx, wT, wA, wG, yT: top + 104, yA: top + 228, yG: top + 318, yLine: top + 352 };
+}
+
+// ---------- logo transform over time ----------
+function logoXform(t) {
+  const k = eInOutQuart(prog(t, T_MOVE0, T_MOVE1));
+  const s = lerp(S0, S1, k);
+  const breathe = 1 + 0.012 * Math.sin(prog(t, 0, DURATION) * Math.PI); // slow life
+  return { x: lerp(C0[0], LAY.P1[0], k), y: lerp(C0[1], LAY.P1[1], k), s: s * breathe, k };
+}
+function toScreen(xf, ix, iy) { // image px -> screen px
+  return [xf.x + (ix - LOGO_C[0]) * xf.s, xf.y + (iy - LOGO_C[1]) * xf.s];
+}
+const uToImg = (u, y) => [u * SX, y];
+
+// ---------- background: PCB traces converging on the house ----------
+const BG = (() => {
+  const r = rng(7);
+  const traces = [];
+  const N = 38;
+  for (let i = 0; i < N; i++) {
+    const th = (i / N) * Math.PI * 2 + (r() - .5) * 0.12;
+    const rx = 400 + r() * 70, ry = 330 + r() * 50;
+    const pad = [C0[0] + Math.cos(th) * rx, C0[1] + Math.sin(th) * ry];
+    const far = 1500 + r() * 300;
+    const S = [C0[0] + Math.cos(th) * far, C0[1] + Math.sin(th) * far * 0.62];
+    // PCB route: straight run on the dominant axis, then a 45 degree leg into the pad
+    const dx = pad[0] - S[0], dy = pad[1] - S[1];
+    let K;
+    if (Math.abs(dx) > Math.abs(dy)) K = [S[0] + Math.sign(dx) * (Math.abs(dx) - Math.abs(dy)), S[1]];
+    else K = [S[0], S[1] + Math.sign(dy) * (Math.abs(dy) - Math.abs(dx))];
+    // stub so the pad is entered orthogonally
+    const stub = 26 + r() * 30;
+    const dirx = Math.sign(pad[0] - K[0]), diry = Math.sign(pad[1] - K[1]);
+    const D = [pad[0] - dirx * stub * (Math.abs(dx) > Math.abs(dy) ? 1 : 0), pad[1] - diry * stub * (Math.abs(dx) > Math.abs(dy) ? 0 : 1)];
+    const pts = [S, K, D, pad];
+    const delay = 0.04 + r() * 0.5;
+    traces.push({ P: poly(pts), pad, delay, dur: 0.85 + r() * 0.35, w: 1.6 + r() * 0.8,
+      eDelay: delay + 0.18 + r() * 0.25, eDur: 0.7 + r() * 0.3, out: 2.5 + r() * 2.0, outSpeed: 260 + r() * 160 });
+  }
+  // scattered vias for texture
+  const vias = [];
+  for (let i = 0; i < 70; i++) {
+    const a = r() * Math.PI * 2, d = 520 + r() * 900;
+    vias.push([C0[0] + Math.cos(a) * d, C0[1] + Math.sin(a) * d * 0.6, 2 + r() * 2.5, r() * 0.9]);
+  }
+  return { traces, vias };
+})();
+
+// ---------- sparks emitted by the drawing heads ----------
+const SPARKS = (() => {
+  const r = rng(42), out = [];
+  PATHS.forEach((p, pi) => {
+    const n = 34;
+    for (let i = 0; i < n; i++) {
+      const tb = p.t0 + p.dur * (0.04 + 0.94 * (i / n)) + r() * 0.02;
+      const a = r() * Math.PI * 2;
+      const sp = 140 + r() * 420;
+      out.push({ pi, tb, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 120, life: 0.22 + r() * 0.4, size: 1.2 + r() * 2.2 });
+    }
+  });
+  return out;
+})();
+function headAt(p, t) { // draw progress of a logo path in display px
+  return eInOutCubic(prog(t, p.t0, p.t1)) * p.P.total;
+}
+
+// ---------- film grain tile ----------
+const GRAIN = (() => {
+  const g = new OffscreenCanvas(256, 256), gx = g.getContext("2d");
+  const img = gx.createImageData(256, 256), r = rng(99);
+  for (let i = 0; i < img.data.length; i += 4) { const v = r() * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  gx.putImageData(img, 0, 0); return g;
+})();
+
+// =====================================================================
+function render(t) {
+  const xf = logoXform(t);
+  const fadeIn = eOutCubic(prog(t, 0, 0.45));
+
+  // ---- base ----
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalCompositeOperation = "source-over";
+  ctx.globalAlpha = 1; ctx.filter = "none";
+  ctx.fillStyle = INK; ctx.fillRect(0, 0, W, H);
+  const vg = ctx.createRadialGradient(xf.x, xf.y, 40, xf.x, xf.y, 1250);
+  vg.addColorStop(0, `rgba(30,32,40,${0.9 * fadeIn})`);
+  vg.addColorStop(1, "rgba(6,7,9,0)");
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+
+  // ---- camera: slow push-in ----
+  const cam = 1 + 0.04 * eInOutSine(prog(t, 0, DURATION));
+  ctx.setTransform(cam, 0, 0, cam, (1 - cam) * W / 2, (1 - cam) * H / 2);
+
+  // parallax: background follows the house partially
+  const par = [(xf.x - C0[0]) * 0.82, (xf.y - C0[1]) * 0.82];
+  const bgScale = Math.sqrt(xf.s / S0);
+
+  // ---- dot grid with power-on reveal and a ripple wave ----
+  const R = eOutCubic(prog(t, 0.05, 1.35)) * 1500;
+  const rip = (t - (T_PULSE + 0.08)) * 1250, ripA = 1 - prog(t, T_PULSE + 0.08, T_PULSE + 1.6);
+  const step = 34;
+  for (let gy = -step; gy < H + step; gy += step) {
+    for (let gx = -step; gx < W + step; gx += step) {
+      const px = gx + (par[0] * 0.25) % step, py = gy + (par[1] * 0.25) % step;
+      const d = Math.hypot(px - xf.x, py - xf.y);
+      let a = 0.075 * clamp((R - d) / 160);
+      const edge = Math.exp(-Math.pow((d - R) / 46, 2)) * 0.5 * (1 - prog(t, 0.9, 1.5));
+      let wave = 0;
+      if (t > T_PULSE && ripA > 0) wave = Math.exp(-Math.pow((d - rip) / 64, 2)) * 0.55 * ripA;
+      const amber = edge + wave;
+      if (a + amber < 0.004) continue;
+      if (a > 0) { ctx.fillStyle = rgba(TEXT, a); ctx.fillRect(px - 1, py - 1, 2, 2); }
+      if (amber > 0.004) { ctx.fillStyle = rgba(AMBER, amber); ctx.fillRect(px - 1.5, py - 1.5, 3, 3); }
+    }
+  }
+
+  // ---- background traces ----
+  const textDim = (1.45 - 0.45 * eOutCubic(prog(t, 1.6, 2.4))) * (1 - 0.55 * eOutCubic(prog(t, T_TEXT - 0.2, T_TEXT + 0.6)));
+  ctx.save();
+  ctx.translate(C0[0] + par[0], C0[1] + par[1]); ctx.scale(bgScale, bgScale); ctx.translate(-C0[0], -C0[1]);
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  for (const v of BG.vias) {
+    const vis = clamp((R - Math.hypot(v[0] - C0[0], v[1] - C0[1])) / 200);
+    if (vis <= 0) continue;
+    ctx.strokeStyle = rgba(AMBER, 0.13 * vis * v[3] * textDim); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(v[0], v[1], v[2], 0, Math.PI * 2); ctx.stroke();
+  }
+  for (const tr of BG.traces) {
+    const k = eOutCubic(prog(t, tr.delay, tr.delay + tr.dur));
+    if (k <= 0) continue;
+    const s1 = k * tr.P.total;
+    ctx.strokeStyle = rgba(AMBER, 0.2 * textDim); ctx.lineWidth = tr.w;
+    ctx.beginPath(); subPath(ctx, tr.P, 0, s1); ctx.stroke();
+    // pad
+    const padK = spring(prog(t, tr.delay + tr.dur * 0.92, tr.delay + tr.dur * 0.92 + 0.6));
+    if (padK > 0) {
+      ctx.strokeStyle = rgba(AMBER, 0.45 * textDim); ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(tr.pad[0], tr.pad[1], 6 * padK, 0, Math.PI * 2); ctx.stroke();
+    }
+    // inbound electron
+    const ek = prog(t, tr.eDelay, tr.eDelay + tr.eDur);
+    if (ek > 0 && ek < 1) {
+      const s = eInCubic(ek) * tr.P.total;
+      drawComet(ctx, tr.P, s, 120, 2.6, 0.95 * textDim, false);
+    }
+    // outbound signals after power-on: the house broadcasting
+    if (t > tr.out) {
+      const s = tr.P.total - (t - tr.out) * tr.outSpeed;
+      if (s > 0) drawComet(ctx, tr.P, s, 90, 2, 0.5 * textDim, true);
+    }
+  }
+  ctx.restore();
+
+  // ---- logo layer ----
+  lx.setTransform(1, 0, 0, 1, 0, 0);
+  lx.clearRect(0, 0, W, H);
+  lx.setTransform(cam, 0, 0, cam, (1 - cam) * W / 2, (1 - cam) * H / 2);
+  drawLogo(lx, t, xf);
+
+  // composite with bloom
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const pulse = Math.exp(-Math.pow((t - (T_PULSE + 0.22)) / 0.18, 2));
+  const glow = 0.3 + 0.55 * pulse + 0.25 * eOutCubic(prog(t, 0.6, 1.9)) * (1 - prog(t, 2.2, 3.4)) ;
+  // bloom sits BEHIND the crisp mark so the stroke keeps the exact brand amber
+  ctx.globalCompositeOperation = "lighter";
+  ctx.filter = "blur(16px)"; ctx.globalAlpha = clamp(0.8 * glow, 0, 1); ctx.drawImage(L, 0, 0);
+  ctx.filter = "blur(56px)"; ctx.globalAlpha = clamp(0.5 * glow, 0, 1); ctx.drawImage(L, 0, 0);
+  ctx.filter = "none"; ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "source-over";
+  ctx.drawImage(L, 0, 0);
+  ctx.restore();
+
+  drawSpark(t);
+
+  // sparks (screen space, additive)
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  for (const sp of SPARKS) {
+    const age = t - sp.tb;
+    if (age < 0 || age > sp.life) continue;
+    const p = PATHS[sp.pi];
+    const hp = pointAt(p.P, headAt(p, sp.tb));
+    const im = uToImg(hp[0], hp[1]);
+    const xb = logoXform(sp.tb);
+    const o = toScreen(xb, im[0], im[1]);
+    const x = o[0] + sp.vx * age, y = o[1] + sp.vy * age + 520 * age * age;
+    const f = 1 - age / sp.life;
+    ctx.fillStyle = rgba(mix(AMBER, HOT, f), f);
+    ctx.beginPath(); ctx.arc(x, y, sp.size * (0.5 + f), 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+
+  // ---- type ----
+  drawType(t);
+
+  // ---- grain + vignette ----
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalCompositeOperation = "overlay";
+  ctx.globalAlpha = 0.06;
+  const gr = rng(Math.floor(t * 120) + 3);
+  const ox = -Math.floor(gr() * 256), oy = -Math.floor(gr() * 256);
+  for (let y = oy; y < H; y += 256) for (let x = ox; x < W; x += 256) ctx.drawImage(GRAIN, x, y);
+  ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
+  const vv = ctx.createRadialGradient(W / 2, H / 2, 520, W / 2, H / 2, 1180);
+  vv.addColorStop(0, "rgba(0,0,0,0)"); vv.addColorStop(1, "rgba(0,0,0,0.55)");
+  ctx.fillStyle = vv; ctx.fillRect(0, 0, W, H);
+  // open from black
+  if (t < 0.25) { ctx.fillStyle = `rgba(0,0,0,${1 - eOutCubic(t / 0.25)})`; ctx.fillRect(0, 0, W, H); }
+}
+
+
+// ---------- the idea spark: one point of light that splits into the four circuits ----------
+function drawSpark(t) {
+  if (t > 1.3) return;
+  const cam = 1 + 0.04 * eInOutSine(prog(t, 0, DURATION));
+  ctx.save();
+  ctx.setTransform(cam, 0, 0, cam, (1 - cam) * W / 2, (1 - cam) * H / 2);
+  ctx.globalCompositeOperation = "lighter";
+  const xf = logoXform(t);
+  const born = spring(prog(t, 0.06, 0.6));
+  const fade = 1 - eOutCubic(prog(t, 0.95, 1.25));
+  const flick = 0.85 + 0.15 * Math.sin(t * 40);
+  const a = born * fade * flick;
+  if (a > 0.01) {
+    const r = 70 * born;
+    const rg = ctx.createRadialGradient(C0[0], C0[1], 0, C0[0], C0[1], r);
+    rg.addColorStop(0, rgba(HOT, a)); rg.addColorStop(0.12, rgba(HOT, a * 0.9));
+    rg.addColorStop(0.3, rgba(AMBER, a * 0.35)); rg.addColorStop(1, rgba(AMBER, 0));
+    ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(C0[0], C0[1], r, 0, Math.PI * 2); ctx.fill();
+    // anamorphic streak
+    const sw = 260 * born * fade;
+    const lg = ctx.createLinearGradient(C0[0] - sw, 0, C0[0] + sw, 0);
+    lg.addColorStop(0, rgba(AMBER, 0)); lg.addColorStop(0.5, rgba(HOT, 0.55 * a)); lg.addColorStop(1, rgba(AMBER, 0));
+    ctx.fillStyle = lg; ctx.fillRect(C0[0] - sw, C0[1] - 1.5, sw * 2, 3);
+  }
+  // launch ring
+  const rk = prog(t, 0.12, 0.95);
+  if (rk > 0 && rk < 1) {
+    ctx.strokeStyle = rgba(AMBER, 0.55 * (1 - rk)); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(C0[0], C0[1], 12 + 300 * eOutExpo(rk), 0, Math.PI * 2); ctx.stroke();
+  }
+  // four streaks fly from the spark to where each circuit starts drawing
+  for (const p of PATHS) {
+    const k = prog(t, p.t0 - 0.24, p.t0);
+    if (k <= 0 || k >= 1.0001) continue;
+    const st = uToImg(p.pts[0][0], p.pts[0][1]);
+    const end = toScreen(xf, st[0], st[1]);
+    const e = eInOutCubic(k);
+    const hx = lerp(C0[0], end[0], e), hy = lerp(C0[1], end[1], e);
+    const tx = lerp(C0[0], end[0], Math.max(0, e - 0.35)), ty = lerp(C0[1], end[1], Math.max(0, e - 0.35));
+    const lg = ctx.createLinearGradient(tx, ty, hx, hy);
+    lg.addColorStop(0, rgba(AMBER, 0)); lg.addColorStop(1, rgba(HOT, 0.95));
+    ctx.strokeStyle = lg; ctx.lineWidth = 3; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(hx, hy); ctx.stroke();
+    const hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, 18);
+    hg.addColorStop(0, rgba(HOT, 1)); hg.addColorStop(1, rgba(AMBER, 0));
+    ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(hx, hy, 18, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+// glowing comet along a polyline (head at s, tail behind)
+function drawComet(g, P, s, tail, w, alpha, reverse) {
+  const n = 8;
+  for (let i = 0; i < n; i++) {
+    const a = reverse ? s + tail * (i / n) : s - tail * (1 - i / n);
+    const b = reverse ? s + tail * ((i + 1) / n) : s - tail * (1 - (i + 1) / n);
+    const k = reverse ? 1 - (i + 1) / n : (i + 1) / n;
+    g.strokeStyle = rgba(mix(AMBER, HOT, k), alpha * k * k);
+    g.lineWidth = w * (0.6 + k);
+    g.beginPath(); if (subPath(g, P, Math.min(a, b), Math.max(a, b))) g.stroke();
+  }
+  const hp = pointAt(P, s);
+  const rg = g.createRadialGradient(hp[0], hp[1], 0, hp[0], hp[1], 16);
+  rg.addColorStop(0, rgba(HOT, alpha)); rg.addColorStop(0.3, rgba(AMBER, alpha * 0.5)); rg.addColorStop(1, rgba(AMBER, 0));
+  g.fillStyle = rg; g.beginPath(); g.arc(hp[0], hp[1], 16, 0, Math.PI * 2); g.fill();
+}
+
+function drawLogo(g, t, xf) {
+  g.save();
+  g.translate(xf.x, xf.y); g.scale(xf.s, xf.s); g.translate(-LOGO_C[0], -LOGO_C[1]);
+  g.lineJoin = "miter"; g.miterLimit = 8; g.lineCap = "butt";
+
+  for (const p of PATHS) {
+    const s = headAt(p, t);
+    if (s <= 0) continue;
+    g.save();
+    if (p.clipEave) { // 45 degree cut on the eave's right end, as in the mark
+      g.beginPath();
+      g.moveTo(-50 * SX, -50); g.lineTo((312.9 + (-50 - 212.5)) * SX, -50);
+      g.lineTo((312.9 + (600 - 212.5)) * SX, 600); g.lineTo(-50 * SX, 600); g.closePath(); g.clip();
+    }
+    g.save(); g.scale(SX, 1);
+    // settled trace
+    g.strokeStyle = rgba(AMBER, 1); g.lineWidth = STROKE;
+    g.beginPath(); subPath(g, p.P, 0, s); g.stroke();
+    // molten section behind the head, cooling to amber
+    const drawing = t < p.t1 + 0.25;
+    if (drawing) {
+      const cool = prog(t, p.t1, p.t1 + 0.25);
+      const seg = 110, n = 10;
+      for (let i = 0; i < n; i++) {
+        const a = s - seg * (1 - i / n), b = s - seg * (1 - (i + 1) / n) + 0.6;
+        const k = (i + 1) / n;
+        g.strokeStyle = rgba(mix(AMBER, HOT, k * (1 - cool)), 1);
+        g.beginPath(); if (subPath(g, p.P, Math.max(0, a), b)) g.stroke();
+      }
+    }
+    // power-on pulse: a white-hot packet runs the whole circuit
+    const pk = prog(t, T_PULSE, T_PULSE + 0.62);
+    if (pk > 0 && pk < 1) {
+      const len = 150, ps = eInOutCubic(pk) * (p.P.total + len);
+      const n = 12;
+      for (let i = 0; i < n; i++) {
+        const a = ps - len * (1 - i / n), b = ps - len * (1 - (i + 1) / n) + 0.6;
+        const k = Math.sin(Math.PI * (i + 0.5) / n);
+        g.strokeStyle = rgba(HOT, 0.95 * k);
+        g.beginPath(); if (subPath(g, p.P, a, b)) g.stroke();
+      }
+    }
+    // idle current: small packets circulating once alive
+    const idle = prog(t, 2.7, 3.2);
+    if (idle > 0) {
+      for (let j = 0; j < 2; j++) {
+        const ss = ((t - 2.7) * 210 + j * p.P.total / 2 + p.P.total * 0.37 * PATHS.indexOf(p)) % (p.P.total + 60);
+        g.strokeStyle = rgba(HOT, 0.55 * idle);
+        g.lineWidth = STROKE * 0.32;
+        g.beginPath(); if (subPath(g, p.P, ss - 46, ss)) g.stroke();
+        g.lineWidth = STROKE;
+      }
+    }
+    g.restore();
+    // drawing head glow
+    if (t >= p.t0 && t < p.t1 + 0.05) {
+      const hp = pointAt(p.P, s), im = uToImg(hp[0], hp[1]);
+      const rg = g.createRadialGradient(im[0], im[1], 0, im[0], im[1], 34);
+      rg.addColorStop(0, rgba(HOT, 1)); rg.addColorStop(0.35, rgba(AMBER, 0.6)); rg.addColorStop(1, rgba(AMBER, 0));
+      g.fillStyle = rg; g.beginPath(); g.arc(im[0], im[1], 34, 0, Math.PI * 2); g.fill();
+    }
+    g.restore();
+
+    // node: solder pop with spring + shockwave ring
+    const nk = prog(t, p.t1 - 0.04, p.t1 + 0.9);
+    if (nk > 0) {
+      const sc = spring(nk * 1.1);
+      const flash = Math.exp(-nk * 9);
+      const pulseHit = Math.exp(-Math.pow((t - (T_PULSE + 0.6)) / 0.08, 2));
+      g.fillStyle = rgba(mix(AMBER, HOT, clamp(flash + pulseHit)), 1);
+      g.beginPath(); g.arc(p.node[0], p.node[1], NODE_R * sc, 0, Math.PI * 2); g.fill();
+      const rk = prog(t, p.t1, p.t1 + 0.7);
+      if (rk > 0 && rk < 1) {
+        g.strokeStyle = rgba(AMBER, 0.75 * (1 - rk)); g.lineWidth = 2.5 * (1 - rk) + 0.5;
+        g.beginPath(); g.arc(p.node[0], p.node[1], NODE_R + 44 * eOutExpo(rk), 0, Math.PI * 2); g.stroke();
+      }
+      const rk2 = prog(t, T_PULSE + 0.58, T_PULSE + 1.3);
+      if (rk2 > 0 && rk2 < 1) {
+        g.strokeStyle = rgba(HOT, 0.32 * (1 - rk2)); g.lineWidth = 1.5;
+        g.beginPath(); g.arc(p.node[0], p.node[1], NODE_R + 40 * eOutExpo(rk2), 0, Math.PI * 2); g.stroke();
+      }
+    }
+  }
+  g.restore();
+}
+
+function drawChars(text, font, spacing, x, y, t0, stagger, color, alpha, lineTop, lineBottom, t) {
+  ctx.save();
+  ctx.font = font; ctx.letterSpacing = spacing;
+  ctx.beginPath(); ctx.rect(x - 40, lineTop, 2000, lineBottom - lineTop); ctx.clip();
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]; if (ch === " ") continue;
+    const k = prog(t, t0 + i * stagger, t0 + i * stagger + 0.85);
+    if (k <= 0) continue;
+    const e = eOutExpo(k);
+    const cx = x + ctx.measureText(text.slice(0, i)).width;
+    const dy = (1 - e) * 110;
+    const blur = (1 - eOutCubic(k)) * 14;
+    ctx.filter = blur > 0.3 ? `blur(${blur.toFixed(2)}px)` : "none";
+    ctx.fillStyle = rgba(color, alpha * clamp(k * 2.2));
+    ctx.fillText(ch, cx, y + dy);
+  }
+  ctx.restore();
+}
+
+function drawType(t) {
+  if (t < T_TEXT - 0.1) return;
+  const cam = 1 + 0.04 * eInOutSine(prog(t, 0, DURATION));
+  ctx.save();
+  ctx.setTransform(cam, 0, 0, cam, (1 - cam) * W / 2, (1 - cam) * H / 2);
+  const drift = (1 - eOutExpo(prog(t, T_TEXT, T_TEXT + 1.2))) * 46; // type settles in from the right
+  const x = LAY.tx + drift;
+  ctx.textBaseline = "alphabetic";
+  drawChars(TITLE, F_TITLE, "-5px", x, LAY.yT, T_TEXT, 0.034, TEXT, 1, LAY.yT - 130, LAY.yT + 36, t);
+  drawChars(ACAD, F_ACAD, "-5px", x, LAY.yA, T_ACAD, 0.038, TEXT, 0.56, LAY.yA - 130, LAY.yA + 40, t);
+
+  // tagline, word by word
+  ctx.font = F_TAG; ctx.letterSpacing = "0px";
+  const words = TAG.split(" ");
+  let wx = x;
+  words.forEach((w, i) => {
+    const k = prog(t, T_TAG + i * 0.075, T_TAG + i * 0.075 + 0.7);
+    const ww = ctx.measureText(w + " ").width;
+    if (k > 0) {
+      const e = eOutExpo(k);
+      ctx.save();
+      ctx.beginPath(); ctx.rect(wx - 4, LAY.yG - 44, ww + 8, 60); ctx.clip();
+      ctx.fillStyle = rgba(TEXT, 0.74 * clamp(k * 2));
+      ctx.fillText(w, wx, LAY.yG + (1 - e) * 40);
+      ctx.restore();
+    }
+    wx += ww;
+  });
+
+  // signature trace under the tagline: straight, 45 degree jog, node
+  const yL = LAY.yLine, len = LAY.wG + 30;
+  const pts = [[x, yL], [x + len, yL], [x + len + 18, yL + 18], [x + len + 58, yL + 18]];
+  const P = poly(pts);
+  const k = eInOutCubic(prog(t, T_LINE0, T_LINE1));
+  if (k > 0) {
+    ctx.lineCap = "butt"; ctx.lineJoin = "miter";
+    ctx.strokeStyle = rgba(AMBER, 0.95); ctx.lineWidth = 4;
+    ctx.beginPath(); subPath(ctx, P, 0, k * P.total); ctx.stroke();
+    if (k < 1) {
+      const hp = pointAt(P, k * P.total);
+      const rg = ctx.createRadialGradient(hp[0], hp[1], 0, hp[0], hp[1], 22);
+      rg.addColorStop(0, rgba(HOT, 1)); rg.addColorStop(1, rgba(AMBER, 0));
+      ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(hp[0], hp[1], 22, 0, Math.PI * 2); ctx.fill();
+    }
+    const nk = prog(t, T_LINE1 - 0.03, T_LINE1 + 0.8);
+    if (nk > 0) {
+      const end = pts[pts.length - 1];
+      ctx.fillStyle = rgba(mix(AMBER, HOT, Math.exp(-nk * 8)), 1);
+      ctx.beginPath(); ctx.arc(end[0], end[1], 8.5 * spring(nk * 1.1), 0, Math.PI * 2); ctx.fill();
+      const rk = prog(t, T_LINE1, T_LINE1 + 0.6);
+      if (rk < 1) {
+        ctx.strokeStyle = rgba(AMBER, 0.8 * (1 - rk)); ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(end[0], end[1], 8.5 + 34 * eOutExpo(rk), 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
+}
+
+window.ready = (async () => {
+  await Promise.all([document.fonts.load(F_TITLE), document.fonts.load(F_ACAD), document.fonts.load(F_TAG)]);
+  layout();
+  render(0);
+  return true;
+})();
+window.render = render;
+window.DURATION = DURATION;
+</script>
+</body>
+</html>

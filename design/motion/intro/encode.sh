@@ -18,5 +18,5 @@ ffmpeg -y -hide_banner -loglevel error -framerate 120 -i "$FRAMES/f%04d.png" \
   "$OUT/idea-house-intro.webm"
 
 # Poster (final frame) for instant first paint
-cp "$FRAMES/$(ls "$FRAMES" | tail -1)" "$OUT/idea-house-intro-poster.png"
+ffmpeg -y -hide_banner -loglevel error -i "$FRAMES/$(ls "$FRAMES" | tail -1)" -q:v 3 "$OUT/idea-house-intro-poster.jpg"
 ls -la "$OUT"

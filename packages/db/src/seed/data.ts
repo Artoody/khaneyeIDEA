@@ -116,3 +116,36 @@ export const PAGE_BLOCKS: Record<string, Localized> = {
     "World, Asian and national competitions, each recorded with its year and placing.",
   ),
 };
+
+export const APPOINTMENT_TYPES = [
+  {
+    kind: "trial_class" as const,
+    place: "in_person" as const,
+    title: L("کلاس آزمایشی", "Trial class"),
+    description: L("یک جلسه‌ی واقعی کنار بچه‌های هم‌سن، تا فرزندتان فضای کلاس را از نزدیک ببیند.", "A real session with children of the same age, so your child can try the class first-hand."),
+  },
+  {
+    kind: "consultation" as const,
+    place: "in_person" as const,
+    title: L("مشاوره‌ی حضوری", "In-person consultation"),
+    description: L("گفت‌وگو با مشاور آموزشی در شعبه برای انتخاب مسیر مناسب.", "Talk with an advisor at a branch to choose the right path."),
+  },
+  {
+    kind: "consultation" as const,
+    place: "phone" as const,
+    title: L("مشاوره‌ی تلفنی", "Phone consultation"),
+    description: L("در زمانی که انتخاب می‌کنید با شما تماس می‌گیریم.", "We call you at the time you pick."),
+  },
+  {
+    kind: "placement" as const,
+    place: "in_person" as const,
+    title: L("تعیین سطح", "Placement session"),
+    description: L("برای بچه‌هایی که تجربه‌ی قبلی دارند، تا از سطح درست شروع کنند.", "For children with prior experience, so they start at the right level."),
+  },
+  {
+    kind: "visit" as const,
+    place: "in_person" as const,
+    title: L("بازدید از آموزشگاه", "Visit the academy"),
+    description: L("کارگاه‌ها و پروژه‌های بچه‌ها را از نزدیک ببینید.", "See the workshops and the children's projects up close."),
+  },
+];

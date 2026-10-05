@@ -15,6 +15,10 @@ import {
   Trophy,
   X,
   ArrowSquareOut,
+  CalendarCheck,
+  CalendarX,
+  Clock,
+  ListChecks,
 } from "@phosphor-icons/react";
 
 const ICONS = {
@@ -26,9 +30,13 @@ const ICONS = {
   courses: GraduationCap,
   teachers: ChalkboardTeacher,
   achievements: Trophy,
+  bookings: CalendarCheck,
+  templates: Clock,
+  closures: CalendarX,
+  types: ListChecks,
 } as const;
 
-export type NavItem = { key: keyof typeof ICONS; href: string; label: string };
+export type NavItem = { key: keyof typeof ICONS; href: string; label: string; group?: string };
 
 // The active-link highlight reads the URL, which is request data: keep it behind Suspense so the
 // panel frame still prerenders, and show the same links without a highlight until it resolves.
@@ -47,11 +55,15 @@ function ActiveLinks(props: { items: NavItem[]; onNavigate?: () => void }) {
 function LinkList({ items, onNavigate, path }: { items: NavItem[]; onNavigate?: () => void; path: string }) {
   return (
     <ul className="flex flex-col gap-0.5">
-      {items.map((it) => {
+      {items.map((it, i) => {
         const Ico = ICONS[it.key];
-        const active = it.key === "dashboard" ? path === it.href : path === it.href || path.startsWith(`${it.href}/`);
+        // The longest matching href wins, so /booking/templates does not also light up /booking.
+        const best = items.filter((x) => path === x.href || path.startsWith(`${x.href}/`)).sort((a, b) => b.href.length - a.href.length)[0];
+        const active = it.key === "dashboard" ? path === it.href : best?.key === it.key;
+        const heading = it.group && it.group !== items[i - 1]?.group ? it.group : null;
         return (
           <li key={it.key}>
+            {heading && <p className="px-3 pb-1.5 pt-5 text-xs font-semibold text-muted first:pt-1">{heading}</p>}
             <Link
               href={it.href}
               onClick={onNavigate}

@@ -5,6 +5,7 @@ import { SignOut } from "@phosphor-icons/react/dist/ssr";
 import { getDict, href, isLocale, num, type Locale } from "@/lib/i18n";
 import { getAdminDict } from "@/lib/admin-i18n";
 import { getUser } from "@/server/auth";
+import { can } from "@khaneyeidea/core";
 import { logoutAction } from "@/app/[lang]/login/actions";
 import { LogoMark } from "@/components/site/logo-mark";
 import { AdminNav, type NavItem } from "@/components/admin/admin-nav";
@@ -21,15 +22,29 @@ async function UserChip({ lang }: { lang: Locale }) {
   );
 }
 
+// Shows only the sections the user can open. The pages and actions still check permissions themselves.
+async function PermittedNav({ sections, ...rest }: { sections: { content: NavItem[]; booking: NavItem[] }; siteHref: string; siteLabel: string; menuLabel: string }) {
+  const user = await getUser();
+  const items = [...(can(user, "content.edit") ? sections.content : sections.content.slice(0, 1)), ...(can(user, "schedule.manage") ? sections.booking : [])];
+  return <AdminNav items={items} {...rest} />;
+}
+
 export default async function AdminLayout({ children, params }: LayoutProps<"/[lang]/app/admin">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const a = getAdminDict(lang);
   const t = getDict(lang);
   const base = href(lang, "/app/admin");
-  const items: NavItem[] = (
-    ["dashboard", "settings", "pages", "branches", "departments", "courses", "teachers", "achievements"] as const
-  ).map((key) => ({ key, label: a.nav[key], href: key === "dashboard" ? base : `${base}/${key}` }));
+  const content: NavItem[] = (["dashboard", "settings", "pages", "branches", "departments", "courses", "teachers", "achievements"] as const).map(
+    (key) => ({ key, label: a.nav[key], href: key === "dashboard" ? base : `${base}/${key}`, group: key === "dashboard" ? undefined : a.nav.content }),
+  );
+  const booking: NavItem[] = [
+    { key: "bookings", label: a.booking.navBookings, href: `${base}/booking`, group: a.nav.booking },
+    { key: "templates", label: a.booking.navTemplates, href: `${base}/booking/templates`, group: a.nav.booking },
+    { key: "closures", label: a.booking.navClosures, href: `${base}/booking/closures`, group: a.nav.booking },
+    { key: "types", label: a.booking.navTypes, href: `${base}/booking/types`, group: a.nav.booking },
+  ];
+  const navProps = { siteHref: href(lang), siteLabel: a.nav.viewSite, menuLabel: t.menu };
 
   return (
     <div className="min-h-[100dvh]">
@@ -53,7 +68,9 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
         </div>
       </header>
       <div className="flex">
-        <AdminNav items={items} siteHref={href(lang)} siteLabel={a.nav.viewSite} menuLabel={t.menu} />
+        <Suspense fallback={<AdminNav items={content} {...navProps} />}>
+          <PermittedNav sections={{ content, booking }} {...navProps} />
+        </Suspense>
         <main className="min-w-0 flex-1 px-4 pb-24 pt-8 sm:px-8 lg:pb-12">{children}</main>
       </div>
     </div>

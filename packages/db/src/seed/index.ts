@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { closeDb, getDb } from "../index";
 import * as s from "../schema";
 import type { Localized } from "../schema";
-import { BRANCHES, COURSES, DEPARTMENTS, PAGE_BLOCKS, SAMPLE_TEACHERS } from "./data";
+import { APPOINTMENT_TYPES, BRANCHES, COURSES, DEPARTMENTS, PAGE_BLOCKS, SAMPLE_TEACHERS } from "./data";
 
 config({ path: fileURLToPath(new URL("../../../../.env", import.meta.url)) });
 
@@ -148,6 +148,11 @@ await db.transaction(async (tx) => {
       };
     }),
   );
+
+  // Appointment types are generic (the academy's schedule lives in templates the admin creates).
+  // Never wiped: bookings reference them.
+  const existingTypes = await tx.select({ id: s.appointmentTypes.id }).from(s.appointmentTypes).where(eq(s.appointmentTypes.tenantId, tenantId));
+  if (!existingTypes.length) await tx.insert(s.appointmentTypes).values(APPOINTMENT_TYPES.map((t, i) => ({ tenantId, ...t, sortOrder: i })));
 
   await tx.insert(s.studentProjects).values(
     exported.student_projects.map((p, i) => ({

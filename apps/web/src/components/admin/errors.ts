@@ -12,6 +12,18 @@ export function errorText(code: string | undefined, a: AdminDict): string | unde
       return a.common.slugTaken;
     case "number":
       return a.common.numberInvalid;
+    case "required":
+      return a.common.required;
+    case "time":
+      return "HH:MM";
+    case "time_order":
+      return a.booking.invalidTime;
+    case "weekdays":
+      return a.booking.weekdaysRequired;
+    case "range":
+      return a.booking.rangeInvalid;
+    case "invalid":
+      return a.common.invalid;
     case "too_long":
       return "≤ 600";
     case "https_required":

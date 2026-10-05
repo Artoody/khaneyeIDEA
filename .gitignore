@@ -4,3 +4,9 @@ proposal.html
 scripts/site-export/.cache
 scripts/site-export/_probe
 docs/site-export/_probe/
+.turbo
+.next
+.env
+.env.local
+*.tsbuildinfo
+.devdata/

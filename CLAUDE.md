@@ -20,7 +20,7 @@ Specs live in `docs/`: `PROPOSAL.md` (product), `specs/*.md` (implementation con
 - Motion reference: `design/motion/intro/`.
 
 ## Stack (decided)
-TypeScript monorepo (pnpm + Turborepo): Next.js App Router, Tailwind v4, shadcn/ui (customized), Phosphor icons, Motion; PostgreSQL + Prisma; Redis + BullMQ; MinIO; grammY bots for Bale (`https://tapi.bale.ai`) and Telegram; Python service only for speech-to-text.
+TypeScript monorepo (pnpm + Turborepo): Next.js App Router, Tailwind v4, shadcn/ui (customized), Phosphor icons, Motion; PostgreSQL + Drizzle ORM (SQL migrations in packages/db/migrations); Redis + BullMQ; MinIO; grammY bots for Bale (`https://tapi.bale.ai`) and Telegram; Python service only for speech-to-text.
 
 ## Model use (Cursor)
 Pick Opus 5.5 manually for auth, permissions, payments, migrations, bots, scheduling. Sonnet 5.5 for UI and CRUD. Auto only for trivial edits.

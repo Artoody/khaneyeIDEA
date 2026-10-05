@@ -11,6 +11,7 @@
     "db:generate": "pnpm --filter @khaneyeidea/db generate",
     "db:migrate": "pnpm --filter @khaneyeidea/db migrate",
     "db:seed": "pnpm --filter @khaneyeidea/db seed",
+    "db:demo": "pnpm --filter @khaneyeidea/core demo",
     "bot:dev": "pnpm --filter @khaneyeidea/bot dev",
     "bot:check": "pnpm --filter @khaneyeidea/bot check"
   },

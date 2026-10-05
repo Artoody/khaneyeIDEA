@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { SignOut } from "@phosphor-icons/react/dist/ssr";
 import { getDict, href, isLocale, num, type Locale } from "@/lib/i18n";
 import { getAdminDict } from "@/lib/admin-i18n";
+import { getOpsDict } from "@/lib/ops-i18n";
 import { getUser } from "@/server/auth";
 import { can } from "@khaneyeidea/core";
 import { logoutAction } from "@/app/[lang]/login/actions";
@@ -23,9 +24,23 @@ async function UserChip({ lang }: { lang: Locale }) {
 }
 
 // Shows only the sections the user can open. The pages and actions still check permissions themselves.
-async function PermittedNav({ sections, ...rest }: { sections: { content: NavItem[]; booking: NavItem[] }; siteHref: string; siteLabel: string; menuLabel: string }) {
+async function PermittedNav({
+  sections,
+  ...rest
+}: {
+  sections: { content: NavItem[]; booking: NavItem[]; schedule: NavItem[]; students: NavItem[]; staff: NavItem[] };
+  siteHref: string;
+  siteLabel: string;
+  menuLabel: string;
+}) {
   const user = await getUser();
-  const items = [...(can(user, "content.edit") ? sections.content : sections.content.slice(0, 1)), ...(can(user, "schedule.manage") ? sections.booking : [])];
+  const items = [
+    ...(can(user, "content.edit") ? sections.content : sections.content.slice(0, 1)),
+    ...(can(user, "schedule.manage") ? sections.schedule : []),
+    ...(can(user, "students.manage") ? sections.students : []),
+    ...(can(user, "users.manage") ? sections.staff : []),
+    ...(can(user, "schedule.manage") ? sections.booking : []),
+  ];
   return <AdminNav items={items} {...rest} />;
 }
 
@@ -44,6 +59,15 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
     { key: "closures", label: a.booking.navClosures, href: `${base}/booking/closures`, group: a.nav.booking },
     { key: "types", label: a.booking.navTypes, href: `${base}/booking/types`, group: a.nav.booking },
   ];
+  const o = getOpsDict(lang);
+  const ops = {
+    schedule: [
+      { key: "sessions", label: o.nav.sessions, href: `${base}/sessions`, group: o.nav.group },
+      { key: "classes", label: o.nav.classes, href: `${base}/classes`, group: o.nav.group },
+    ] as NavItem[],
+    students: [{ key: "students", label: o.nav.students, href: `${base}/students`, group: o.nav.group }] as NavItem[],
+    staff: [{ key: "staff", label: o.nav.staff, href: `${base}/staff`, group: o.nav.group }] as NavItem[],
+  };
   const navProps = { siteHref: href(lang), siteLabel: a.nav.viewSite, menuLabel: t.menu };
 
   return (
@@ -69,7 +93,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
       </header>
       <div className="flex">
         <Suspense fallback={<AdminNav items={content} {...navProps} />}>
-          <PermittedNav sections={{ content, booking }} {...navProps} />
+          <PermittedNav sections={{ content, booking, ...ops }} {...navProps} />
         </Suspense>
         <main className="min-w-0 flex-1 px-4 pb-24 pt-8 sm:px-8 lg:pb-12">{children}</main>
       </div>

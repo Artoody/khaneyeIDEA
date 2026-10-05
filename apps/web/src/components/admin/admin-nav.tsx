@@ -20,6 +20,10 @@ import {
   Clock,
   ListChecks,
   Newspaper,
+  CalendarDots,
+  Chalkboard,
+  Student,
+  UsersThree,
 } from "@phosphor-icons/react";
 
 const ICONS = {
@@ -32,6 +36,10 @@ const ICONS = {
   teachers: ChalkboardTeacher,
   achievements: Trophy,
   posts: Newspaper,
+  sessions: CalendarDots,
+  classes: Chalkboard,
+  students: Student,
+  staff: UsersThree,
   bookings: CalendarCheck,
   templates: Clock,
   closures: CalendarX,

@@ -6,7 +6,7 @@ import { Phone } from "@phosphor-icons/react/dist/ssr";
 import { appointmentTypes, availabilityTemplates, courses, getDb } from "@khaneyeidea/db";
 import { getDict, href, isLocale, num, pick, type Locale } from "@/lib/i18n";
 import { getBranches, getCatalog, getSettings, tenantId } from "@/server/content";
-import { getUser } from "@/server/auth";
+import { devOtpCode, getUser } from "@/server/auth";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/home-sections";
 import { BookingFlow, type BookBranch, type BookType } from "@/components/site/booking/booking-flow";
@@ -79,6 +79,7 @@ async function Flow({ lang, courseSlug, src }: { lang: Locale; courseSlug: strin
       signedInPhone={user?.phone ?? null}
       source={src}
       siteName={pick(settings.name, lang)}
+      devCode={devOtpCode()}
     />
   );
 }

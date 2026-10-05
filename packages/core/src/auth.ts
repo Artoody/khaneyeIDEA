@@ -7,7 +7,7 @@ import type { Principal, Role } from "./permissions";
 type Db = ReturnType<typeof getDb>;
 
 export const OTP = {
-  length: 5,
+  length: 4,
   ttlMs: 2 * 60 * 1000,
   maxAttempts: 5,
   perPhoneWindowMs: 10 * 60 * 1000,
@@ -15,13 +15,24 @@ export const OTP = {
   perIpWindowMs: 60 * 60 * 1000,
   perIpMax: 15,
 } as const;
-export const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+/** Sessions slide: each day of use pushes expiry 180 days ahead (stay signed in, like Snapp). */
+export const SESSION_TTL_MS = 180 * 24 * 60 * 60 * 1000;
+/** Expiry is renewed at most once per this interval, so normal requests stay read-only. */
+export const SESSION_RENEW_MS = 24 * 60 * 60 * 1000;
 
 export interface OtpSender {
   send(phone: string, code: string): Promise<void>;
 }
 
-export type AuthDeps = { db: Db; tenantId: string; secret: string; sender: OtpSender; now?: () => Date };
+export type AuthDeps = {
+  db: Db;
+  tenantId: string;
+  secret: string;
+  sender: OtpSender;
+  now?: () => Date;
+  /** Development only: every code is this value (e.g. "1234") while no SMS/Bale delivery is set up. */
+  fixedCode?: string;
+};
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 const hmac = (secret: string, s: string) => createHmac("sha256", secret).update(s).digest("hex");
@@ -60,7 +71,8 @@ export async function requestOtp(deps: AuthDeps, rawPhone: string, ip: string | 
     if ((byIp?.n ?? 0) >= OTP.perIpMax) return { ok: false, reason: "rate_limited" };
   }
 
-  const code = String(randomInt(0, 10 ** OTP.length)).padStart(OTP.length, "0");
+  const fixed = deps.fixedCode && new RegExp(`^\\d{${OTP.length}}$`).test(deps.fixedCode) ? deps.fixedCode : null;
+  const code = fixed ?? String(randomInt(0, 10 ** OTP.length)).padStart(OTP.length, "0");
   await db.insert(otpCodes).values({
     tenantId,
     phone,
@@ -144,6 +156,13 @@ export async function getSessionUser(db: Db, token: string | undefined | null, n
     .innerJoin(users, eq(users.id, authSessions.userId))
     .where(eq(authSessions.tokenHash, sha256(token)));
   if (!row || row.expiresAt <= now || !row.user.active) return null;
+  // Sliding expiry: at most one write per day per session.
+  if (row.expiresAt.getTime() - now.getTime() < SESSION_TTL_MS - SESSION_RENEW_MS) {
+    await db
+      .update(authSessions)
+      .set({ expiresAt: new Date(now.getTime() + SESSION_TTL_MS) })
+      .where(eq(authSessions.id, row.sessionId));
+  }
   const roles = await db
     .select({ role: userRoles.role, branchId: userRoles.branchId })
     .from(userRoles)

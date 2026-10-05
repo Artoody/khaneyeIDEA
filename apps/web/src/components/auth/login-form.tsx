@@ -18,7 +18,17 @@ const inputCls =
 const btnCls =
   "inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-accent text-base font-semibold text-on-accent transition hover:bg-accent-strong active:scale-[0.99] disabled:opacity-60";
 
-export function LoginForm({ lang, t }: { lang: Locale; t: Labels }) {
+/** Shown only in development while OTP_DEV_CODE is set (no SMS yet). */
+export function DevCodeNote({ code, lang }: { code: string; lang: Locale }) {
+  return (
+    <p className="rounded-xl border border-dashed border-accent/60 bg-accent/10 px-3 py-2 text-xs text-ink">
+      {lang === "fa" ? "حالت آزمایشی: کد ورود " : "Test mode: the code is "}
+      <b dir="ltr" className="font-mono">{code}</b>
+    </p>
+  );
+}
+
+export function LoginForm({ lang, t, devCode }: { lang: Locale; t: Labels; devCode?: string | null }) {
   const [reqState, requestCode, requesting] = useActionState<LoginState, FormData>(requestCodeAction, { step: "phone" });
   const [verState, verifyCode, verifying] = useActionState<LoginState, FormData>(verifyCodeAction, { step: "phone" });
   const [editingPhone, setEditingPhone] = useState(false);
@@ -74,7 +84,7 @@ export function LoginForm({ lang, t }: { lang: Locale; t: Labels }) {
           inputMode="numeric"
           autoComplete="one-time-code"
           dir="ltr"
-          maxLength={5}
+          maxLength={4}
           required
           aria-invalid={!!verifyError}
           aria-describedby="code-help"
@@ -83,6 +93,7 @@ export function LoginForm({ lang, t }: { lang: Locale; t: Labels }) {
         <p id="code-help" className={`text-sm ${verifyError ? "text-red-500" : "text-muted"}`} role={verifyError ? "alert" : undefined}>
           {verifyError ? t.errors[verifyError] : t.codeHint.replace("{phone}", fmtPhone(codeStep.phone, lang))}
         </p>
+        {devCode && <DevCodeNote code={devCode} lang={lang} />}
         <button type="submit" disabled={verifying} className={`${btnCls} mt-4`}>
           {verifying && <CircleNotch className="size-5 animate-spin" />}
           {t.verify}

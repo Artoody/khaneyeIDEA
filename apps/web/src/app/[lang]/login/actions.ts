@@ -30,7 +30,7 @@ export async function verifyCodeAction(prev: LoginState, form: FormData): Promis
   const lang = localeOf(form.get("lang"));
   const phone = String(form.get("phone") ?? "");
   const code = String(form.get("code") ?? "");
-  let token: string, expiresAt: Date;
+  let token: string;
   try {
     const r = await verifyOtp(await authDeps(), phone, code, await clientMeta());
     if (!r.ok) {
@@ -38,12 +38,11 @@ export async function verifyCodeAction(prev: LoginState, form: FormData): Promis
       return { step: "code", phone, expiresInSec: prev.step === "code" ? prev.expiresInSec : 120, error: r.reason };
     }
     token = r.token;
-    expiresAt = r.expiresAt;
   } catch (e) {
     console.error("[login] verify failed", e);
     return { step: "code", phone, expiresInSec: 120, error: "unknown" };
   }
-  await setSessionCookie(token, expiresAt);
+  await setSessionCookie(token);
   const user = await getSessionUser(getDb(), token);
   redirect(href(lang, user ? homeFor(user) : "/app"));
 }

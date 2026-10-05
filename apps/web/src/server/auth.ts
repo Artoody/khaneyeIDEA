@@ -39,8 +39,19 @@ function otpSender(): OtpSender {
   throw new Error(`OTP provider "${provider}" is not configured yet`);
 }
 
+/**
+ * Development-only fixed sign-in code (OTP_DEV_CODE, e.g. 1234) while no SMS/Bale delivery is set up.
+ * Never active in production or with a real OTP provider.
+ */
+export function devOtpCode(): string | null {
+  if (process.env.NODE_ENV === "production") return null;
+  if ((process.env.OTP_PROVIDER ?? "console") !== "console") return null;
+  const c = process.env.OTP_DEV_CODE?.trim();
+  return c && /^\d{4}$/.test(c) ? c : null;
+}
+
 export async function authDeps(): Promise<AuthDeps> {
-  return { db: getDb(), tenantId: await tenantId(), secret: sessionSecret(), sender: otpSender() };
+  return { db: getDb(), tenantId: await tenantId(), secret: sessionSecret(), sender: otpSender(), fixedCode: devOtpCode() ?? undefined };
 }
 
 export async function clientMeta() {
@@ -77,12 +88,16 @@ export async function requirePermission(perm: Permission, scope?: { branchId?: s
   return user;
 }
 
-export async function setSessionCookie(token: string, expiresAt: Date) {
+/**
+ * The cookie lives as long as browsers allow (400 days); the server-side session decides validity and slides
+ * forward with use, so an active parent effectively stays signed in.
+ */
+export async function setSessionCookie(token: string) {
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    expires: expiresAt,
+    maxAge: 400 * 24 * 60 * 60,
   });
 }

@@ -12,7 +12,7 @@ const check = (n, ok, x = "") => results.push(`${ok ? "PASS" : "FAIL"} ${n} ${x}
 const tag = Date.now().toString(36).slice(-5);
 const lastCode = async (phone) => {
   for (let i = 0; i < 20; i++) {
-    const m = [...fs.readFileSync(LOG, "utf8").matchAll(new RegExp(`\\[otp\\] ${phone}: (\\d{5})`, "g"))].pop();
+    const m = [...fs.readFileSync(LOG, "utf8").matchAll(new RegExp(`\\[otp\\] ${phone}: (\\d{4})`, "g"))].pop();
     if (m) return m[1];
     await new Promise((r) => setTimeout(r, 300));
   }
@@ -76,7 +76,7 @@ await v.getByRole("button", { name: "دریافت کد تأیید" }).click();
 await v.waitForSelector('input[name="code"]');
 const code = await lastCode(`98${phone.slice(1)}`);
 check("code sent", !!code);
-await v.fill('input[name="code"]', code === "11111" ? "22222" : "11111");
+await v.fill('input[name="code"]', code === "1111" ? "2222" : "1111");
 await v.waitForSelector("text=کد درست نیست");
 check("wrong code rejected", true);
 await v.fill('input[name="code"]', code);

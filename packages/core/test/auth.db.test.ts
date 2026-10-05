@@ -35,7 +35,7 @@ describe("OTP login", () => {
     const r = await requestOtp(deps, "0912 000 0001", "1.1.1.1");
     expect(r.ok).toBe(true);
     expect(sent[0]!.phone).toBe("989120000001");
-    expect(lastCode()).toMatch(/^\d{5}$/);
+    expect(lastCode()).toMatch(/^\d{4}$/);
 
     const v = await verifyOtp(deps, "09120000001", lastCode());
     expect(v.ok).toBe(true);
@@ -88,5 +88,24 @@ describe("OTP login", () => {
     if (!v.ok) throw new Error("expected ok");
     await deps.db.update(users).set({ active: false }).where(eq(users.id, v.userId));
     expect(await getSessionUser(deps.db, v.token)).toBeNull();
+  });
+
+  it("uses the fixed development code when configured", async () => {
+    await requestOtp({ ...deps, fixedCode: "1234" }, "09120000007", null);
+    expect(lastCode()).toBe("1234");
+    expect((await verifyOtp(deps, "09120000007", "1234")).ok).toBe(true);
+  });
+
+  it("keeps a session alive while it is used (sliding expiry)", async () => {
+    await requestOtp(deps, "09120000008", null);
+    const v = await verifyOtp(deps, "09120000008", lastCode());
+    if (!v.ok) throw new Error("expected ok");
+    // 170 days later: still valid, and the expiry moves another 180 days ahead
+    const later = new Date(Date.now() + 170 * 86_400_000);
+    expect(await getSessionUser(deps.db, v.token, later)).not.toBeNull();
+    const muchLater = new Date(later.getTime() + 170 * 86_400_000);
+    expect(await getSessionUser(deps.db, v.token, muchLater)).not.toBeNull();
+    // unused for longer than the window: expired
+    expect(await getSessionUser(deps.db, v.token, new Date(muchLater.getTime() + 181 * 86_400_000))).toBeNull();
   });
 });

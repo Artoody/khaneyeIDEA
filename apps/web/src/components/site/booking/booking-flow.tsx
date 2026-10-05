@@ -10,6 +10,7 @@ import { fill } from "@/lib/format";
 import { dayLabel, tehranIso, timeLabel } from "@/lib/jalali";
 import { confirmBooking, loadSlots, sendBookingCode, type ConfirmResult, type SlotDTO } from "@/app/[lang]/book/actions";
 import { DeptIcon } from "../dept-icon";
+import { DevCodeNote } from "@/components/auth/login-form";
 
 type L10n = { fa: string; en: string };
 export type BookType = { id: string; kind: "trial_class" | "consultation" | "placement" | "visit"; place: "in_person" | "phone" | "online"; title: string; description: string };
@@ -137,6 +138,7 @@ export function BookingFlow({
   signedInPhone,
   source,
   siteName,
+  devCode,
 }: {
   lang: Locale;
   labels: Labels;
@@ -147,6 +149,7 @@ export function BookingFlow({
   signedInPhone: string | null;
   source: string | null;
   siteName: string;
+  devCode?: string | null;
 }) {
   const t = labels;
   const preType = course ? (types.find((x) => x.kind === "trial_class") ?? types[0]) : types.length === 1 ? types[0] : undefined;
@@ -541,24 +544,25 @@ export function BookingFlow({
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 dir="ltr"
-                maxLength={5}
+                maxLength={4}
                 value={code}
                 onChange={(e) => {
-                  const v = e.target.value.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/\D/g, "").slice(0, 5);
+                  const v = e.target.value.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/\D/g, "").slice(0, 4);
                   setCode(v);
-                  if (v.length === 5 && !pending) book(v);
+                  if (v.length === 4 && !pending) book(v);
                 }}
                 className={`${input} w-44 text-center font-display text-2xl tracking-[0.5em]`}
                 autoFocus
               />
             </label>
             <div className="flex flex-wrap items-center gap-4">
-              <button type="submit" disabled={pending || code.length !== 5} className={primary}>
+              <button type="submit" disabled={pending || code.length !== 4} className={primary}>
                 {pending && <CircleNotch className="size-5 animate-spin" />}
                 {t.confirm}
               </button>
               {codeInfo && <ResendTimer key={codeInfo.sentAt} seconds={60} labels={t} lang={lang} onResend={requestCode} />}
             </div>
+            {devCode && <DevCodeNote code={devCode} lang={lang} />}
             {step === "code" && <ErrorLine text={error} />}
           </form>
         </Section>

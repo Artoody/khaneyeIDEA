@@ -81,7 +81,7 @@ export async function confirmBooking(input: z.input<typeof confirmInput>): Promi
     if (!v.phone || !v.code) return { ok: false, error: "invalid_code", step: "code" };
     const r = await verifyOtp(await authDeps(), v.phone, v.code, await clientMeta());
     if (!r.ok) return { ok: false, error: r.reason, step: r.reason === "invalid_phone" ? "contact" : "code" };
-    await setSessionCookie(r.token, r.expiresAt);
+    await setSessionCookie(r.token);
     userId = r.userId;
     phone = (await db.select({ phone: users.phone }).from(users).where(eq(users.id, r.userId)))[0]?.phone ?? null;
   }

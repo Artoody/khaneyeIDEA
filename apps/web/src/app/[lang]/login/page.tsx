@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getDict, href, isLocale, pick } from "@/lib/i18n";
 import { getSettings } from "@/server/content";
 import { LoginForm } from "@/components/auth/login-form";
+import { devOtpCode } from "@/server/auth";
 import { LogoMark } from "@/components/site/logo-mark";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/login">): Promise<Metadata> {
@@ -36,7 +37,7 @@ export default async function LoginPage({ params }: PageProps<"/[lang]/login">) 
           <h1 className="font-display text-3xl font-extrabold tracking-tight">{t.auth.title}</h1>
           <p className="mt-2 text-muted">{t.auth.subtitle}</p>
           <div className="mt-8">
-            <LoginForm lang={lang} t={t.auth} />
+            <LoginForm lang={lang} t={t.auth} devCode={devOtpCode()} />
           </div>
           <p className="mt-10 text-xs leading-relaxed text-muted">{t.auth.privacy}</p>
         </div>

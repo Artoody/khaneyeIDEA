@@ -26,7 +26,7 @@ export const TAGS = {
   stats: "content:stats",
 } as const;
 
-async function tenantId(): Promise<string> {
+export async function tenantId(): Promise<string> {
   "use cache";
   cacheLife("max");
   const slug = process.env.DEFAULT_TENANT_SLUG ?? "khaneyeide";

@@ -12,6 +12,7 @@
   "dependencies": {
     "@fontsource-variable/estedad": "^5.3.0",
     "@fontsource-variable/vazirmatn": "^5.3.0",
+    "@khaneyeidea/core": "workspace:*",
     "@khaneyeidea/db": "workspace:*",
     "@phosphor-icons/react": "^2.1.10",
     "clsx": "^2.1.1",

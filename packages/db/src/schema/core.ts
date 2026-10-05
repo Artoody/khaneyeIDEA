@@ -73,13 +73,14 @@ export const otpCodes = pgTable(
     id: id(),
     tenantId: tenantId(),
     phone: text("phone").notNull(),
+    ip: text("ip"),
     codeHash: text("code_hash").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     attempts: integer("attempts").notNull().default(0),
     consumedAt: timestamp("consumed_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("otp_phone_idx").on(t.tenantId, t.phone, t.createdAt)],
+  (t) => [index("otp_phone_idx").on(t.tenantId, t.phone, t.createdAt), index("otp_ip_idx").on(t.ip, t.createdAt)],
 );
 
 /** Server-side sessions. The cookie holds a random token; only its SHA-256 is stored. */

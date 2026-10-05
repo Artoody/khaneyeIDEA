@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
-  transpilePackages: ["@khaneyeidea/db"],
+  transpilePackages: ["@khaneyeidea/db", "@khaneyeidea/core"],
   poweredByHeader: false,
   async headers() {
     return [

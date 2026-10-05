@@ -12,7 +12,8 @@
     "migrate": "tsx src/migrate.ts",
     "seed": "tsx src/seed/index.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "grant-role": "tsx src/grant-role.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",

@@ -8,6 +8,13 @@
       "when": 1791206804183,
       "tag": "0000_gigantic_moonstone",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791207444487,
+      "tag": "0001_nostalgic_dragon_lord",
+      "breakpoints": true
     }
   ]
 }

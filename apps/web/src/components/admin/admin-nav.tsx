@@ -19,6 +19,7 @@ import {
   CalendarX,
   Clock,
   ListChecks,
+  Newspaper,
 } from "@phosphor-icons/react";
 
 const ICONS = {
@@ -30,6 +31,7 @@ const ICONS = {
   courses: GraduationCap,
   teachers: ChalkboardTeacher,
   achievements: Trophy,
+  posts: Newspaper,
   bookings: CalendarCheck,
   templates: Clock,
   closures: CalendarX,

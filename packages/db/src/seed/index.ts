@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { closeDb, getDb } from "../index";
 import * as s from "../schema";
 import type { Localized } from "../schema";
+import { CONTENT_FROM, DRAFT_REDIRECT, LEGACY_ARTICLES, LEGACY_REDIRECTS, readLegacyPage } from "./legacy";
 import { ALSO_IN, APPOINTMENT_TYPES, BRANCHES, COURSES, DEPARTMENTS, PAGE_BLOCKS, SAMPLE_TEACHERS } from "./data";
 
 config({ path: fileURLToPath(new URL("../../../../.env", import.meta.url)) });
@@ -49,6 +50,20 @@ function scopeOf(title: string): string | null {
   return null;
 }
 
+/** "Title - خانه ی ایده" -> "Title" (our pages append the academy name themselves). */
+const stripBrand = (t: string) => t.replace(/\s*[-|–]\s*خانه\s*(?:ی|‌ی)?\s*ایده\s*$/u, "").trim();
+
+/** Old course page text and Yoast fields for a course, if the export has them. */
+function legacyCourseFields(legacyPath: string) {
+  const p = readLegacyPage(legacyPath.replace(/^\/|\/$/g, ""), "course");
+  if (!p) return {};
+  return {
+    body: p.body.length >= 300 ? L(p.body) : null,
+    summary: p.description ? L(p.description) : null,
+    seo: { title: L(p.title ? stripBrand(p.title) : ""), description: L(p.description ?? "") },
+  };
+}
+
 const db = getDb();
 const slug = process.env.DEFAULT_TENANT_SLUG ?? "khaneyeide";
 
@@ -57,7 +72,7 @@ if (!tenant) [tenant] = await db.insert(s.tenants).values({ slug, name: "Idea Ho
 const tenantId = tenant!.id;
 
 await db.transaction(async (tx) => {
-  for (const table of [s.achievements, s.studentProjects, s.faqs, s.redirects, s.pageBlocks, s.teachers, s.courses, s.departments, s.branches]) {
+  for (const table of [s.posts, s.achievements, s.studentProjects, s.faqs, s.redirects, s.pageBlocks, s.teachers, s.courses, s.departments, s.branches]) {
     await tx.delete(table).where(eq(table.tenantId, tenantId));
   }
   await tx.delete(s.siteSettings).where(eq(s.siteSettings.tenantId, tenantId));
@@ -82,8 +97,13 @@ await db.transaction(async (tx) => {
     showStudentCount: true,
     stats: { yearsActive: 15 },
     seo: {
-      title: L("خانه ایده | آموزشگاه رباتیک، برنامه‌نویسی و هوش مصنوعی", "Idea House Academy | Robotics, Coding & AI for Kids"),
-      description: L(PAGE_BLOCKS["home.hero.subtitle"]!.fa, PAGE_BLOCKS["home.hero.subtitle"]!.en),
+      // The old site's home title (it carries the ranking keywords). Its description claimed counts we cannot
+      // verify ("100 national, 60 world titles"), so the numbers are left out (rule: no fake numbers).
+      title: L("آموزشگاه رباتیک خانه ایده - معتبرترین آموزشگاه رباتیک کشور", "Idea House Academy | Robotics, Coding & AI for Kids in Tehran"),
+      description: L(
+        "آموزشگاه رباتیک بین المللی خانه ایده، مدرن‌ترین و معتبرترین آموزشگاه رباتیک کشور با مقام‌های کشوری و جهانی؛ رباتیک، برنامه‌نویسی و هوش مصنوعی برای کودکان و نوجوانان.",
+        "Idea House is an international robotics academy in Tehran with national and world titles: robotics, coding and AI for children and teens.",
+      ),
     },
   });
 
@@ -110,6 +130,7 @@ await db.transaction(async (tx) => {
       priceVisibility: "contact" as const,
       legacyUrl: c.legacyPath,
       sortOrder: i,
+      ...legacyCourseFields(CONTENT_FROM[c.slug] ?? c.legacyPath),
     })),
   ).returning({ id: s.courses.id, slug: s.courses.slug, modes: s.courses.modes });
   const courseId = new Map(courseRows.map((c) => [c.slug, c.id]));
@@ -124,8 +145,38 @@ await db.transaction(async (tx) => {
   const offered = courseRows.filter((c) => c.modes.some((m) => m !== "online")).flatMap((c) => branchRows.map((b) => ({ courseId: c.id, branchId: b.id })));
   if (offered.length) await tx.insert(s.courseBranches).values(offered);
   await tx.insert(s.redirects).values(
-    COURSES.map((c) => ({ tenantId, fromPath: c.legacyPath, toPath: `/courses/${c.slug}`, permanent: true })),
+    // Old pages of unpublished courses point at the closest published course, never at a 404.
+    COURSES.map((c) => ({
+      tenantId,
+      fromPath: c.legacyPath,
+      toPath: c.published ? `/courses/${c.slug}` : (DRAFT_REDIRECT[c.slug] ?? "/courses"),
+      permanent: true,
+    })),
   );
+
+  // Old articles become blog posts (same title, description and date) and their old URLs redirect there.
+  const articles = Object.entries(LEGACY_ARTICLES).flatMap(([file, slug]) => {
+    const p = readLegacyPage(file, "article");
+    if (!p || !p.title || p.body.length < 300) return [];
+    const title = stripBrand(p.title);
+    return [{
+      tenantId,
+      slug,
+      title: L(title),
+      excerpt: p.description ? L(p.description) : null,
+      body: L(p.body),
+      coverImage: p.image,
+      status: "published" as const,
+      publishedAt: p.publishedAt ?? new Date(),
+      seo: { title: L(title), description: L(p.description ?? "") },
+      legacyUrl: `/${file}/`,
+    }];
+  });
+  if (articles.length) await tx.insert(s.posts).values(articles);
+  await tx.insert(s.redirects).values([
+    ...articles.map((a) => ({ tenantId, fromPath: a.legacyUrl, toPath: `/blog/${a.slug}`, permanent: true })),
+    ...Object.entries(LEGACY_REDIRECTS).map(([fromPath, toPath]) => ({ tenantId, fromPath, toPath, permanent: true })),
+  ]);
 
   await tx.insert(s.teachers).values(
     SAMPLE_TEACHERS.map((t, i) => ({ tenantId, ...t, isSample: true, sortOrder: i })),

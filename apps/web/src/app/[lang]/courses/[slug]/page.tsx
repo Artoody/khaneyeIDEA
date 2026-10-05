@@ -9,6 +9,7 @@ import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/home-sections";
 import { Reveal } from "@/components/site/reveal";
 import { DeptBadge } from "@/components/site/dept-badge";
+import { Prose } from "@/components/site/prose";
 
 export async function generateStaticParams() {
   const slugs = await getPublishedCourseSlugs();
@@ -18,12 +19,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/[lang]/courses/[slug]">): Promise<Metadata> {
   const { lang, slug } = await params;
   if (!isLocale(lang)) return {};
-  const [data, s] = await Promise.all([getCourse(decodeURIComponent(slug)), getSettings()]);
+  const data = await getCourse(decodeURIComponent(slug));
   if (!data) return {};
   const c = data.course;
   const title = pick(c.seo.title, lang) || pick(c.title, lang);
   return {
-    title: `${title} | ${pick(s.name, lang)}`,
+    title: `${title}`,
     description: pick(c.seo.description, lang) || pick(c.summary, lang) || undefined,
     alternates: {
       canonical: href(lang, `/courses/${c.slug}`),
@@ -127,9 +128,9 @@ export default async function CoursePage({ params }: PageProps<"/[lang]/courses/
 
         {(body || prereq) && (
           <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6">
-            <Reveal className="max-w-[65ch]">
+            <Reveal className="max-w-3xl">
               <h2 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">{tc.about}</h2>
-              {body && <p className="mt-5 whitespace-pre-line text-lg leading-loose text-ink/85">{body}</p>}
+              {body && <Prose className="mt-6">{body}</Prose>}
               {prereq && (
                 <p className="mt-6 rounded-2xl border border-line p-5 text-[15px] leading-relaxed">
                   <span className="font-semibold">{tc.prerequisites}: </span>

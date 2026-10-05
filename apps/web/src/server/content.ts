@@ -10,6 +10,7 @@ import {
   departments,
   getDb,
   pageBlocks,
+  posts,
   siteSettings,
   students,
   teachers,
@@ -26,6 +27,7 @@ export const TAGS = {
   achievements: "content:achievements",
   teachers: "content:teachers",
   stats: "content:stats",
+  posts: "content:posts",
 } as const;
 
 export async function tenantId(): Promise<string> {
@@ -240,4 +242,26 @@ export async function getAllAchievements() {
     .from(achievements)
     .where(eq(achievements.tenantId, await tenantId()))
     .orderBy(desc(achievements.year), desc(achievements.featured), asc(achievements.sortOrder));
+}
+
+export async function getPosts() {
+  "use cache";
+  cacheTag(TAGS.posts);
+  cacheLife("days");
+  return getDb()
+    .select({ id: posts.id, slug: posts.slug, title: posts.title, excerpt: posts.excerpt, coverImage: posts.coverImage, publishedAt: posts.publishedAt, body: posts.body })
+    .from(posts)
+    .where(and(eq(posts.tenantId, await tenantId()), eq(posts.status, "published")))
+    .orderBy(desc(posts.publishedAt));
+}
+
+export async function getPost(slug: string) {
+  "use cache";
+  cacheTag(TAGS.posts);
+  cacheLife("days");
+  const [p] = await getDb()
+    .select()
+    .from(posts)
+    .where(and(eq(posts.tenantId, await tenantId()), eq(posts.slug, slug), eq(posts.status, "published")));
+  return p ?? null;
 }

@@ -24,6 +24,7 @@ export async function SiteHeader({ lang }: { lang: Locale }) {
       page: "/achievements",
       section: "achievements",
     },
+    { href: href(lang, "/blog"), label: t.nav.blog, page: "/blog", section: "blog" },
     {
       href: href(lang, "/#branches"),
       label: t.nav.branches,

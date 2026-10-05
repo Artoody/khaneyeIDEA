@@ -8,6 +8,7 @@ import {
   pgTable,
   primaryKey,
   text,
+  timestamp,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -212,6 +213,26 @@ export const achievements = pgTable("achievements", {
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps(),
 });
+
+/** Blog / magazine articles (the old site's articles carry their search traffic over). Body is Markdown. */
+export const posts = pgTable(
+  "posts",
+  {
+    id: id(),
+    tenantId: tenantId(),
+    slug: text("slug").notNull(),
+    title: jsonb("title").$type<Localized>().notNull(),
+    excerpt: jsonb("excerpt").$type<Localized>(),
+    body: jsonb("body").$type<Localized>().notNull(),
+    coverImage: text("cover_image"),
+    status: publishStatusEnum("status").notNull().default("draft"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    seo: jsonb("seo").$type<SeoFields>().notNull().default({}),
+    legacyUrl: text("legacy_url"),
+    ...timestamps(),
+  },
+  (t) => [uniqueIndex("posts_slug_uq").on(t.tenantId, t.slug)],
+);
 
 export const faqs = pgTable("faqs", {
   id: id(),

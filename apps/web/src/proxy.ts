@@ -8,7 +8,7 @@ import { findLegacyRedirect } from "./server/legacy-redirects";
 const SESSION_COOKIE = "kh_session";
 const PANEL = /^(\/en)?\/app(\/|$)/;
 // First path segments that belong to this app. Anything else may be an old-site URL with a stored redirect.
-const APP_ROUTES = new Set(["", "en", "fa", "app", "login", "courses", "achievements", "book"]);
+const APP_ROUTES = new Set(["", "en", "fa", "app", "login", "courses", "achievements", "book", "blog"]);
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -16,10 +16,8 @@ export async function proxy(request: NextRequest) {
   if (!APP_ROUTES.has(pathname.split("/")[1] ?? "")) {
     const hit = await findLegacyRedirect(pathname);
     if (hit) {
-      const url = request.nextUrl.clone();
-      url.pathname = hit.to;
-      url.search = "";
-      return NextResponse.redirect(url, hit.permanent ? 308 : 307);
+      // Targets may carry a query or a hash (e.g. /courses?d=robotics, /#contact).
+      return NextResponse.redirect(new URL(hit.to, request.nextUrl.origin), hit.permanent ? 308 : 307);
     }
   }
 

@@ -14,9 +14,8 @@ import { BookingFlow, type BookBranch, type BookType } from "@/components/site/b
 export async function generateMetadata({ params }: PageProps<"/[lang]/book">): Promise<Metadata> {
   const { lang } = await params;
   if (!isLocale(lang)) return {};
-  const s = await getSettings();
   const t = getDict(lang).book;
-  return { title: `${t.title} | ${pick(s.name, lang)}`, description: t.subtitle, alternates: { canonical: href(lang, "/book") } };
+  return { title: `${t.title}`, description: t.subtitle, alternates: { canonical: href(lang, "/book"), languages: { fa: "/book", en: "/en/book" } } };
 }
 
 /** Types with at least one active template; the rest would only lead to an empty calendar. */

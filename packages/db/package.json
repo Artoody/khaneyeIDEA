@@ -13,7 +13,8 @@
     "seed": "tsx src/seed/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "grant-role": "tsx src/grant-role.ts"
+    "grant-role": "tsx src/grant-role.ts",
+    "legacy-media": "tsx src/legacy-media.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDict, href, isLocale, num, pick } from "@/lib/i18n";
 import { localDigits } from "@/lib/format";
-import { getAllAchievements, getBlocks, getSettings, getStats } from "@/server/content";
+import { getAllAchievements, getBlocks, getStats } from "@/server/content";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/home-sections";
 import { AchievementsBrowser, type AchievementItem } from "@/components/site/achievements-browser";
@@ -10,9 +10,9 @@ import { AchievementsBrowser, type AchievementItem } from "@/components/site/ach
 export async function generateMetadata({ params }: PageProps<"/[lang]/achievements">): Promise<Metadata> {
   const { lang } = await params;
   if (!isLocale(lang)) return {};
-  const [blocks, s] = await Promise.all([getBlocks(), getSettings()]);
+  const blocks = await getBlocks();
   return {
-    title: `${pick(blocks["achievements.title"], lang)} | ${pick(s.name, lang)}`,
+    title: `${pick(blocks["achievements.title"], lang)}`,
     description: pick(blocks["achievements.subtitle"], lang),
     alternates: { canonical: href(lang, "/achievements"), languages: { fa: "/achievements", en: "/en/achievements" } },
   };

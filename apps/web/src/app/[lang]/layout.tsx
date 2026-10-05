@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { dirOf, isLocale, LOCALES, pick, type Locale } from "@/lib/i18n";
 import { getSettings } from "@/server/content";
 import { InlineScript } from "@/components/inline-script";
+import { siteUrl } from "@/lib/site-url";
 import "../globals.css";
 
 const display = localFont({
@@ -29,9 +30,16 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
   if (!isLocale(lang)) return {};
   const s = await getSettings();
   return {
+    metadataBase: new URL(siteUrl()),
+    openGraph: {
+      siteName: pick(s.name, lang),
+      locale: lang === "fa" ? "fa_IR" : "en_US",
+      type: "website",
+      images: [{ url: "/og.jpg", width: 1200, height: 630, alt: pick(s.name, lang) }],
+    },
+    twitter: { card: "summary_large_image", images: ["/og.jpg"] },
     title: { default: pick(s.seo.title, lang) || pick(s.name, lang), template: `%s | ${pick(s.name, lang)}` },
     description: pick(s.seo.description, lang),
-    alternates: { languages: { fa: "/", en: "/en" } },
     icons: { icon: "/brand/mark.svg" },
   };
 }

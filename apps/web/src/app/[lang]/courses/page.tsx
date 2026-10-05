@@ -11,9 +11,9 @@ import { CatalogBrowser, CourseGrid, type CatalogCourse, type CatalogDept } from
 export async function generateMetadata({ params }: PageProps<"/[lang]/courses">): Promise<Metadata> {
   const { lang } = await params;
   if (!isLocale(lang)) return {};
-  const [blocks, s] = await Promise.all([getBlocks(), getSettings()]);
+  const blocks = await getBlocks();
   return {
-    title: `${pick(blocks["courses.title"], lang)} | ${pick(s.name, lang)}`,
+    title: `${pick(blocks["courses.title"], lang)}`,
     description: pick(blocks["courses.subtitle"], lang),
     alternates: { canonical: href(lang, "/courses"), languages: { fa: "/courses", en: "/en/courses" } },
   };

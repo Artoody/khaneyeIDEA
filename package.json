@@ -10,7 +10,9 @@
     "test": "turbo run test",
     "db:generate": "pnpm --filter @khaneyeidea/db generate",
     "db:migrate": "pnpm --filter @khaneyeidea/db migrate",
-    "db:seed": "pnpm --filter @khaneyeidea/db seed"
+    "db:seed": "pnpm --filter @khaneyeidea/db seed",
+    "bot:dev": "pnpm --filter @khaneyeidea/bot dev",
+    "bot:check": "pnpm --filter @khaneyeidea/bot check"
   },
   "devDependencies": {
     "turbo": "^2"

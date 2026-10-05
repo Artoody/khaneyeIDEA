@@ -1,0 +1,25 @@
+{
+  "name": "@khaneyeidea/bot",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "check": "tsx src/check.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@khaneyeidea/db": "workspace:*",
+    "drizzle-orm": "^0.45.3",
+    "grammy": "^1.46.0",
+    "https-proxy-agent": "^9.1.0",
+    "socks-proxy-agent": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "dotenv": "^18.0.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}

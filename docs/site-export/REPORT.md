@@ -89,4 +89,4 @@
 - `docs/site-export/assets-manifest.json`
 - `docs/site-export/screenshots/`
 - `assets/raw/site/`
-- اسکریپت‌ها: `scripts/site-export/export.mjs` و `scripts/site-export/export_site.py`
+- اسکریپت‌ها: `scripts/site-export/export.mjs`، `clean-structured.mjs`، `screenshots.mjs`

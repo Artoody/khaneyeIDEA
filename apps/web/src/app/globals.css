@@ -120,13 +120,51 @@ body {
   }
 }
 
-/* Intro overlay safety net: even if scripts never run, it fades out by itself. */
+/* ---------- Intro (components/site/intro-splash.tsx) ---------- */
+@property --ir {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+/* Safety net: even if scripts never run, the overlay fades out by itself. */
 @keyframes intro-safety {
   to { opacity: 0; visibility: hidden; pointer-events: none; }
 }
-html[data-intro] .intro-splash {
+html[data-intro="1"] .intro-splash {
   animation: intro-safety 0.6s 10s forwards;
 }
+/* Reveal: the page opens out of the logo as a widening circle, the video drifts forward and softens. */
+@keyframes intro-open {
+  from { --ir: 0px; }
+  to { --ir: 150vmax; }
+}
+html[data-intro="reveal"] .intro-splash {
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(circle at var(--ix, 31%) var(--iy, 50%), transparent var(--ir), #000 calc(var(--ir) + 90px));
+  mask-image: radial-gradient(circle at var(--ix, 31%) var(--iy, 50%), transparent var(--ir), #000 calc(var(--ir) + 90px));
+  animation: intro-open 1.3s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+}
+html[data-intro="reveal"] .intro-video {
+  transform: scale(1.08);
+  filter: blur(6px) brightness(1.15);
+  transition: transform 1.3s cubic-bezier(0.7, 0, 0.2, 1), filter 1.3s ease;
+}
+html[data-intro="reveal"] .intro-controls { opacity: 0; transition: opacity 0.3s; }
+/* Hero waits behind the intro, then eases in (staggered by --i) as the circle opens. */
+html[data-intro] .hero-enter {
+  opacity: 0;
+  transform: translateY(28px);
+  filter: blur(10px);
+}
+html[data-intro] .hero-enter-canvas { transform: scale(0.86); }
+html[data-intro="reveal"] .hero-enter {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition: opacity 0.9s ease, transform 1.1s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s ease;
+  transition-delay: calc(350ms + var(--i, 0) * 110ms);
+}
+html[data-intro="reveal"] .hero-enter-canvas { transition-delay: 150ms; transition-duration: 1.4s; }
 
 /* Theme toggle: sun <-> moon morph. Shows the moon in light mode (tap for dark) and the sun in dark mode. */
 .theme-icon .core,

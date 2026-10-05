@@ -46,17 +46,17 @@ export async function Hero({ lang }: { lang: Locale }) {
     <section className="relative overflow-hidden">
       <div className="bg-dots pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-4 px-4 pb-16 pt-6 sm:px-6 lg:min-h-[calc(100dvh-68px)] lg:grid-cols-[1fr_1.05fr] lg:gap-10 lg:pb-24 lg:pt-0">
-        <div className="relative order-1 aspect-[5/4] w-full [mask-image:radial-gradient(ellipse_closest-side_at_center,black_74%,transparent)] lg:order-2 lg:aspect-square">
+        <div className="hero-enter hero-enter-canvas relative order-1 aspect-[5/4] w-full [mask-image:radial-gradient(ellipse_closest-side_at_center,black_74%,transparent)] lg:order-2 lg:aspect-square">
           <HeroCanvas label={pick(blocks["home.hero.title"], lang)} />
         </div>
         <div className="order-2 max-w-xl lg:order-1">
-          <h1 className="font-display text-[2.6rem] font-black leading-[1.15] tracking-tight text-balance sm:text-6xl lg:text-[4.2rem]">
+          <h1 style={{ ["--i" as string]: 0 }} className="hero-enter font-display text-[2.6rem] font-black leading-[1.15] tracking-tight text-balance sm:text-6xl lg:text-[4.2rem]">
             {pick(blocks["home.hero.title"], lang)}
           </h1>
-          <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted sm:text-xl">
+          <p style={{ ["--i" as string]: 1 }} className="hero-enter mt-6 max-w-[46ch] text-lg leading-relaxed text-muted sm:text-xl">
             {pick(blocks["home.hero.subtitle"], lang)}
           </p>
-          <div className="mt-9 flex flex-wrap items-center gap-3">
+          <div style={{ ["--i" as string]: 2 }} className="hero-enter mt-9 flex flex-wrap items-center gap-3">
             <Link
               href={href(lang, "/book")}
               className="inline-flex h-13 items-center justify-center rounded-full bg-accent px-7 text-base font-semibold text-on-accent shadow-[0_10px_30px_-10px_rgb(255_179_71/0.6)] transition hover:bg-accent-strong active:scale-[0.98]"

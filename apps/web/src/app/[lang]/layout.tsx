@@ -44,8 +44,8 @@ export const viewport: Viewport = {
 };
 
 // Before first paint: applies the saved or system theme (no flash), and flags the one-time intro video for
-// first-time visitors on the home page (skipped for reduced motion and data saver).
-const themeScript = `(function(){var d=document.documentElement;try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.dataset.theme=t}catch(e){d.dataset.theme="light"}try{var p=location.pathname.replace(/\\/$/,"");var c=navigator.connection;if((p===""||p==="/en")&&!localStorage.getItem("intro-seen")&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&!(c&&c.saveData)){d.dataset.intro="1"}}catch(e){}})()`;
+// each new visit (browser session) landing on the home page (skipped for reduced motion and data saver).
+const themeScript = `(function(){var d=document.documentElement;try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.dataset.theme=t}catch(e){d.dataset.theme="light"}try{var p=location.pathname.replace(/\\/$/,"");var c=navigator.connection;if((p===""||p==="/en")&&!sessionStorage.getItem("intro-seen")&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&!(c&&c.saveData)){d.dataset.intro="1"}}catch(e){}})()`;
 
 export default async function RootLayout({ children, params }: LayoutProps<"/[lang]">) {
   const { lang } = await params;

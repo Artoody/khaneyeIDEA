@@ -13,7 +13,8 @@
     "db:seed": "pnpm --filter @khaneyeidea/db seed",
     "db:demo": "pnpm --filter @khaneyeidea/core demo",
     "bot:dev": "pnpm --filter @khaneyeidea/bot dev",
-    "bot:check": "pnpm --filter @khaneyeidea/bot check"
+    "bot:check": "pnpm --filter @khaneyeidea/bot check",
+    "bot:test": "pnpm --filter @khaneyeidea/bot e2e"
   },
   "devDependencies": {
     "turbo": "^2"

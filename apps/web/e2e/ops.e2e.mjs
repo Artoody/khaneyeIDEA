@@ -59,9 +59,9 @@ await admin.waitForSelector('[data-testid="session-panel"]:visible summary');
 check("canceled session restored", true);
 // classes & students lists
 await admin.goto(base + "/app/admin/classes");
-await admin.waitForSelector("main li");
-check("classes list", (await admin.locator("main li").count()) >= 6);
-await admin.locator("main li a").first().click();
+await admin.waitForSelector('[data-testid="class-days"] a');
+check("classes list", (await admin.locator('[data-testid="class-days"] a').count()) >= 6);
+await admin.locator('[data-testid="class-days"] a').first().click();
 await admin.waitForSelector('[data-testid="roster"]');
 check("class page shows roster", (await admin.locator('[data-testid="roster"] li').count()) >= 3);
 await admin.screenshot({ path: `${S}/ops-class.png`, fullPage: true });
@@ -77,11 +77,12 @@ const teacher = await login("09120000101");
 check("teacher lands on coach panel", teacher.url().includes("/app/teacher"));
 await teacher.waitForSelector("main h1", { timeout: 60000 });
 await teacher.screenshot({ path: `${S}/ops-teacher.png`, fullPage: true });
-const tCards = await teacher.locator("main a[href*='?s=']").count();
+const tCards = await teacher.locator('main [data-testid="week"] details').count();
 check("teacher sees own sessions", tCards > 0, `(${tCards})`);
 // teacher cannot open the admin board
 const r = await teacher.goto(base + "/app/admin/sessions");
-check("teacher cannot open admin board", r.status() === 404 || (await teacher.textContent("body")).includes("404"));
+await teacher.waitForURL(/no-access/);
+check("teacher cannot open admin board", r.status() < 500 && (await teacher.textContent("body")).includes("پنل خودتان آماده است"));
 
 // Parent portal
 const parent = await login("09350000001", { width: 390, height: 844 });

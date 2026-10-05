@@ -6,6 +6,7 @@ import { href, isLocale, pick, type Locale } from "@/lib/i18n";
 import { getAdminDict } from "@/lib/admin-i18n";
 import { dayLabel, tehranIso } from "@/lib/jalali";
 import { requirePermissionPage } from "@/server/auth";
+import { Newspaper } from "@phosphor-icons/react/dist/ssr";
 import { Badge, ListSkeleton, PageHeader, RowLink, RowList } from "@/components/admin/ui";
 
 async function List({ lang }: { lang: Locale }) {
@@ -21,7 +22,7 @@ async function List({ lang }: { lang: Locale }) {
       ) : (
         <RowList>
           {rows.map((p) => (
-            <RowLink key={p.id} href={`${base}/${p.id}`}>
+            <RowLink key={p.id} href={`${base}/${p.id}`} icon={Newspaper}>
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-medium">{pick(p.title, lang)}</span>
                 <span className="block truncate text-sm text-muted">

@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { and, asc, eq, ilike, inArray, or, sql } from "drizzle-orm";
-import { Student } from "@phosphor-icons/react/dist/ssr";
 import { classGroups, enrollments, getDb, guardians, students, users } from "@khaneyeidea/db";
 import { normalizeIranMobile } from "@khaneyeidea/core";
 import { href, isLocale, num, type Locale } from "@/lib/i18n";
@@ -53,8 +52,7 @@ async function List({ lang, q }: { lang: Locale; q: string }) {
           {rows.map((s) => {
             const age = ageFromJalaliYear(s.birthYear);
             return (
-              <RowLink key={s.id} href={`${base}/${s.id}`}>
-                <Student weight="duotone" className="size-6 shrink-0 text-accent-text" />
+              <RowLink key={s.id} href={`${base}/${s.id}`} initials={s.firstName.slice(0, 1)}>
                 <span className="min-w-0 flex-1">
                   <span className="block font-medium">
                     {s.firstName} {s.lastName}

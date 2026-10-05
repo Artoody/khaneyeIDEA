@@ -33,8 +33,7 @@ async function List({ lang }: { lang: Locale }) {
           {rows.map(({ tpl, type, branch }) => {
             const perDay = Math.floor((toMin(tpl.endTime) - toMin(tpl.startTime)) / tpl.slotMinutes);
             return (
-              <RowLink key={tpl.id} href={`${base}/${tpl.id}`}>
-                <Clock weight="duotone" className="size-6 shrink-0 text-accent-text" />
+              <RowLink key={tpl.id} href={`${base}/${tpl.id}`} icon={Clock}>
                 <span className="min-w-0 flex-1">
                   <span className="block font-medium">{tpl.name}</span>
                   <span className="block truncate text-sm text-muted">

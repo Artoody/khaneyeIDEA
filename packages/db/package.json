@@ -12,7 +12,7 @@
     "migrate": "tsx src/migrate.ts",
     "seed": "tsx src/seed/index.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "grant-role": "tsx src/grant-role.ts",
     "legacy-media": "tsx src/legacy-media.ts"
   },

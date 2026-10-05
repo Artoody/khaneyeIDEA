@@ -21,8 +21,7 @@ async function List({ lang }: { lang: Locale }) {
       ) : (
         <RowList>
           {rows.map((x) => (
-            <RowLink key={x.id} href={`${base}/${x.id}`}>
-              <ChalkboardTeacher weight="duotone" className="size-6 shrink-0 text-accent-text" />
+            <RowLink key={x.id} href={`${base}/${x.id}`} icon={ChalkboardTeacher}>
               <span className="min-w-0 flex-1">
                 <span className="block font-medium">{pick(x.name, lang)}</span>
                 <span className="block truncate text-sm text-muted">{x.role ? pick(x.role, lang) : null}</span>

@@ -5,11 +5,12 @@ import { href, isLocale, type Locale } from "@/lib/i18n";
 import { requireUser } from "@/server/auth";
 import { PanelSkeleton } from "@/components/panel/panel-shell";
 
-async function RouteToHome({ lang }: { lang: Locale }) {
+async function RouteToHome({ lang }: { lang: Locale }): Promise<null> {
   const user = await requireUser(lang);
   const home = homeFor(user);
   if (home !== "/app") redirect(href(lang, home));
-  return notFound();
+  redirect(href(lang, "/app/no-access"));
+  return null;
 }
 
 export default async function AppIndex({ params }: PageProps<"/[lang]/app">) {

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Plus } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, CaretLeft, Plus } from "@phosphor-icons/react/dist/ssr";
 
 // Server-safe layout pieces for admin pages.
 
@@ -72,12 +72,18 @@ export function ListSkeleton() {
   );
 }
 
-/** Clickable list rows with a consistent look. */
-export function RowLink({ href, children }: { href: string; children: React.ReactNode }) {
+/** Clickable list rows with a consistent look: a tinted icon (or initials) tile, the content, and a caret. */
+export function RowLink({ href, children, icon: Ico, initials }: { href: string; children: React.ReactNode; icon?: React.ComponentType<{ weight?: "duotone" | "regular" | "fill" | "bold"; className?: string }>; initials?: string }) {
   return (
     <li>
-      <Link href={href} className="flex min-h-16 items-center gap-4 px-4 py-3 transition hover:bg-ink/[0.03] sm:px-5">
+      <Link href={href} className="group flex min-h-[4.5rem] items-center gap-4 px-4 py-3 transition hover:bg-ink/[0.03] sm:px-5">
+        {(Ico || initials) && (
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent-text transition group-hover:bg-accent group-hover:text-on-accent">
+            {Ico ? <Ico weight="duotone" className="size-6" /> : <span className="font-display text-base font-extrabold">{initials}</span>}
+          </span>
+        )}
         {children}
+        <CaretLeft className="size-4 shrink-0 text-muted/60 transition group-hover:-translate-x-0.5 group-hover:text-ink ltr:rotate-180 ltr:group-hover:translate-x-0.5" />
       </Link>
     </li>
   );

@@ -5,6 +5,7 @@ import { courses, departments, getDb } from "@khaneyeidea/db";
 import { href, isLocale, num, pick, type Locale } from "@/lib/i18n";
 import { getAdminDict } from "@/lib/admin-i18n";
 import { requirePermissionPage } from "@/server/auth";
+import { House } from "@phosphor-icons/react/dist/ssr";
 import { Badge, ListSkeleton, PageHeader, RowLink, RowList } from "@/components/admin/ui";
 
 async function List({ lang }: { lang: Locale }) {
@@ -26,7 +27,7 @@ async function List({ lang }: { lang: Locale }) {
       ) : (
         <RowList>
           {rows.map(({ d, n }) => (
-            <RowLink key={d.id} href={`${base}/${d.id}`}>
+            <RowLink key={d.id} href={`${base}/${d.id}`} icon={House}>
               <span className="min-w-0 flex-1">
                 <span className="block font-medium">{pick(d.title, lang)}</span>
                 <span className="block truncate text-sm text-muted">{d.description ? pick(d.description, lang) : null}</span>

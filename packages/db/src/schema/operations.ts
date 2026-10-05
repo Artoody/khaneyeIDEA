@@ -78,6 +78,9 @@ export const classGroups = pgTable(
     startsOn: date("starts_on").notNull(),
     endsOn: date("ends_on"),
     onlineUrl: text("online_url"),
+    /** Invite links of the class groups (shown to staff and sent to new students); the bot-linked chat is in chat_links. */
+    baleInviteUrl: text("bale_invite_url"),
+    telegramInviteUrl: text("telegram_invite_url"),
     active: boolean("active").notNull().default(true),
     ...timestamps(),
   },
@@ -147,6 +150,10 @@ export const classSessions = pgTable(
     notHeldReason: text("not_held_reason"),
     needsMakeup: boolean("needs_makeup").notNull().default(false),
     makeupOfSessionId: uuid("makeup_of_session_id"),
+    /** Moved to another time or added as a makeup: off the weekly pattern, so schedule syncing leaves it alone. */
+    custom: boolean("custom").notNull().default(false),
+    /** The weekly slot this session was moved away from (so syncing does not re-create that slot). */
+    originalStartsAt: timestamp("original_starts_at", { withTimezone: true }),
     ...timestamps(),
   },
   (t) => [
@@ -277,3 +284,23 @@ export const cancellationRequests = pgTable("cancellation_requests", {
   decidedAt: timestamp("decided_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * One-time codes that connect a bot chat to something in the platform:
+ * - kind "user": a teacher or parent opens the bot with /start CODE to link their account;
+ * - kind "class": an admin posts /link CODE in a Bale or Telegram group to attach it to a class.
+ */
+export const linkCodes = pgTable(
+  "link_codes",
+  {
+    id: id(),
+    tenantId: tenantId(),
+    code: text("code").notNull(),
+    kind: text("kind").$type<"user" | "class">().notNull(),
+    refId: uuid("ref_id").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("link_codes_code_uq").on(t.code)],
+);

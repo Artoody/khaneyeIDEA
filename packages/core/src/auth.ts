@@ -52,26 +52,30 @@ export async function requestOtp(deps: AuthDeps, rawPhone: string, ip: string | 
   const phone = normalizeIranMobile(rawPhone);
   if (!phone) return { ok: false, reason: "invalid_phone" };
 
-  const [byPhone] = await db
-    .select({ n: count() })
-    .from(otpCodes)
-    .where(
-      and(
-        eq(otpCodes.tenantId, tenantId),
-        eq(otpCodes.phone, phone),
-        gt(otpCodes.createdAt, new Date(now.getTime() - OTP.perPhoneWindowMs)),
-      ),
-    );
-  if ((byPhone?.n ?? 0) >= OTP.perPhoneMax) return { ok: false, reason: "rate_limited" };
-  if (ip) {
-    const [byIp] = await db
+  // With the development code nothing is sent, so there is nothing to limit (never set in production).
+  const fixed = deps.fixedCode && new RegExp(`^\\d{${OTP.length}}$`).test(deps.fixedCode) ? deps.fixedCode : null;
+
+  if (!fixed) {
+    const [byPhone] = await db
       .select({ n: count() })
       .from(otpCodes)
-      .where(and(eq(otpCodes.ip, ip), gt(otpCodes.createdAt, new Date(now.getTime() - OTP.perIpWindowMs))));
-    if ((byIp?.n ?? 0) >= OTP.perIpMax) return { ok: false, reason: "rate_limited" };
+      .where(
+        and(
+          eq(otpCodes.tenantId, tenantId),
+          eq(otpCodes.phone, phone),
+          gt(otpCodes.createdAt, new Date(now.getTime() - OTP.perPhoneWindowMs)),
+        ),
+      );
+    if ((byPhone?.n ?? 0) >= OTP.perPhoneMax) return { ok: false, reason: "rate_limited" };
+    if (ip) {
+      const [byIp] = await db
+        .select({ n: count() })
+        .from(otpCodes)
+        .where(and(eq(otpCodes.ip, ip), gt(otpCodes.createdAt, new Date(now.getTime() - OTP.perIpWindowMs))));
+      if ((byIp?.n ?? 0) >= OTP.perIpMax) return { ok: false, reason: "rate_limited" };
+    }
   }
 
-  const fixed = deps.fixedCode && new RegExp(`^\\d{${OTP.length}}$`).test(deps.fixedCode) ? deps.fixedCode : null;
   const code = fixed ?? String(randomInt(0, 10 ** OTP.length)).padStart(OTP.length, "0");
   await db.insert(otpCodes).values({
     tenantId,

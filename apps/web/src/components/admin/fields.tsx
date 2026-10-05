@@ -210,7 +210,7 @@ export function AdminForm({
             {labels.saved}
           </span>
         )}
-        {state.error && (
+        {state.error && state.error !== "conflict" && (
           <span className="inline-flex items-center gap-1.5 text-sm text-red-500" role="alert">
             <WarningCircle weight="fill" className="size-4" />
             {state.error === "validation" ? labels.error : state.error}

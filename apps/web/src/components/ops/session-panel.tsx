@@ -5,7 +5,8 @@ import { CheckCircle, CircleNotch, WarningCircle } from "@phosphor-icons/react";
 import type { OpsDict } from "@/lib/ops-i18n";
 import type { Locale } from "@/lib/i18n";
 import { fill } from "@/lib/format";
-import { cancelSession, markNotHeld, restoreSession, saveSessionWork } from "@/app/[lang]/app/session-actions";
+import { cancelSession, markNotHeld, removeExtraSession, restoreSession, saveSessionWork } from "@/app/[lang]/app/session-actions";
+import { MakeupForm, MoveForm } from "./session-extras";
 
 type State = { ok?: boolean; error?: string; savedAt?: number; fieldErrors?: Record<string, string> };
 export type PanelData = {
@@ -13,6 +14,7 @@ export type PanelData = {
   title: string;
   when: string;
   dayLabel: string;
+  dayIso: string;
   place: string;
   status: string;
   started: boolean;
@@ -21,8 +23,16 @@ export type PanelData = {
   summary: string;
   homework: string | null;
   hasHomeworkRow: boolean;
-  announcement: { text: string; sendAt: string } | null;
+  announcement: { status: string; text: string; sendAt: string } | null;
   notHeldReason: string | null;
+  classGroupId: string;
+  from: string;
+  to: string;
+  whenShort: string;
+  custom: boolean;
+  isMakeup: boolean;
+  days: { iso: string; weekday: string; label: string }[];
+  request: { reason: string | null } | null;
 };
 
 const btn =
@@ -193,7 +203,12 @@ export function SessionPanel({ d, o, asTeacher }: { d: PanelData; o: OpsDict; la
         {d.announcement && (
           <blockquote className="rounded-2xl border border-line p-4 text-sm leading-relaxed">
             {d.announcement.text}
-            <footer className="mt-2 text-xs text-muted">{d.announcement.sendAt}</footer>
+            <footer className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
+              <span>{d.announcement.sendAt}</span>
+              <span className={d.announcement.status === "failed" ? "text-red-500" : d.announcement.status === "sent" ? "text-emerald-600 dark:text-emerald-400" : ""}>
+                {d.announcement.status === "failed" ? o.announce.failed : d.announcement.status === "sent" ? o.announce.sent : o.announce.scheduled}
+              </span>
+            </footer>
           </blockquote>
         )}
         {!asTeacher && (
@@ -208,13 +223,27 @@ export function SessionPanel({ d, o, asTeacher }: { d: PanelData; o: OpsDict; la
     return (
       <div className="flex flex-col gap-4">
         <p className="text-sm text-muted">{o.session.future}</p>
+        {d.request && <p className="rounded-2xl bg-accent/10 p-4 text-sm">{o.requests.badge}: {d.request.reason ?? o.requests.noReason}</p>}
+        {d.isMakeup && <span className="w-fit rounded-full bg-ink/5 px-2.5 py-1 text-xs">{o.move.makeupOf}</span>}
+        {d.custom && !d.isMakeup && <span className="w-fit rounded-full bg-ink/5 px-2.5 py-1 text-xs">{o.move.moved_tag}</span>}
+        {!asTeacher && d.isMakeup && (
+          <form action={removeExtraSession}>
+            <input type="hidden" name="sessionId" value={d.id} />
+            <button className="inline-flex h-10 items-center rounded-full border border-red-500/40 px-5 text-sm text-red-600 hover:bg-red-500/10">{o.move.removeExtra}</button>
+          </form>
+        )}
+        {!asTeacher && <MoveForm o={o} days={d.days} from={d.from} to={d.to} sessionId={d.id} dayIso={d.dayIso} />}
         <Cancel d={d} o={o} asTeacher={asTeacher} />
+        {d.announcement && d.announcement.status === "failed" && <p className="text-sm text-red-500">{o.announce.failed}</p>}
       </div>
     );
   return (
     <div className="flex flex-col gap-6">
       <Work d={d} o={o} />
       <NotHeld d={d} o={o} />
+      {!asTeacher && (d.status === "needs_makeup" || d.status === "not_held") && (
+        <MakeupForm o={o} days={d.days} from={d.from} to={d.to} classGroupId={d.classGroupId} ofSessionId={d.status === "needs_makeup" ? d.id : undefined} />
+      )}
     </div>
   );
 }

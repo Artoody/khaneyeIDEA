@@ -5,6 +5,7 @@ import { appointmentTypes, availabilityTemplates, getDb } from "@khaneyeidea/db"
 import { href, isLocale, pick, type Locale } from "@/lib/i18n";
 import { getAdminDict } from "@/lib/admin-i18n";
 import { requirePermissionPage } from "@/server/auth";
+import { ListChecks } from "@phosphor-icons/react/dist/ssr";
 import { Badge, ListSkeleton, PageHeader, RowLink, RowList } from "@/components/admin/ui";
 
 async function List({ lang }: { lang: Locale }) {
@@ -24,7 +25,7 @@ async function List({ lang }: { lang: Locale }) {
       <PageHeader title={t.navTypes} description={t.typesHelp} action={{ href: `${base}/new`, label: t.newType }} />
       <RowList>
         {rows.map(({ ty, n }) => (
-          <RowLink key={ty.id} href={`${base}/${ty.id}`}>
+          <RowLink key={ty.id} href={`${base}/${ty.id}`} icon={ListChecks}>
             <span className="min-w-0 flex-1">
               <span className="block font-medium">{pick(ty.title, lang)}</span>
               <span className="block truncate text-sm text-muted">{[t.kind[ty.kind], t.place[ty.place]].join(" · ")}</span>

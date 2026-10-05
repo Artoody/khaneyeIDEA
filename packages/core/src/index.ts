@@ -4,3 +4,6 @@ export * from "./auth";
 export * from "./booking";
 export * from "./classes";
 export * from "./users";
+export * from "./session-work";
+export * from "./linking";
+export * from "./followup";

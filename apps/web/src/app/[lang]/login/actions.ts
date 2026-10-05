@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getDb } from "@khaneyeidea/db";
 import { getSessionUser, homeFor, requestOtp, revokeSession, verifyOtp } from "@khaneyeidea/core";
 import { href, isLocale, type Locale } from "@/lib/i18n";
-import { authDeps, clientMeta, SESSION_COOKIE, setSessionCookie } from "@/server/auth";
+import { authDeps, bootstrapDevOwner, clientMeta, SESSION_COOKIE, setSessionCookie } from "@/server/auth";
 
 export type LoginState =
   | { step: "phone"; error?: "invalid_phone" | "rate_limited" | "unknown"; phone?: string }
@@ -43,7 +43,11 @@ export async function verifyCodeAction(prev: LoginState, form: FormData): Promis
     return { step: "code", phone, expiresInSec: 120, error: "unknown" };
   }
   await setSessionCookie(token);
-  const user = await getSessionUser(getDb(), token);
+  let user = await getSessionUser(getDb(), token);
+  if (user && user.roles.length === 0) {
+    await bootstrapDevOwner(user.userId, user.tenantId);
+    user = await getSessionUser(getDb(), token);
+  }
   redirect(href(lang, user ? homeFor(user) : "/app"));
 }
 

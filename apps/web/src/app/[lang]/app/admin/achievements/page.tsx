@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
-import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
+import { MagnifyingGlass, Trophy } from "@phosphor-icons/react/dist/ssr";
 import { achievements, getDb } from "@khaneyeidea/db";
 import { href, isLocale, num, pick, type Locale } from "@/lib/i18n";
 import { getAdminDict } from "@/lib/admin-i18n";
@@ -63,8 +63,8 @@ async function List({ lang, q, missingEn }: { lang: Locale; q: string; missingEn
       ) : (
         <RowList>
           {rows.map((x) => (
-            <RowLink key={x.id} href={`${base}/${x.id}`}>
-              <span className="w-12 shrink-0 text-sm tabular-nums text-muted">{x.year ? num(String(x.year), lang) : "—"}</span>
+            <RowLink key={x.id} href={`${base}/${x.id}`} icon={Trophy}>
+              <span className="w-12 shrink-0 text-sm tabular-nums text-muted">{x.year ? num(String(x.year), lang) : "-"}</span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-medium">{pick(x.title, lang)}</span>
                 <span className="block truncate text-sm text-muted">{[x.competition, x.rank].filter(Boolean).join(" · ")}</span>

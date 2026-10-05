@@ -6,6 +6,7 @@ import { courses, departments, getDb } from "@khaneyeidea/db";
 import { href, isLocale, num, pick, type Locale } from "@/lib/i18n";
 import { getAdminDict } from "@/lib/admin-i18n";
 import { requirePermissionPage } from "@/server/auth";
+import { GraduationCap } from "@phosphor-icons/react/dist/ssr";
 import { Badge, ListSkeleton, PageHeader, RowLink, RowList } from "@/components/admin/ui";
 
 const FILTERS = ["price", "age", "syllabus"] as const;
@@ -53,7 +54,7 @@ async function List({ lang, missing }: { lang: Locale; missing: Missing | null }
       ) : (
         <RowList>
           {rows.map(({ c, dep }) => (
-            <RowLink key={c.id} href={`${base}/${c.id}`}>
+            <RowLink key={c.id} href={`${base}/${c.id}`} icon={GraduationCap}>
               <span className="min-w-0 flex-1">
                 <span className="block font-medium">{pick(c.title, lang)}</span>
                 <span className="block truncate text-sm text-muted">

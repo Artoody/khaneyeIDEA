@@ -21,8 +21,7 @@ async function List({ lang }: { lang: Locale }) {
       ) : (
         <RowList>
           {rows.map((b) => (
-            <RowLink key={b.id} href={`${base}/${b.id}`}>
-              <MapPin weight="duotone" className="size-6 shrink-0 text-accent-text" />
+            <RowLink key={b.id} href={`${base}/${b.id}`} icon={MapPin}>
               <span className="min-w-0 flex-1">
                 <span className="block font-medium">{pick(b.name, lang)}</span>
                 <span className="block truncate text-sm text-muted">{pick(b.address, lang)}</span>

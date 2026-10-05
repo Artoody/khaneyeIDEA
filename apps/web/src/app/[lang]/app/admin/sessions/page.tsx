@@ -11,7 +11,8 @@ import { getOpsDict } from "@/lib/ops-i18n";
 import { fill } from "@/lib/format";
 import { dayLabel, tehranIso, timeLabel, WEEKDAYS } from "@/lib/jalali";
 import { requirePermissionPage } from "@/server/auth";
-import { loadSessionDetail, loadWeek, weekStart } from "@/server/sessions";
+import { loadPendingRequests, loadSessionDetail, loadWeek, weekStart } from "@/server/sessions";
+import { RequestsInbox } from "@/components/ops/requests-inbox";
 import { ListSkeleton, PageHeader } from "@/components/admin/ui";
 import { SessionPanel } from "@/components/ops/session-panel";
 import { panelData, STATUS_DOT, STATUS_STYLE } from "@/components/ops/panel-data";
@@ -30,11 +31,13 @@ async function Board({ lang, q }: { lang: Locale; q: Q }) {
   const teacherId = q.t && z.uuid().safeParse(q.t).success ? q.t : null;
   const branchId = q.b && z.uuid().safeParse(q.b).success ? q.b : null;
   const db = getDb();
-  const [rows, ts, bs] = await Promise.all([
+  const [rows, ts, bs, requests] = await Promise.all([
     loadWeek(user.tenantId, start, { teacherId, branchId }),
     db.select().from(teachers).where(eq(teachers.tenantId, user.tenantId)).orderBy(asc(teachers.sortOrder)),
     db.select().from(branches).where(eq(branches.tenantId, user.tenantId)).orderBy(asc(branches.sortOrder)),
+    loadPendingRequests(user.tenantId),
   ]);
+  const requested = new Set(requests.map((r) => r.s.id));
   const withStatus = rows.map((r) => ({ ...r, status: effectiveStatus(r.s) }));
   const counts = new Map<string, number>();
   for (const r of withStatus) counts.set(r.status, (counts.get(r.status) ?? 0) + 1);
@@ -61,6 +64,12 @@ async function Board({ lang, q }: { lang: Locale; q: Q }) {
   return (
     <>
       <PageHeader title={o.nav.sessions} />
+      {requests.length > 0 && (
+        <section className="mb-6 rounded-[var(--radius-card)] border border-accent/40 bg-accent/5 p-5">
+          <h2 className="mb-3 font-display text-lg font-bold">{o.requests.title}</h2>
+          <RequestsInbox rows={requests} lang={lang} o={o} />
+        </section>
+      )}
       <div className="mb-5 flex flex-wrap items-center gap-2">
         <Link href={link({ w: addDays(start, -7) })} aria-label={o.board.prev} className="grid size-10 place-items-center rounded-full border border-line hover:border-ink/30">
           <CaretRight className="size-4 ltr:rotate-180" />
@@ -143,6 +152,16 @@ async function Board({ lang, q }: { lang: Locale; q: Q }) {
                           <span className={`size-2 shrink-0 rounded-full ${STATUS_DOT[r.status]}`} title={o.status[r.status]} />
                         </span>
                         <span className="title mt-1 block font-medium leading-snug">{r.c.title}</span>
+                        {(requested.has(r.s.id) || r.s.custom) && (
+                          <span className="mt-1.5 flex flex-wrap gap-1">
+                            {requested.has(r.s.id) && <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-semibold text-on-accent">{o.requests.badge}</span>}
+                            {r.s.makeupOfSessionId || (r.s.custom && !r.s.originalStartsAt) ? (
+                              <span className="rounded-full bg-ink/10 px-2 py-0.5 text-[11px]">{o.move.makeupOf}</span>
+                            ) : r.s.custom ? (
+                              <span className="rounded-full bg-ink/10 px-2 py-0.5 text-[11px]">{o.move.moved_tag}</span>
+                            ) : null}
+                          </span>
+                        )}
                         <span className="mt-1 flex items-center justify-between gap-2 text-xs text-muted">
                           <span className="truncate">{r.teacher ? pick(r.teacher, lang) : o.classes.noTeacher}</span>
                           <span className="inline-flex shrink-0 items-center gap-1">

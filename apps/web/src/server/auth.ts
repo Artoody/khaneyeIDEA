@@ -1,10 +1,11 @@
 import "server-only";
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
-import { getDb } from "@khaneyeidea/db";
+import { redirect } from "next/navigation";
+import { getDb, userRoles, users } from "@khaneyeidea/db";
 import {
   can,
+  grantRole,
   ForbiddenError,
   getSessionUser,
   type AuthDeps,
@@ -12,6 +13,7 @@ import {
   type Permission,
   type SessionUser,
 } from "@khaneyeidea/core";
+import { and, eq } from "drizzle-orm";
 import { href, type Locale } from "@/lib/i18n";
 import { tenantId } from "./content";
 
@@ -77,7 +79,8 @@ export async function requireUser(lang: Locale): Promise<SessionUser> {
 /** For pages: users without the permission get a 404 (the page's existence is not revealed). */
 export async function requirePermissionPage(lang: Locale, perm: Permission, scope?: { branchId?: string | null }) {
   const user = await requireUser(lang);
-  if (!can(user, perm, scope)) notFound();
+  // Signed in but not allowed: a friendly page that says why (and where to go), not a bare 404.
+  if (!can(user, perm, scope)) redirect(href(lang, "/app/no-access"));
   return user;
 }
 
@@ -100,4 +103,21 @@ export async function setSessionCookie(token: string) {
     path: "/",
     maxAge: 400 * 24 * 60 * 60,
   });
+}
+
+/**
+ * Development convenience: while the fixed sign-in code is active and the tenant has no owner yet, the first person
+ * who signs in becomes the owner, so a fresh checkout can reach the admin panel without a CLI step.
+ * Never runs in production or with a real OTP provider (devOtpCode() is null there).
+ */
+export async function bootstrapDevOwner(userId: string, tenantId: string): Promise<void> {
+  if (!devOtpCode()) return;
+  const db = getDb();
+  const owners = await db
+    .select({ id: userRoles.id })
+    .from(userRoles)
+    .innerJoin(users, eq(users.id, userRoles.userId))
+    .where(and(eq(users.tenantId, tenantId), eq(userRoles.role, "owner")))
+    .limit(1);
+  if (owners.length === 0) await grantRole(db, userId, "owner", null);
 }

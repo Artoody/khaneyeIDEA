@@ -7,14 +7,16 @@
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
     "check": "tsx src/check.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "e2e": "tsx e2e/mock-api.e2e.ts"
   },
   "dependencies": {
     "@khaneyeidea/db": "workspace:*",
     "drizzle-orm": "^0.45.3",
     "grammy": "^1.46.0",
     "https-proxy-agent": "^9.1.0",
-    "socks-proxy-agent": "^10.1.0"
+    "socks-proxy-agent": "^10.1.0",
+    "@khaneyeidea/core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.18.0",

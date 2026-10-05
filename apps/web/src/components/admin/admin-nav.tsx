@@ -24,6 +24,7 @@ import {
   Chalkboard,
   Student,
   UsersThree,
+  Door,
 } from "@phosphor-icons/react";
 
 const ICONS = {
@@ -40,13 +41,14 @@ const ICONS = {
   classes: Chalkboard,
   students: Student,
   staff: UsersThree,
+  rooms: Door,
   bookings: CalendarCheck,
   templates: Clock,
   closures: CalendarX,
   types: ListChecks,
 } as const;
 
-export type NavItem = { key: keyof typeof ICONS; href: string; label: string; group?: string };
+export type NavItem = { key: keyof typeof ICONS; href: string; label: string; group?: string; badge?: number };
 
 // The active-link highlight reads the URL, which is request data: keep it behind Suspense so the
 // panel frame still prerenders, and show the same links without a highlight until it resolves.
@@ -78,10 +80,19 @@ function LinkList({ items, onNavigate, path }: { items: NavItem[]; onNavigate?: 
               href={it.href}
               onClick={onNavigate}
               aria-current={active ? "page" : undefined}
-              className="flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] text-muted transition hover:bg-ink/5 hover:text-ink aria-[current=page]:bg-accent/15 aria-[current=page]:font-medium aria-[current=page]:text-ink"
+              className="group flex h-12 items-center gap-3 rounded-xl px-2 text-[15px] text-muted transition hover:bg-ink/5 hover:text-ink aria-[current=page]:bg-accent/12 aria-[current=page]:font-medium aria-[current=page]:text-ink"
             >
-              <Ico weight={active ? "fill" : "regular"} className={`size-5 ${active ? "text-accent-text" : ""}`} />
-              {it.label}
+              <span
+                className={`grid size-8 shrink-0 place-items-center rounded-lg transition ${active ? "bg-accent text-on-accent" : "bg-ink/5 text-muted group-hover:text-ink"}`}
+              >
+                <Ico weight={active ? "fill" : "regular"} className="size-[18px]" />
+              </span>
+              <span className="min-w-0 flex-1 truncate">{it.label}</span>
+              {!!it.badge && (
+                <span className="grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1.5 text-[11px] font-bold tabular-nums text-on-accent" aria-label={String(it.badge)}>
+                  {it.badge > 99 ? "99+" : it.badge.toLocaleString("fa-IR")}
+                </span>
+              )}
             </Link>
           </li>
         );

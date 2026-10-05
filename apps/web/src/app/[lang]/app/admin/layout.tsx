@@ -6,6 +6,7 @@ import { getDict, href, isLocale, num, type Locale } from "@/lib/i18n";
 import { getAdminDict } from "@/lib/admin-i18n";
 import { getOpsDict } from "@/lib/ops-i18n";
 import { getUser } from "@/server/auth";
+import { navCounts } from "@/server/sessions";
 import { can } from "@khaneyeidea/core";
 import { logoutAction } from "@/app/[lang]/login/actions";
 import { LogoMark } from "@/components/site/logo-mark";
@@ -34,9 +35,11 @@ async function PermittedNav({
   menuLabel: string;
 }) {
   const user = await getUser();
+  const counts = user && can(user, "schedule.manage") ? await navCounts(user.tenantId) : { requests: 0, waiting: 0 };
+  const withBadge = (list: NavItem[]) => list.map((it) => (it.key === "sessions" ? { ...it, badge: counts.requests + counts.waiting } : it));
   const items = [
     ...(can(user, "content.edit") ? sections.content : sections.content.slice(0, 1)),
-    ...(can(user, "schedule.manage") ? sections.schedule : []),
+    ...(can(user, "schedule.manage") ? withBadge(sections.schedule) : []),
     ...(can(user, "students.manage") ? sections.students : []),
     ...(can(user, "users.manage") ? sections.staff : []),
     ...(can(user, "schedule.manage") ? sections.booking : []),
@@ -64,6 +67,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
     schedule: [
       { key: "sessions", label: o.nav.sessions, href: `${base}/sessions`, group: o.nav.group },
       { key: "classes", label: o.nav.classes, href: `${base}/classes`, group: o.nav.group },
+      { key: "rooms", label: o.nav2.rooms, href: `${base}/rooms`, group: o.nav.group },
     ] as NavItem[],
     students: [{ key: "students", label: o.nav.students, href: `${base}/students`, group: o.nav.group }] as NavItem[],
     staff: [{ key: "staff", label: o.nav.staff, href: `${base}/staff`, group: o.nav.group }] as NavItem[],

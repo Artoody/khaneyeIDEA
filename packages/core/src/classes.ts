@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, notExists, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, isNotNull, notExists, sql } from "drizzle-orm";
 import { attendance, classGroups, classSessions, sessionReports, type getDb } from "@khaneyeidea/db";
 import { addDays, isFixedHoliday, tehranDay, weekdaySat0, zonedToUtc } from "./booking";
 
@@ -45,10 +45,11 @@ export async function syncClassSessions(db: Db, tenantId: string, classGroupId: 
 
   return db.transaction(async (tx) => {
     const future = await tx
-      .select({ id: classSessions.id, startsAt: classSessions.startsAt, status: classSessions.status })
+      .select({ id: classSessions.id, startsAt: classSessions.startsAt, status: classSessions.status, custom: classSessions.custom, originalStartsAt: classSessions.originalStartsAt })
       .from(classSessions)
       .where(and(eq(classSessions.classGroupId, c.id), gte(classSessions.startsAt, now)));
-    const stale = future.filter((s) => s.status === "scheduled" && !wantedKeys.has(s.startsAt.getTime())).map((s) => s.id);
+    // Moved sessions and makeups (custom) are off the weekly pattern: never removed by a schedule change.
+    const stale = future.filter((s) => s.status === "scheduled" && !s.custom && !wantedKeys.has(s.startsAt.getTime())).map((s) => s.id);
     let removed = 0;
     if (stale.length) {
       const del = await tx
@@ -64,6 +65,12 @@ export async function syncClassSessions(db: Db, tenantId: string, classGroupId: 
       removed = del.length;
     }
     const have = new Set(future.map((s) => s.startsAt.getTime()));
+    // A weekly slot a session was moved away from stays empty.
+    const moved = await tx
+      .select({ at: classSessions.originalStartsAt })
+      .from(classSessions)
+      .where(and(eq(classSessions.classGroupId, c.id), isNotNull(classSessions.originalStartsAt)));
+    for (const m of moved) if (m.at) have.add(m.at.getTime());
     const toAdd = wanted.filter((w) => w.startsAt >= now && !have.has(w.startsAt.getTime()));
     if (toAdd.length) {
       await tx

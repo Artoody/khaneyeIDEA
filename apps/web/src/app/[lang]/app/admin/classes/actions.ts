@@ -1,11 +1,11 @@
 "use server";
 
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, inArray } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { branches, classGroups, courses, enrollments, getDb, students, teachers } from "@khaneyeidea/db";
-import { syncClassSessions } from "@khaneyeidea/core";
+import { branches, classGroups, courses, enrollments, getDb, rooms, students, teachers } from "@khaneyeidea/db";
+import { classScheduleConflicts, syncClassSessions } from "@khaneyeidea/core";
 import { requirePermission } from "@/server/auth";
 import { href, isLocale } from "@/lib/i18n";
 import { audit, bool, int, text, type ActionState } from "@/server/admin";
@@ -13,7 +13,9 @@ import { audit, bool, int, text, type ActionState } from "@/server/admin";
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
-export async function saveClass(_: ActionState, f: FormData): Promise<ActionState & { synced?: { added: number; removed: number } }> {
+export type ClassState = ActionState & { synced?: { added: number; removed: number }; conflicts?: { kind: "teacher" | "room"; title: string }[] };
+
+export async function saveClass(_: ActionState, f: FormData): Promise<ClassState> {
   const user = await requirePermission("schedule.manage");
   const db = getDb();
   const tid = user.tenantId;
@@ -42,6 +44,11 @@ export async function saveClass(_: ActionState, f: FormData): Promise<ActionStat
   const mode = z.enum(["in_person", "online", "hybrid"]).catch("in_person").parse(f.get("mode"));
   const onlineUrl = text(f, "onlineUrl");
   if (onlineUrl && !/^https:\/\//.test(onlineUrl)) e["onlineUrl"] = "https_required";
+  const baleInviteUrl = text(f, "baleInviteUrl");
+  if (baleInviteUrl && !/^https:\/\//.test(baleInviteUrl)) e["baleInviteUrl"] = "https_required";
+  const telegramInviteUrl = text(f, "telegramInviteUrl");
+  if (telegramInviteUrl && !/^https:\/\//.test(telegramInviteUrl)) e["telegramInviteUrl"] = "https_required";
+  const roomId = text(f, "roomId");
 
   const owned = async (table: typeof courses | typeof teachers | typeof branches, rowId: string | null, key: string, required = false) => {
     if (!rowId) {
@@ -52,13 +59,24 @@ export async function saveClass(_: ActionState, f: FormData): Promise<ActionStat
     if (!rows.length) e[key] = "invalid";
   };
   await Promise.all([owned(courses, courseId, "courseId", true), owned(teachers, teacherId, "teacherId"), owned(branches, branchId, "branchId")]);
+  if (roomId) {
+    const r = await db.select({ id: rooms.id }).from(rooms).where(and(eq(rooms.id, roomId), eq(rooms.tenantId, tid)));
+    if (!r.length) e["roomId"] = "invalid";
+  }
   if (Object.keys(e).length) return { error: "validation", fieldErrors: e };
+
+  // Same teacher or room at the same hours: warn first; the admin may save anyway.
+  if (bool(f, "active") && !bool(f, "force")) {
+    const clash = await classScheduleConflicts(db, tid, { id, teacherId, roomId: mode === "online" ? null : roomId, weekday: weekday!, startTime, endTime, startsOn: startsOn!, endsOn });
+    if (clash.length) return { error: "conflict", conflicts: clash.map((c) => ({ kind: c.kind, title: c.title })) };
+  }
 
   const values = {
     title: title!.slice(0, 120),
     courseId: courseId!,
     teacherId,
     branchId: mode === "online" ? null : branchId,
+    roomId: mode === "online" ? null : roomId,
     weekday: weekday!,
     startTime,
     endTime,
@@ -67,6 +85,8 @@ export async function saveClass(_: ActionState, f: FormData): Promise<ActionStat
     endsOn,
     mode,
     onlineUrl,
+    baleInviteUrl,
+    telegramInviteUrl,
     active: bool(f, "active"),
   };
   let rowId = id;
@@ -117,5 +137,29 @@ export async function setEnrollment(f: FormData) {
     .where(and(eq(enrollments.id, id), eq(enrollments.tenantId, user.tenantId)))
     .returning({ classGroupId: enrollments.classGroupId });
   if (res.length) await audit(user.tenantId, user.userId, "update", "enrollment", id, { status });
+  refresh();
+}
+
+/** Adds several students at once (the picker on the class page). Students beyond the capacity go to the waitlist. */
+export async function enrollStudents(f: FormData) {
+  const user = await requirePermission("schedule.manage");
+  const classGroupId = z.uuid().parse(f.get("classGroupId"));
+  const ids = [...new Set(f.getAll("studentId").map((v) => String(v)))].filter((v) => z.uuid().safeParse(v).success).slice(0, 60);
+  if (!ids.length) return;
+  const db = getDb();
+  const [c] = await db.select().from(classGroups).where(and(eq(classGroups.id, classGroupId), eq(classGroups.tenantId, user.tenantId)));
+  if (!c) return;
+  const owned = await db.select({ id: students.id }).from(students).where(and(eq(students.tenantId, user.tenantId), inArray(students.id, ids)));
+  const [{ n } = { n: 0 }] = await db.select({ n: count() }).from(enrollments).where(and(eq(enrollments.classGroupId, c.id), eq(enrollments.status, "active")));
+  let seats = Math.max(0, c.capacity - n);
+  for (const s of owned) {
+    const status = seats > 0 ? ("active" as const) : ("waitlist" as const);
+    if (status === "active") seats--;
+    await db
+      .insert(enrollments)
+      .values({ tenantId: user.tenantId, classGroupId: c.id, studentId: s.id, status, startedOn: new Date().toISOString().slice(0, 10) })
+      .onConflictDoUpdate({ target: [enrollments.classGroupId, enrollments.studentId], set: { status } });
+  }
+  await audit(user.tenantId, user.userId, "create", "enrollment", c.id, { count: owned.length });
   refresh();
 }

@@ -3,13 +3,14 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { and, asc, desc, eq, gte, inArray, lt } from "drizzle-orm";
 import { CalendarCheck, Monitor } from "@phosphor-icons/react/dist/ssr";
-import { appointmentTypes, attendance, branches, classGroups, classSessions, enrollments, getDb, guardians, homework, sessionReports, students, teachers } from "@khaneyeidea/db";
+import { appointmentTypes, attendance, branches, classGroups, classSessions, enrollments, getDb, guardians, homework, messengerAccounts, sessionReports, students, teachers } from "@khaneyeidea/db";
 import { upcomingFor } from "@khaneyeidea/core";
 import { href, isLocale, pick, type Locale } from "@/lib/i18n";
 import { getOpsDict } from "@/lib/ops-i18n";
 import { dayLabel, tehranIso, timeLabel, WEEKDAYS } from "@/lib/jalali";
 import { requirePermissionPage } from "@/server/auth";
 import { PanelShell, PanelSkeleton } from "@/components/panel/panel-shell";
+import { ConnectCard } from "@/components/ops/connect-card";
 
 // A parent sees only their own children: their classes, the next session, class reports and homework,
 // and their own child's attendance (never other children's).
@@ -36,6 +37,7 @@ async function ParentPanel({ lang }: { lang: Locale }) {
         .where(and(inArray(enrollments.studentId, kidIds), eq(enrollments.status, "active")))
     : [];
   const classIds = [...new Set(classes.map((x) => x.c.id))];
+  const linked = (await db.select({ channel: messengerAccounts.channel }).from(messengerAccounts).where(eq(messengerAccounts.userId, user.userId))).map((l) => l.channel as "bale" | "telegram");
   const [upcoming, recent, bookings] = await Promise.all([
     classIds.length
       ? db.select().from(classSessions).where(and(inArray(classSessions.classGroupId, classIds), gte(classSessions.startsAt, now))).orderBy(asc(classSessions.startsAt)).limit(40)
@@ -156,6 +158,10 @@ async function ParentPanel({ lang }: { lang: Locale }) {
           </ul>
         )}
       </section>
+
+      <div className="mt-10 max-w-xl">
+        <ConnectCard o={o} linked={linked} />
+      </div>
     </PanelShell>
   );
 }

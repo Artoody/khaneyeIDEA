@@ -4,6 +4,7 @@ Read this before any work. These rules apply to every contributor and every AI a
 
 ## Product
 Platform for Idea House Academy (robotics, programming, AI for kids and teens, Tehran): public website, admin / teacher / parent panels, Bale and Telegram bots, booking, session follow-up, entry assessment.
+Current state, what is missing and how to run it: `docs/STATUS.md` (keep it updated when you finish a piece of work).
 Specs live in `docs/`: `PROPOSAL.md` (product), `specs/*.md` (implementation contracts), `site-export/` (data from the old WordPress site).
 
 ## Non-negotiables

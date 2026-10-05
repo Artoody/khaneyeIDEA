@@ -117,7 +117,7 @@ ${brief ? "" : `<section class="cover">
   </div>
   <div class="meta">
     <div><b>نام کاری محصول</b>ایده‌یار</div>
-    <div><b>نسخه</b>۰.۵، پیش‌نویس برای بررسی</div>
+    <div><b>نسخه</b>۰.۶، پیش‌نویس برای بررسی</div>
     <div><b>تاریخ</b>مهر ۱۴۰۵</div>
   </div>
 </section>
@@ -144,7 +144,7 @@ await page.goto("file://" + htmlPath, { waitUntil: "load" });
 await page.waitForFunction(() => document.body.dataset.ready, null, { timeout: 30000 });
 console.log("mermaid:", await page.evaluate(() => document.body.dataset.ready));
 await page.evaluate(() => document.fonts.ready);
-const footer = `<div style="width:100%;font-size:8px;color:#71717a;padding:0 16mm;display:flex;justify-content:space-between;font-family:sans-serif;"><span>Khaneye Idea Platform Proposal v0.5</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`;
+const footer = `<div style="width:100%;font-size:8px;color:#71717a;padding:0 16mm;display:flex;justify-content:space-between;font-family:sans-serif;"><span>Khaneye Idea Platform Proposal v0.6</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`;
 if (brief) {
   await page.pdf({ path: outPath, format: "A4", printBackground: true, preferCSSPageSize: true });
   await browser.close();

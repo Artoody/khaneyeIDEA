@@ -1,0 +1,588 @@
+{
+  "theme": "hello-elementor",
+  "theme_version": "3.4.3",
+  "wordpress": "7.1.2",
+  "generator": "WordPress 7.1.2",
+  "yoast_seo": "28.6",
+  "yoast_seo_premium": "25.0",
+  "elementor": "4.3.3",
+  "elementor_pro": "3.28.2",
+  "plugins_seen_in_asset_paths": [
+    "elementor",
+    "elementor-pro",
+    "menu-icons",
+    "wp-rocket"
+  ],
+  "pages_crawled": 70,
+  "html_bytes_by_page": [
+    {
+      "url": "https://khaneyeide.ir/kharazmi-festival/",
+      "html_bytes": 106194
+    },
+    {
+      "url": "https://khaneyeide.ir/what-is-robotic/",
+      "html_bytes": 122933
+    },
+    {
+      "url": "https://khaneyeide.ir/why-should-you-learn-robotics-online/",
+      "html_bytes": 107954
+    },
+    {
+      "url": "https://khaneyeide.ir/مسابقات-روبوکاپ/",
+      "html_bytes": 121074
+    },
+    {
+      "url": "https://khaneyeide.ir/مسابقات-آیروکاپ/",
+      "html_bytes": 111640
+    },
+    {
+      "url": "https://khaneyeide.ir/روانشناسی-کودک-و-نوجوان/",
+      "html_bytes": 87998
+    },
+    {
+      "url": "https://khaneyeide.ir/از-ایده-تا-اجرا/",
+      "html_bytes": 87043
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-نویسندگی-خلاق/",
+      "html_bytes": 87366
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-نانو/",
+      "html_bytes": 86585
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-زیست-شناس-نوجوان/",
+      "html_bytes": 87756
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-معماری/",
+      "html_bytes": 101976
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-بازیسازی/",
+      "html_bytes": 102369
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-مکاترونیک/",
+      "html_bytes": 100475
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-طراحی-سایت/",
+      "html_bytes": 107707
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-کواسپیس/",
+      "html_bytes": 102228
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-برنامه-نویسی/",
+      "html_bytes": 102729
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-رباتیک/",
+      "html_bytes": 100480
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-رویاپردازی/",
+      "html_bytes": 102564
+    },
+    {
+      "url": "https://khaneyeide.ir/خلاقیت-کودک/",
+      "html_bytes": 99745
+    },
+    {
+      "url": "https://khaneyeide.ir/از-ایده-تا-اختراع/",
+      "html_bytes": 102715
+    },
+    {
+      "url": "https://khaneyeide.ir/پروژههای-دانشپژوهان/",
+      "html_bytes": 108027
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-روانشناسی-کودک-و-نوجوان/",
+      "html_bytes": 112962
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-خلاقیت-در-هنر/",
+      "html_bytes": 138167
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-خلاقیت-کودک-و-نوجوان/",
+      "html_bytes": 123040
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-معماری/",
+      "html_bytes": 112134
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-نانو-زیست-نوجوان/",
+      "html_bytes": 123377
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-برنامهنویسی-و-بازیسازی/",
+      "html_bytes": 131797
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-رباتیک/",
+      "html_bytes": 103722
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-ایده-و-اختراع/",
+      "html_bytes": 126293
+    },
+    {
+      "url": "https://khaneyeide.ir/مراحل-ثبت-نام/",
+      "html_bytes": 100637
+    },
+    {
+      "url": "https://khaneyeide.ir/مجله-خانهی-ایده/",
+      "html_bytes": 97515
+    },
+    {
+      "url": "https://khaneyeide.ir/لینکدونی/",
+      "html_bytes": 127576
+    },
+    {
+      "url": "https://khaneyeide.ir/shop/",
+      "html_bytes": 86121
+    },
+    {
+      "url": "https://khaneyeide.ir/دورههای-خانهی-ایده/",
+      "html_bytes": 121148
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمانهای-خانهی-ایده/",
+      "html_bytes": 106523
+    },
+    {
+      "url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/",
+      "html_bytes": 182716
+    },
+    {
+      "url": "https://khaneyeide.ir/سلام-دنیا/",
+      "html_bytes": 92476
+    },
+    {
+      "url": "https://khaneyeide.ir/why-you-need-to-learn-ai/",
+      "html_bytes": 132061
+    },
+    {
+      "url": "https://khaneyeide.ir/patent-of-idea/",
+      "html_bytes": 123078
+    },
+    {
+      "url": "https://khaneyeide.ir/what-is-the-importance-of-acquiring/",
+      "html_bytes": 108618
+    },
+    {
+      "url": "https://khaneyeide.ir/steam-method/",
+      "html_bytes": 110522
+    },
+    {
+      "url": "https://khaneyeide.ir/futures-of-jobs-with-ai/",
+      "html_bytes": 112046
+    },
+    {
+      "url": "https://khaneyeide.ir/",
+      "html_bytes": 226399
+    },
+    {
+      "url": "https://khaneyeide.ir/برگه-404/",
+      "html_bytes": 88191
+    },
+    {
+      "url": "https://khaneyeide.ir/ثبت-نام/",
+      "html_bytes": 95038
+    },
+    {
+      "url": "https://khaneyeide.ir/evercompare/",
+      "html_bytes": 83129
+    },
+    {
+      "url": "https://khaneyeide.ir/تماس-با-ما/",
+      "html_bytes": 112451
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-خلاقیت-کودک-و-نوجوان/",
+      "html_bytes": 107039
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-کارگاه-پرینتر-۳-بعدی/",
+      "html_bytes": 106017
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-آلتیوم-دیزاینر/",
+      "html_bytes": 105690
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-آردوئینو/",
+      "html_bytes": 108914
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-بازی-سازی/",
+      "html_bytes": 105470
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-برنامه-نویسی-پایتون/",
+      "html_bytes": 112627
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-برنامه-نویسی/",
+      "html_bytes": 102307
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-طراحی-سایت/",
+      "html_bytes": 102151
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-طراحی-صنعتی-و-سالیدورکس/",
+      "html_bytes": 102592
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-ایده-تا-اختراع-و-خلاقیت/",
+      "html_bytes": 105099
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-بازی-سازی/",
+      "html_bytes": 101339
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-آلتیوم-دیزاین-و-آردوئینو/",
+      "html_bytes": 102738
+    },
+    {
+      "url": "https://khaneyeide.ir/مجله-خانه-ایده/",
+      "html_bytes": 154862
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-آموزش-رباتیک/",
+      "html_bytes": 138447
+    },
+    {
+      "url": "https://khaneyeide.ir/آموزش-رباتیک-با-سالیدورکس/",
+      "html_bytes": 113463
+    },
+    {
+      "url": "https://khaneyeide.ir/ai-course/",
+      "html_bytes": 143938
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-ایده-تا-اختراع/",
+      "html_bytes": 126098
+    },
+    {
+      "url": "https://khaneyeide.ir/category/دستهبندی-نشده/",
+      "html_bytes": 91064
+    },
+    {
+      "url": "https://khaneyeide.ir/category/articles/",
+      "html_bytes": 98244
+    },
+    {
+      "url": "https://khaneyeide.ir/author/khaneyeide/",
+      "html_bytes": 100523
+    },
+    {
+      "url": "https://khaneyeide.ir/آموزش-رباتیک-با-سالیدورکس/",
+      "html_bytes": 113463
+    },
+    {
+      "url": "https://khaneyeide.ir/ai-course/",
+      "html_bytes": 143938
+    },
+    {
+      "url": "https://khaneyeide.ir/2025/08/18/",
+      "html_bytes": 84069
+    }
+  ],
+  "largest_downloaded_images": [
+    {
+      "file": "assets/raw/site/InShot_20211221_144403551.jpg",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2022/03/InShot_20211221_144403551.jpg",
+      "alt": "InShot_20211221_144403551",
+      "page": "https://khaneyeide.ir/افتخارات-خانهی-ایده/",
+      "width": 1920,
+      "height": 2400,
+      "bytes": 2487507,
+      "downloaded": true,
+      "role": "award"
+    },
+    {
+      "file": "assets/raw/site/InShot_20211221_144403551-1.jpg",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2022/03/InShot_20211221_144403551-1.jpg",
+      "alt": "عکس ۳",
+      "page": "https://khaneyeide.ir/مجله-خانهی-ایده/",
+      "width": 1920,
+      "height": 2400,
+      "bytes": 2487507,
+      "downloaded": true,
+      "role": "content"
+    },
+    {
+      "file": "assets/raw/site/InShot_20211017_162231444.jpg",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2022/03/InShot_20211017_162231444.jpg",
+      "alt": "InShot_20211017_162231444",
+      "page": "https://khaneyeide.ir/افتخارات-خانهی-ایده/",
+      "width": 1920,
+      "height": 1920,
+      "bytes": 1917792,
+      "downloaded": true,
+      "role": "award"
+    },
+    {
+      "file": "assets/raw/site/buch-of-kids-tryning-to-fix-a-cute-blue-robot-1.png",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2025/09/buch-of-kids-tryning-to-fix-a-cute-blue-robot-1.png",
+      "alt": "آموزش رباتیک برای نوجوانان",
+      "page": "https://khaneyeide.ir/دوره-آموزش-رباتیک/",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 1876199,
+      "downloaded": true,
+      "role": "content"
+    },
+    {
+      "file": "assets/raw/site/buch-of-kids-tryning-to-fix-a-badass-blue-robot.png",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2025/09/buch-of-kids-tryning-to-fix-a-badass-blue-robot.png",
+      "alt": "آموزش رباتیک",
+      "page": "https://khaneyeide.ir/دوره-آموزش-رباتیک/",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 1835968,
+      "downloaded": true,
+      "role": "content"
+    },
+    {
+      "file": "assets/raw/site/Picture2-1.png",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2025/08/Picture2-1.png",
+      "alt": "ربات امدادگر محیط زیست در آیروکاپ",
+      "page": "https://khaneyeide.ir/مسابقات-آیروکاپ/",
+      "width": 935,
+      "height": 935,
+      "bytes": 1805743,
+      "downloaded": true,
+      "role": "content"
+    },
+    {
+      "file": "assets/raw/site/InShot_20231211_142821938.jpg",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2023/12/InShot_20231211_142821938.jpg",
+      "alt": "عکس ۵",
+      "page": "https://khaneyeide.ir/مجله-خانهی-ایده/",
+      "width": 1920,
+      "height": 1920,
+      "bytes": 1564959,
+      "downloaded": true,
+      "role": "content"
+    },
+    {
+      "file": "assets/raw/site/m.r.2.jpg",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2022/03/m.r.2.jpg",
+      "alt": "مهندس محمدرضا ریاحی",
+      "page": "https://khaneyeide.ir/دپارتمان-خلاقیت-کودک-و-نوجوان/",
+      "width": 2128,
+      "height": 1728,
+      "bytes": 1234650,
+      "downloaded": true,
+      "role": "content"
+    },
+    {
+      "file": "assets/raw/site/green-chalkboard-scaled.jpg",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2022/03/green-chalkboard-scaled.jpg",
+      "alt": "دپارتمان خلاقیت کودک و نوجوان",
+      "page": "https://khaneyeide.ir/دپارتمان-خلاقیت-کودک-و-نوجوان/",
+      "width": 2560,
+      "height": 2560,
+      "bytes": 1200086,
+      "downloaded": true,
+      "role": "content"
+    },
+    {
+      "file": "assets/raw/site/screenshot-21.png",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2022/03/screenshot-21.png",
+      "alt": null,
+      "page": "https://khaneyeide.ir/shop/",
+      "width": 834,
+      "height": 535,
+      "bytes": 1099111,
+      "downloaded": true,
+      "role": "content"
+    },
+    {
+      "file": "assets/raw/site/IMG_20221114_132429-scaled.jpg",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2023/12/IMG_20221114_132429-scaled.jpg",
+      "alt": "عکس ۲",
+      "page": "https://khaneyeide.ir/مجله-خانهی-ایده/",
+      "width": 1920,
+      "height": 2560,
+      "bytes": 997057,
+      "downloaded": true,
+      "role": "content"
+    },
+    {
+      "file": "assets/raw/site/IMG_20221114_132153-scaled.jpg",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2023/12/IMG_20221114_132153-scaled.jpg",
+      "alt": "عکس ۶",
+      "page": "https://khaneyeide.ir/مجله-خانهی-ایده/",
+      "width": 2560,
+      "height": 1920,
+      "bytes": 946656,
+      "downloaded": true,
+      "role": "content"
+    },
+    {
+      "file": "assets/raw/site/Picture1.png",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2025/08/Picture1.png",
+      "alt": null,
+      "page": "https://khaneyeide.ir/مسابقات-آیروکاپ/",
+      "width": 537,
+      "height": 783,
+      "bytes": 899984,
+      "downloaded": true,
+      "role": "hero"
+    },
+    {
+      "file": "assets/raw/site/IMG_20210924_010530_224-scaled.jpg",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2022/03/IMG_20210924_010530_224-scaled.jpg",
+      "alt": "IMG_20210924_010530_224",
+      "page": "https://khaneyeide.ir/افتخارات-خانهی-ایده/",
+      "width": 2560,
+      "height": 1920,
+      "bytes": 897430,
+      "downloaded": true,
+      "role": "award"
+    },
+    {
+      "file": "assets/raw/site/buch-of-kids-tryning-to-fix-a-cute-blue-robot.png",
+      "source_url": "https://khaneyeide.ir/wp-content/uploads/2025/09/buch-of-kids-tryning-to-fix-a-cute-blue-robot.png",
+      "alt": "آموزش رباتیک برای کودکان",
+      "page": "https://khaneyeide.ir/دوره-آموزش-رباتیک/",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 896721,
+      "downloaded": true,
+      "role": "content"
+    }
+  ],
+  "total_downloaded_asset_bytes": 67832588,
+  "browser_page_weight": {
+    "home_1440": {
+      "url": "https://khaneyeide.ir/",
+      "document": {
+        "transferSize": 31775,
+        "encodedBodySize": 31475,
+        "decodedBodySize": 226399,
+        "duration": 13874
+      },
+      "resource_count": 143,
+      "response_count": 141,
+      "transfer_bytes_including_document": 3406530,
+      "largest_transferred_images": [
+        {
+          "name": "https://khaneyeide.ir/wp-content/uploads/2023/12/IMG_20231210_193020_047-scaled.jpg",
+          "type": "css",
+          "transferSize": 758958,
+          "encodedBodySize": 758658,
+          "decodedBodySize": 758658
+        },
+        {
+          "name": "https://khaneyeide.ir/wp-content/uploads/2025/09/%D8%A2%DB%8C%DA%A9%D9%88%D9%86-2.png",
+          "type": "img",
+          "transferSize": 264754,
+          "encodedBodySize": 264454,
+          "decodedBodySize": 264454
+        },
+        {
+          "name": "https://khaneyeide.ir/wp-content/uploads/2025/06/1000099801.jpg",
+          "type": "link",
+          "transferSize": 209230,
+          "encodedBodySize": 208930,
+          "decodedBodySize": 208930
+        },
+        {
+          "name": "https://khaneyeide.ir/wp-content/uploads/2025/06/w-logo-circle-logo-icon-sign-vector-design_1313853-141559-removebg-preview.png",
+          "type": "img",
+          "transferSize": 164569,
+          "encodedBodySize": 164269,
+          "decodedBodySize": 164269
+        },
+        {
+          "name": "https://khaneyeide.ir/wp-content/uploads/2025/06/isometric-abstract-vector-dimensional-shape-polygonal-figure_570429-51177-removebg-preview.png",
+          "type": "img",
+          "transferSize": 162964,
+          "encodedBodySize": 162664,
+          "decodedBodySize": 162664
+        },
+        {
+          "name": "https://khaneyeide.ir/wp-content/uploads/2025/06/canvas-artificial-intelligence_1242175-12635-removebg-preview.png",
+          "type": "img",
+          "transferSize": 161136,
+          "encodedBodySize": 160836,
+          "decodedBodySize": 160836
+        },
+        {
+          "name": "https://khaneyeide.ir/wp-content/uploads/2025/06/3d-rendering-optical-illusion_23-2150854146-removebg-preview.png",
+          "type": "img",
+          "transferSize": 136695,
+          "encodedBodySize": 136395,
+          "decodedBodySize": 136395
+        },
+        {
+          "name": "https://khaneyeide.ir/wp-content/uploads/2025/06/illustration-creative-ideas-with-ligh-bulb_53876-37291-removebg-preview.png",
+          "type": "img",
+          "transferSize": 118925,
+          "encodedBodySize": 118625,
+          "decodedBodySize": 118625
+        },
+        {
+          "name": "https://khaneyeide.ir/wp-content/uploads/2025/06/3d-printer-hand-drawn-outline-removebg-preview.png",
+          "type": "img",
+          "transferSize": 85013,
+          "encodedBodySize": 84713,
+          "decodedBodySize": 84713
+        },
+        {
+          "name": "https://khaneyeide.ir/wp-content/uploads/2025/06/human-head-silhouette-eureka-with-creative-idea-concept_1017-42733-removebg-preview.png",
+          "type": "img",
+          "transferSize": 80864,
+          "encodedBodySize": 80564,
+          "decodedBodySize": 80564
+        }
+      ]
+    },
+    "other_pages_1440": [
+      {
+        "page": "courses",
+        "url": "https://khaneyeide.ir/%D8%AF%D9%88%D8%B1%D9%87%D9%87%D8%A7%DB%8C-%D8%AE%D8%A7%D9%86%D9%87%DB%8C-%D8%A7%DB%8C%D8%AF%D9%87/",
+        "requests": 70,
+        "transfer_bytes": 617941,
+        "response_count": 67
+      },
+      {
+        "page": "projects",
+        "url": "https://khaneyeide.ir/%D9%BE%D8%B1%D9%88%DA%98%D9%87%D9%87%D8%A7%DB%8C-%D8%AF%D8%A7%D9%86%D8%B4%D9%BE%DA%98%D9%88%D9%87%D8%A7%D9%86/",
+        "requests": 74,
+        "transfer_bytes": 646952,
+        "response_count": 71
+      },
+      {
+        "page": "contact",
+        "url": "https://khaneyeide.ir/%D8%AA%D9%85%D8%A7%D8%B3-%D8%A8%D8%A7-%D9%85%D8%A7/",
+        "requests": 81,
+        "transfer_bytes": 755382,
+        "response_count": 78
+      }
+    ]
+  },
+  "lighthouse_mobile": null,
+  "lighthouse_note": "Lighthouse was not run. A mobile Lighthouse pass fires hundreds of requests at once, which breaks the 1 request/second limit used for this export.",
+  "screenshots": [
+    "docs/site-export/screenshots/home-1440.png",
+    "docs/site-export/screenshots/home-390.png",
+    "docs/site-export/screenshots/courses-1440.png",
+    "docs/site-export/screenshots/courses-390.png",
+    "docs/site-export/screenshots/projects-1440.png",
+    "docs/site-export/screenshots/projects-390.png",
+    "docs/site-export/screenshots/contact-1440.png",
+    "docs/site-export/screenshots/contact-390.png"
+  ]
+}

@@ -1,2 +1,6 @@
 node_modules
 proposal.html
+.export-cache/
+scripts/site-export/.cache
+scripts/site-export/_probe
+docs/site-export/_probe/

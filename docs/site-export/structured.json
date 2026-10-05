@@ -1,0 +1,2297 @@
+{
+  "source": "https://khaneyeide.ir/",
+  "exported_at": "2026-10-05T13:00:01.148Z",
+  "unknown_values_are_null": true,
+  "note": "Personal names of children are not stored. Teacher names are included only when the page labels them as استاد، مربی، or مدرس. Empty arrays mean the public pages were checked and nothing was found.",
+  "courses": [
+    {
+      "name": "دوره از ایده تا اجرا - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": null,
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/از-ایده-تا-اجرا/"
+    },
+    {
+      "name": "دوره نویسندگی خلاق - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": null,
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-نویسندگی-خلاق/"
+    },
+    {
+      "name": "دوره نانو - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": null,
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-نانو/"
+    },
+    {
+      "name": "دوره زیست شناس نوجوان - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": null,
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-زیست-شناس-نوجوان/"
+    },
+    {
+      "name": "دوره معماری - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online",
+        "in-person"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-معماری/"
+    },
+    {
+      "name": "دوره بازی‌سازی - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online",
+        "in-person"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-بازیسازی/"
+    },
+    {
+      "name": "دوره مکاترونیک - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online",
+        "in-person"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-مکاترونیک/"
+    },
+    {
+      "name": "ثبت نام دوره طراحی سایت",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online",
+        "in-person"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-طراحی-سایت/"
+    },
+    {
+      "name": "دوره کواسپیس - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online",
+        "in-person"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-کواسپیس/"
+    },
+    {
+      "name": "دوره برنامه‌ نویسی - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online",
+        "in-person"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-برنامه-نویسی/"
+    },
+    {
+      "name": "دوره رباتیک - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online",
+        "in-person"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-رباتیک/"
+    },
+    {
+      "name": "دوره رویاپردازی - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online",
+        "in-person"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-رویاپردازی/"
+    },
+    {
+      "name": "دوره خلاقیت کودک - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online",
+        "in-person"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/خلاقیت-کودک/"
+    },
+    {
+      "name": "دوره از ایده تا اختراع - خانه ی ایده",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online",
+        "in-person"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/از-ایده-تا-اختراع/"
+    },
+    {
+      "name": "ثبت نام دوره خلاقیت کودک و نوجوان",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": null,
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-خلاقیت-کودک-و-نوجوان/"
+    },
+    {
+      "name": "ثبت نام دوره کارگاه پرینتر ۳ بعدی",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": null,
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-کارگاه-پرینتر-۳-بعدی/"
+    },
+    {
+      "name": "ثبت نام دوره آلتیوم دیزاینر",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": null,
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-آلتیوم-دیزاینر/"
+    },
+    {
+      "name": "ثبت نام دوره آردوینو",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": null,
+      "syllabus": [
+        "آشنایی با قطعات الکترونیکی (مقاومت، خازن، سنسورها، ترانزیستور و …) - کار با بردهای آردوئینو (Uno, Nano, Mega) ✅ برنامه‌نویسی آردوئینو",
+        "آشنایی با محیط توسعه آردوئینو (IDE) - نوشتن کدهای پایه تا پیشرفته (ورودی/خروجی دیجیتال و آنالوگ، PWM، ارتباط سریال) ✅ اتصال سنسورها و ماژول‌ها",
+        "کار با سنسورهای دما، رطوبت، فاصله‌سنج، مادون‌قرمز و … - استفاده از ماژول‌های بی‌سیم (Bluetooth, Wi-Fi, RF) ✅ طراحی و ساخت بردهای الکترونیکی",
+        "طراحی مدار با نرم‌افزارهای Altium Designer و Proteus - ساخت PCB (برد مدار چاپی) و لحیم‌کاری قطعات ✅ پروژه‌های عملی",
+        "ساخت ربات مسیریاب - طراحی سیستم روشنایی هوشمند - پیاده‌سازی خانه هوشمند با کنترل از راه دور - ارتباط آردوئینو با پایتون و رزبری پای"
+      ],
+      "page_url": "https://khaneyeide.ir/دوره-آردوئینو/"
+    },
+    {
+      "name": "ثبت نام دوره بازی سازی",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-بازی-سازی/"
+    },
+    {
+      "name": "ثبت نام دوره برنامه نویسی پایتون",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": null,
+      "syllabus": [
+        "مفاهیم پایه پایتون (متغیر، حلقه، شرط و تابع) - شی‌گرایی (OOP) و ماژول‌های کاربردی - کتابخانه‌های تخصصی در رباتیک (PySerial, RPi.GPIO, OpenCV) - اتصال پایتون به آردوینو و رزبری پای - پروژه‌های واقعی مانند: - ساخت ربات مسیریاب با بینایی ماشین - برنامه‌نویسی بازوی رباتیک - طراحی یک چت‌بات هوشمند ساده"
+      ],
+      "page_url": "https://khaneyeide.ir/دوره-برنامه-نویسی-پایتون/"
+    },
+    {
+      "name": "آموزش رباتیک",
+      "department": null,
+      "age_range": null,
+      "level": "مبتدی تا حرفه‌ای",
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online",
+        "in-person"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-آموزش-رباتیک/"
+    },
+    {
+      "name": "ثبت نام دوره سالیدورکس",
+      "department": null,
+      "age_range": null,
+      "level": "پیشرفته",
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": null,
+      "syllabus": [
+        "معرفی محیط کار سالیدورکس - آشنایی با ابزار Sketch و ایجاد ترسیمات دوبعدی - استفاده از Feature برای ساخت حجم‌های سه‌بعدی",
+        "بازوهای مکانیکی - شاسی و پایه‌ها - چرخ‌دنده‌ها و اتصالات آشنا خواهید شد. تکنیک‌های پیشرفته‌ای مثل Pattern، Loft و Shell نیز آموزش داده می‌شوند.",
+        "مونتاژ اجزا با استفاده از Mate - تست تداخل قطعات - شبیه‌سازی حرکات مکانیکی مانند چرخش و انتقال"
+      ],
+      "page_url": "https://khaneyeide.ir/آموزش-رباتیک-با-سالیدورکس/"
+    },
+    {
+      "name": "دوره آموزش هوش مصنوعی",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online",
+        "in-person"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/ai-course/"
+    },
+    {
+      "name": "ثبت نام دوره ایده تا اختراع",
+      "department": null,
+      "age_range": null,
+      "level": null,
+      "duration": null,
+      "sessions": null,
+      "price": null,
+      "modes": [
+        "online"
+      ],
+      "syllabus": null,
+      "page_url": "https://khaneyeide.ir/دوره-ایده-تا-اختراع/"
+    }
+  ],
+  "achievements": [
+    {
+      "title": "رتبه اول جهانی در مسابقات جهانی رباتیک - لیگ ماموریت غیر ممکن- 2018 تایوان -",
+      "year": 2018,
+      "competition": null,
+      "country": "تایوان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه سوم جهانی در مسابقات جهانی رباتیک - لیگ ربات های ورزشکار-2018 تایوان -",
+      "year": 2018,
+      "competition": null,
+      "country": "تایوان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول آسیا و اقیانوسیه در مسابقات ربوکاپ 2018 کیش -",
+      "year": 2018,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول سوپر تیم آسیا و اقیانوسیه در مسابقات ربوکاپ 2018 کیش -",
+      "year": 2018,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول جهانی رباتیک (لیگ ربات های شهری) در مسابقات جهانی 2019 کره جنوبی -",
+      "year": 2019,
+      "competition": null,
+      "country": "کره جنوبی",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول لیگ ربات های جنگجوی هوشمند در مسابقات جهانی 2019 کره جنوبی -",
+      "year": 2019,
+      "competition": null,
+      "country": "کره جنوبی",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول جهانی ربات های اسپورت در مسابقات جهانی 2019 کره جنوبی -",
+      "year": 2019,
+      "competition": null,
+      "country": "کره جنوبی",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه دوم جهانی ربات های اسپورت در مسابقات جهانی 2019 کره جنوبی -",
+      "year": 2019,
+      "competition": null,
+      "country": "کره جنوبی",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه دوم در مسابقات روبوکاپ آسیا و اقیانوسیه لیگ کواسپیس پرایمری 2019 روسیه -",
+      "year": 2019,
+      "competition": "RoboCup",
+      "country": "روسیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه سوم در مسابقات روبوکاپ آسیا و اقیانوسیه لیگ کواسپیس پرایمری 2019 روسیه -",
+      "year": 2019,
+      "competition": "RoboCup",
+      "country": "روسیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه دوم در مسابقات روبوکاپ آسیا و اقیانوسیه لیگ کواسپیس سکندری 2019 روسیه -",
+      "year": 2019,
+      "competition": "RoboCup",
+      "country": "روسیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام اول در مسابقات آسیا و اقیانوسیه روبوکاپ ژاپن 2020 -",
+      "year": 2020,
+      "competition": "RoboCup",
+      "country": "ژاپن",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام دوم در مسابقات آسیا و اقیانوسیه روبوکاپ ژاپن 2020 -",
+      "year": 2020,
+      "competition": "RoboCup",
+      "country": "ژاپن",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام اول مسابقات جهانی ربوکاپ2020 فرانسه -",
+      "year": 2020,
+      "competition": "RoboCup",
+      "country": "فرانسه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام اول در مسابقات شبیه ساز ربات های امدادگر، زیر 12 سال ربوکاپ آسیایی 2022 چین -",
+      "year": 2022,
+      "competition": "RoboCup",
+      "country": "چین",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام اول سوپر تیم لیگ کواسپیس در مسابقات آسیا و اقیانوسیه 2022 چین -",
+      "year": 2022,
+      "competition": null,
+      "country": "چین",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام دوم در مسابقات کواسپیس زیر 19 سال آسیا و اقیانوسیه 2022 چین -",
+      "year": 2022,
+      "competition": null,
+      "country": "چین",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام اول ایده خلاقانه در مسابقات ، ربوکاپ آسیا و اقیانوسیه 2022 سنگاپور -",
+      "year": 2022,
+      "competition": "RoboCup",
+      "country": "سنگاپور",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام اول در مسابقات رباتیک ، ربوکاپ آسیا و اقیانوسیه لیگ کواسپیس پرایمری 2022 سنگاپور -",
+      "year": 2022,
+      "competition": "RoboCup",
+      "country": "سنگاپور",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام دوم در مسابقات رباتیک ، ربوکاپ آسیا و اقیانوسیه لیگ کواسپیس سکندری 2022 سنگاپور -",
+      "year": 2022,
+      "competition": "RoboCup",
+      "country": "سنگاپور",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام فینالیست مسابقات جهانی در لیگ خلاقیت در رباتیک 2023 آلمان -",
+      "year": 2023,
+      "competition": null,
+      "country": "آلمان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام چهارم جهان در مسابقات جهانی رباتیک 2023 آلمان -",
+      "year": 2023,
+      "competition": null,
+      "country": "آلمان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام بهترین طراحی مسابقات جهانی در لیگ ربات های اسپورت 2023 آلمان -",
+      "year": 2023,
+      "competition": null,
+      "country": "آلمان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال طلا مسابقات اختراعات جهانی با پروژه «پکیج ایمنی مشاغل سخت»دبی 2023 -",
+      "year": 2023,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال نقره مسابقات اختراعات جهانی با پروژه «ماگ هوشمند ورزشکاران»دبی 2023",
+      "year": 2023,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال نقره مسابقات اختراعات جهانی با پروژه «کیف یاد آور»دبی 2023 -",
+      "year": 2023,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال نقره مسابقات اختراعات جهانی با پروژه «اسکین گارد»دبی 2023 -",
+      "year": 2023,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال طلا مسابقات جهانی اختراعات با پروژه «پکیج ایمنی مشاغل سخت» رومانی 2024 -",
+      "year": 2024,
+      "competition": "مسابقات اختراعات",
+      "country": "رومانی",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال طلا مسابقات جهانی تکنوفست با پروژه «پرورش هوشمند عقرب» ترکیه 2024 -",
+      "year": 2024,
+      "competition": "تکنوفست",
+      "country": "ترکیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال نقره مسابقات جهانی تکنوفست با پروژه «اتاق هوشمند بیماران» ترکیه 2024 -",
+      "year": 2024,
+      "competition": "تکنوفست",
+      "country": "ترکیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال نقره مسابقات جهانی تکنوفست با پروژه «دستگاه فیزیوتراپی آسیب های ورزشی» ترکیه 2024 -",
+      "year": 2024,
+      "competition": "تکنوفست",
+      "country": "ترکیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال نقره مسابقات جهانی تکنوفست با پروژه «سخت افزار و اپلیکیشن کنترل سلامت» ترکیه 2024 -",
+      "year": 2024,
+      "competition": "تکنوفست",
+      "country": "ترکیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال برنز مسابقات جهانی تکنوفست با پروژه «صندلی هوشمند مشاغل خاص» ترکیه 2024 -",
+      "year": 2024,
+      "competition": "تکنوفست",
+      "country": "ترکیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال طلا مسابقات جهانی اختراعات دبی با پروژه «کالسکه هوشمند» دبی 2024 -",
+      "year": 2024,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال طلا مسابقات جهانی اختراعات دبی با پروژه «ربات بازرس لوله» دبی 2024 -",
+      "year": 2024,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال طلا مسابقات جهانی اختراعات دبی با پروژه «کلاه کاسکت هوشمند» دبی 2024 -",
+      "year": 2024,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال نقره مسابقات جهانی اختراعات دبی با پروژه «ربات همیار کشاورز» دبی 2024 -",
+      "year": 2024,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال نقره مسابقات جهانی اختراعات دبی با پروژه «قمقمه سنگ کلیه» دبی 2024 -",
+      "year": 2024,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال نقره مسابقات جهانی اختراعات دبی با پروژه «کمربند هوشمند کار در ارتفاع» دبی 2024 -",
+      "year": 2024,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال برنز مسابقات جهانی اختراعات دبی با پروژه «مچ بند ترک سیگار» دبی 2024 -",
+      "year": 2024,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال طلا مسابقات رباتیک و مهارت کشور های عضو پیمان شانگهای چین 2024 -",
+      "year": 2024,
+      "competition": "مسابقات رباتیک و مهارت کشورهای عضو پیمان شانگهای",
+      "country": "چین",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال نقره مسابقات رباتیک و مهارت کشور های عضو پیمان شانگهای چین 2024 -",
+      "year": 2024,
+      "competition": "مسابقات رباتیک و مهارت کشورهای عضو پیمان شانگهای",
+      "country": "چین",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "جایزه ویژه فدراسیون اختراعات اروپا 2024",
+      "year": 2024,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی آسیایی دانش آموزان ابتدایی و دبیرستان دوره اول](https://khaneyeide.ir/wp-content/uploads/2022/03/سال-2018-–-جزیره-ی-کیش-–-مسابقات-ربوکاپ-آسیا-و-اقیانوسیه-و-کسب-2-رتبه-ی-آسیایی-150x150.jpg)",
+      "year": 2022,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی اول و سوم جهان در مسابقات فیراکاپ2018 تایوان](https://khaneyeide.ir/wp-content/uploads/2022/03/دعوت-به-برنامه-ی-زنده-ی-تلویزیونی-150x150.jpg)",
+      "year": 2018,
+      "competition": "فیراکاپ",
+      "country": "تایوان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ها شدند)](https://khaneyeide.ir/wp-content/uploads/2022/03/برگزیدگان-جشنواره-ی-نوجوان-خوارزمی،-جشنواره-ی-ایده-و-اختراعات-و-جشنواره-ی-سلام-کاپ-150x150.jpg)",
+      "year": 2022,
+      "competition": "جشنواره خوارزمی",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی دوم در مسابقات ربوکاپ آسیا و اقیانوسیه – مسکو 2019 دبیرستان دوره اول سلام صدر](https://khaneyeide.ir/wp-content/uploads/2022/03/کسب-رتبه-دوم-در-مسابقات-ربوکاپ-آسیا-و-اقیانوسیه-مسکو-2019.jpg)",
+      "year": 2019,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی دوم در مسابقات ربوکاپ آسیا و اقیانوسیه–مسکو 2019",
+      "year": 2019,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه سوم مسابقات مسکو2019",
+      "year": 2019,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه سوم مسابقات مسکو2019](https://khaneyeide.ir/wp-content/uploads/2022/03/",
+      "year": 2019,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "تندیس-رتبه-دوم-و-رتبه-سوم-مسابقات-مسکو-2019.jpg)",
+      "year": 2019,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی دوم مسابقات آسیا و اقیانوسیه 2019 روسیه – مسکو",
+      "year": 2019,
+      "competition": null,
+      "country": "روسیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی دوم مسابقات آسیا و اقیانوسیه 2019 روسیه – مسکو](https://khaneyeide.ir/wp-content/uploads/2022/03/",
+      "year": 2019,
+      "competition": null,
+      "country": "روسیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "سرتیفیکیت-رتبه-ی-دوم-مسابقات-آسیا-و-اقیانوسیه-2019-روسیه-مسکو-718x1024.jpg)",
+      "year": 2019,
+      "competition": null,
+      "country": "روسیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی اول و دوم مسابقات ربوکاپ آسیا و اقیانوسیه – جزیره‌ی کیش 2018",
+      "year": 2018,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی اول و دوم مسابقات ربوکاپ آسیا و اقیانوسیه – جزیره ی کیش 2018 دبستان ندای پیروز](https://khaneyeide.ir/wp-content/uploads/2022/03/20181207_185157-1-1024x576.jpg)",
+      "year": 2018,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی اول در مسابقات روبوکاپ آسیا و اقیانوسیه – 2018 کیش",
+      "year": 2018,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی اول در مسابقات روبوکاپ آسیا و اقیانوسیه – 2018 کیش](https://khaneyeide.ir/wp-content/uploads/2022/03/",
+      "year": 2018,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "سرتیفیکیت-رتبه-ی-اول-در-مسابقات-روبوکاپ-آسیا-و-اقیانوسیه-–-2018-کیش-690x1024.jpg)",
+      "year": 2018,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی آسیایی",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی آسیایی دانش آموزان ابتدایی و دبیرستان دوره اول](https://khaneyeide.ir/wp-content/uploads/2022/03/سال-2018-–-جزیره-ی-کیش-–-مسابقات-ربوکاپ-آسیا-و-اقیانوسیه-و-کسب-2-رتبه-ی-آسیایی.jpg)",
+      "year": 2022,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی اول و سوم جهان در مسابقات 2018 تایوان",
+      "year": 2018,
+      "competition": null,
+      "country": "تایوان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی اول و سوم جهان در مسابقات فیراکاپ2018 تایوان](https://khaneyeide.ir/wp-content/uploads/2022/03/دعوت-به-برنامه-ی-زنده-ی-تلویزیونی-1024x1024.jpg)",
+      "year": 2018,
+      "competition": "فیراکاپ",
+      "country": "تایوان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی اول جهانی – در مسابقات جهانی فیراکاپ 2018",
+      "year": 2018,
+      "competition": "فیراکاپ",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی اول جهانی – در مسابقات جهانی فیراکاپ 2018 مدرسه سلام صدر](https://khaneyeide.ir/wp-content/uploads/2022/03/",
+      "year": 2018,
+      "competition": "فیراکاپ",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "سرتیفیکیت-رتبه-ی-اول-جهانی-–-در-مسابقات-جهانی-فیراکاپ-2018.jpg)",
+      "year": 2018,
+      "competition": "فیراکاپ",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول مسابقات کشوری دانشگاه امیر کبیر (AUT )",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول مسابقات کشوری دانشگاه امیر کبیر (AUT ) و کسب سهمیه ی شرکت در مسابقات جهانی](https://khaneyeide.ir/wp-content/uploads/2022/03/کسب-رتبه-اول-مسابقات-کشوری-دانشگاه-امیر-کبیر-AUT--1024x705.jpg)",
+      "year": 2022,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "#### کسب عنوان بهترین ایده در مسابقات بین المللی فیراکاپ – و دعوت در برنامه ی زنده ی تلویزیونی",
+      "year": null,
+      "competition": "فیراکاپ",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "![کسب عنوان بهترین ایده در مسابقات بین المللی فیراکاپ – و دعوت در برنامه ی زنده ی تلویزیونی](https://khaneyeide.ir/wp-content/uploads/2022/03/کسب-عنوان-بهترین-ایده-در-مسابقات-بین-المللی-فیراکاپ-–-و-دعوت-در-برنامه-ی-زنده-ی-تلویزیونی-1024x768.jpg)",
+      "year": 2022,
+      "competition": "فیراکاپ",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام جهانی در",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام جهانی در فیراکاپ فرودگاه امام خمینی](https://khaneyeide.ir/wp-content/uploads/2022/03/بازگشت-از-مسابقات-جهانی-2018-–-با-کسب-دو-مقام-جهانی-در-فیراکاپ.jpg)",
+      "year": 2022,
+      "competition": "فیراکاپ",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول جهانی در لیگ سیتی ریسر",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول جهانی در لیگ ربات های جنگجو هوشمند",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول جهانی در لیگ اسپورت ربات",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه دوم جهانی در لیگ اسپورت ربات",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول جهانی در لیگ سیتی ریسر *",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول جهانی در لیگ ربات های جنگجو هوشمند *",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول جهانی در لیگ اسپورت ربات *",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه دوم جهانی در لیگ اسپورت ربات](https://khaneyeide.ir/wp-content/uploads/2022/03/مسابقات-جهانی-فیراکاپ-2019-کره-جنوبی-چانگوون.jpg)",
+      "year": 2022,
+      "competition": "فیراکاپ",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول جهانی در مسابقات جهانی رباتیک – لیگ ماموریت غیر ممکن- 2018 تایوان -",
+      "year": 2018,
+      "competition": null,
+      "country": "تایوان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه سوم جهانی در مسابقات جهانی رباتیک – لیگ ربات های ورزشکار-2018 تایوان -",
+      "year": 2018,
+      "competition": null,
+      "country": "تایوان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال نقره مسابقات اختراعات جهانی با پروژه «ماگ هوشمند ورزشکاران»دبی 2023 -",
+      "year": 2023,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال آوران ایران در مسابقات بین‌المللی",
+      "year": null,
+      "competition": null,
+      "country": "ایران",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال آوران ایران در مسابقات بین المللی](https://khaneyeide.ir/wp-content/uploads/2022/03/تقدیر-کاپیتان-پرواز-مسکو-تهران-،-از-مدال-آوران-ایران-در-مسابقات-بین-المللی.jpg)",
+      "year": 2022,
+      "competition": null,
+      "country": "ایران",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ها شدند)",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ها شدند)](https://khaneyeide.ir/wp-content/uploads/2022/03/برگزیدگان-جشنواره-ی-نوجوان-خوارزمی،-جشنواره-ی-ایده-و-اختراعات-و-جشنواره-ی-سلام-کاپ-1024x776.jpg)",
+      "year": 2022,
+      "competition": "جشنواره خوارزمی",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول جهانی در مسابقات جهانی رباتیک - لیگ ماموریت غیر ممکن- 2018 تایوان",
+      "year": 2018,
+      "competition": null,
+      "country": "تایوان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه سوم جهانی در مسابقات جهانی رباتیک - لیگ ربات های ورزشکار-2018 تایوان",
+      "year": 2018,
+      "competition": null,
+      "country": "تایوان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول آسیا و اقیانوسیه در مسابقات ربوکاپ 2018 کیش",
+      "year": 2018,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول سوپر تیم آسیا و اقیانوسیه در مسابقات ربوکاپ 2018 کیش",
+      "year": 2018,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول جهانی رباتیک (لیگ ربات های شهری) در مسابقات جهانی 2019 کره جنوبی",
+      "year": 2019,
+      "competition": null,
+      "country": "کره جنوبی",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول لیگ ربات های جنگجوی هوشمند در مسابقات جهانی 2019 کره جنوبی",
+      "year": 2019,
+      "competition": null,
+      "country": "کره جنوبی",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول جهانی ربات های اسپورت در مسابقات جهانی 2019 کره جنوبی",
+      "year": 2019,
+      "competition": null,
+      "country": "کره جنوبی",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه دوم جهانی ربات های اسپورت در مسابقات جهانی 2019 کره جنوبی",
+      "year": 2019,
+      "competition": null,
+      "country": "کره جنوبی",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه دوم در مسابقات روبوکاپ آسیا و اقیانوسیه لیگ کواسپیس پرایمری 2019 روسیه",
+      "year": 2019,
+      "competition": "RoboCup",
+      "country": "روسیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه سوم در مسابقات روبوکاپ آسیا و اقیانوسیه لیگ کواسپیس پرایمری 2019 روسیه",
+      "year": 2019,
+      "competition": "RoboCup",
+      "country": "روسیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه دوم در مسابقات روبوکاپ آسیا و اقیانوسیه لیگ کواسپیس سکندری 2019 روسیه",
+      "year": 2019,
+      "competition": "RoboCup",
+      "country": "روسیه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام اول در مسابقات آسیا و اقیانوسیه روبوکاپ ژاپن 2020",
+      "year": 2020,
+      "competition": "RoboCup",
+      "country": "ژاپن",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام دوم در مسابقات آسیا و اقیانوسیه روبوکاپ ژاپن 2020",
+      "year": 2020,
+      "competition": "RoboCup",
+      "country": "ژاپن",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام اول مسابقات جهانی ربوکاپ2020 فرانسه",
+      "year": 2020,
+      "competition": "RoboCup",
+      "country": "فرانسه",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام اول در مسابقات شبیه ساز ربات های امدادگر، زیر 12 سال ربوکاپ آسیایی 2022 چین",
+      "year": 2022,
+      "competition": "RoboCup",
+      "country": "چین",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام اول سوپر تیم لیگ کواسپیس در مسابقات آسیا و اقیانوسیه 2022 چین",
+      "year": 2022,
+      "competition": null,
+      "country": "چین",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام دوم در مسابقات کواسپیس زیر 19 سال آسیا و اقیانوسیه 2022 چین",
+      "year": 2022,
+      "competition": null,
+      "country": "چین",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام اول ایده خلاقانه در مسابقات ، ربوکاپ آسیا و اقیانوسیه 2022 سنگاپور",
+      "year": 2022,
+      "competition": "RoboCup",
+      "country": "سنگاپور",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام اول در مسابقات رباتیک ، ربوکاپ آسیا و اقیانوسیه لیگ کواسپیس پرایمری 2022 سنگاپور",
+      "year": 2022,
+      "competition": "RoboCup",
+      "country": "سنگاپور",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام دوم در مسابقات رباتیک ، ربوکاپ آسیا و اقیانوسیه لیگ کواسپیس سکندری 2022 سنگاپور",
+      "year": 2022,
+      "competition": "RoboCup",
+      "country": "سنگاپور",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام فینالیست مسابقات جهانی در لیگ خلاقیت در رباتیک 2023 آلمان",
+      "year": 2023,
+      "competition": null,
+      "country": "آلمان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام چهارم جهان در مسابقات جهانی رباتیک 2023 آلمان",
+      "year": 2023,
+      "competition": null,
+      "country": "آلمان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام بهترین طراحی مسابقات جهانی در لیگ ربات های اسپورت 2023 آلمان",
+      "year": 2023,
+      "competition": null,
+      "country": "آلمان",
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مدال طلا مسابقات اختراعات جهانی با پروژه «پکیج ایمنی مشاغل سخت»دبی 2023",
+      "year": 2023,
+      "competition": "مسابقات اختراعات",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی دوم در مسابقات ربوکاپ آسیا و اقیانوسیه–مسکو 2019 دبیرستان دوره اول سلام صدر",
+      "year": 2019,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی اول و دوم مسابقات ربوکاپ آسیا و اقیانوسیه – جزیره‌ی کیش 2018 دبستان ندای پیروز",
+      "year": 2018,
+      "competition": "RoboCup",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی آسیایی دانش آموزان ابتدایی و دبیرستان دوره اول",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه ی اول جهانی – در مسابقات جهانی فیراکاپ 2018 مدرسه سلام صدر",
+      "year": 2018,
+      "competition": "فیراکاپ",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "رتبه اول مسابقات کشوری دانشگاه امیر کبیر (AUT ) و کسب سهمیه ی شرکت در مسابقات جهانی",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "کسب عنوان بهترین ایده در مسابقات بین المللی فیراکاپ – و دعوت در برنامه ی زنده ی تلویزیونی",
+      "year": null,
+      "competition": "فیراکاپ",
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مقام جهانی در فرودگاه امام خمینی",
+      "year": null,
+      "competition": null,
+      "country": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    }
+  ],
+  "student_projects": [
+    {
+      "title": "پکیج ایمنی مشاغل سخت",
+      "team": null,
+      "description": "مدال طلا مسابقات اختراعات جهانی با پروژه «پکیج ایمنی مشاغل سخت»دبی 2023 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "ماگ هوشمند ورزشکاران",
+      "team": null,
+      "description": "مدال نقره مسابقات اختراعات جهانی با پروژه «ماگ هوشمند ورزشکاران»دبی 2023",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "کیف یاد آور",
+      "team": null,
+      "description": "مدال نقره مسابقات اختراعات جهانی با پروژه «کیف یاد آور»دبی 2023 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "اسکین گارد",
+      "team": null,
+      "description": "مدال نقره مسابقات اختراعات جهانی با پروژه «اسکین گارد»دبی 2023 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "پرورش هوشمند عقرب",
+      "team": null,
+      "description": "مدال طلا مسابقات جهانی تکنوفست با پروژه «پرورش هوشمند عقرب» ترکیه 2024 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "اتاق هوشمند بیماران",
+      "team": null,
+      "description": "مدال نقره مسابقات جهانی تکنوفست با پروژه «اتاق هوشمند بیماران» ترکیه 2024 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "دستگاه فیزیوتراپی آسیب های ورزشی",
+      "team": null,
+      "description": "مدال نقره مسابقات جهانی تکنوفست با پروژه «دستگاه فیزیوتراپی آسیب های ورزشی» ترکیه 2024 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "سخت افزار و اپلیکیشن کنترل سلامت",
+      "team": null,
+      "description": "مدال نقره مسابقات جهانی تکنوفست با پروژه «سخت افزار و اپلیکیشن کنترل سلامت» ترکیه 2024 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "صندلی هوشمند مشاغل خاص",
+      "team": null,
+      "description": "مدال برنز مسابقات جهانی تکنوفست با پروژه «صندلی هوشمند مشاغل خاص» ترکیه 2024 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "کالسکه هوشمند",
+      "team": null,
+      "description": "مدال طلا مسابقات جهانی اختراعات دبی با پروژه «کالسکه هوشمند» دبی 2024 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "ربات بازرس لوله",
+      "team": null,
+      "description": "مدال طلا مسابقات جهانی اختراعات دبی با پروژه «ربات بازرس لوله» دبی 2024 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "کلاه کاسکت هوشمند",
+      "team": null,
+      "description": "مدال طلا مسابقات جهانی اختراعات دبی با پروژه «کلاه کاسکت هوشمند» دبی 2024 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "ربات همیار کشاورز",
+      "team": null,
+      "description": "مدال نقره مسابقات جهانی اختراعات دبی با پروژه «ربات همیار کشاورز» دبی 2024 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "قمقمه سنگ کلیه",
+      "team": null,
+      "description": "مدال نقره مسابقات جهانی اختراعات دبی با پروژه «قمقمه سنگ کلیه» دبی 2024 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "کمربند هوشمند کار در ارتفاع",
+      "team": null,
+      "description": "مدال نقره مسابقات جهانی اختراعات دبی با پروژه «کمربند هوشمند کار در ارتفاع» دبی 2024 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "title": "مچ بند ترک سیگار",
+      "team": null,
+      "description": "مدال برنز مسابقات جهانی اختراعات دبی با پروژه «مچ بند ترک سیگار» دبی 2024 -",
+      "media": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    }
+  ],
+  "teachers": [
+    {
+      "name": "محمد رضا ریاحی",
+      "role": "استاد راهنما",
+      "bio": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "name": "عمید جرجانی",
+      "role": "استاد راهنما",
+      "bio": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    },
+    {
+      "name": "امیر کفاش",
+      "role": "استاد راهنما",
+      "bio": null,
+      "page_url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/"
+    }
+  ],
+  "contact": {
+    "phones": [
+      "09913535191",
+      "09391084882"
+    ],
+    "emails": [
+      "khaneyeide@gmail.com"
+    ],
+    "addresses": [
+      "تهران، قلهک، پارک علم و فناوری دانشگاه آزاد (مراجعه فقط با هماهنگی)",
+      "تهران، قلهک، پارک علم و فناوری دانشگاه آزاد، واحد 503"
+    ],
+    "branches": [
+      "شعبه مرکزی : پارک علم و فناوری IAU قلهک شعبه شرق : دانشگاه علم و صنعت شعبه پاسداران : دروس ، خیابان صالح حسینیشعبه زعفرانیه : خیابان افراز",
+      "برای دسترسی راحت‌تر علاقه‌مندان، خانه ایده در چهار نقطه کلیدی تهران شعبه دارد:",
+      "آموزشگاه رباتیک خانه ایده شعبه شرق تهران : دانشگاه علم و صنعت",
+      "آموزشگاه رباتیک خانه ایده شعبه پاسداران : دروس ، پاسداران ، صالح حسینی",
+      "آموزشگاه رباتیک خانه ایده شعبه زعفرانیه : زعفرانیه ، خیابان افراز"
+    ],
+    "map_links": [],
+    "social": {
+      "instagram": [
+        "https://www.instagram.com/Khane_ide_academy/",
+        "https://www.instagram.com/khane_ide_academy/",
+        "https://www.instagram.com/mr.ideaaaa/"
+      ],
+      "bale": [],
+      "telegram": [
+        "https://web.telegram.org/a/#5883016011"
+      ],
+      "whatsapp": [
+        "https://api.whatsapp.com/send?phone=09913535191"
+      ]
+    },
+    "notes": {
+      "bale": "No Bale profile URL was found. web.bale.ai appeared only as an emoji image host, and l.ble.ir appeared only as a link wrapper inside an article.",
+      "telegram": "The public href is a web.telegram.org deep link, not a t.me channel.",
+      "addresses": "Addresses are the two wordings published on the contact page.",
+      "second_phone": "09913535191 is on the contact page. 09391084882 is a tel: link on department pages."
+    }
+  },
+  "navigation": {
+    "header": [
+      {
+        "label": "خانه",
+        "url": "https://khaneyeide.ir/",
+        "children": []
+      },
+      {
+        "label": "دپارتمان ها",
+        "url": null,
+        "children": [
+          {
+            "label": "دپارتمان رباتیک",
+            "url": "https://khaneyeide.ir/%d8%af%d9%be%d8%a7%d8%b1%d8%aa%d9%85%d8%a7%d9%86-%d8%b1%d8%a8%d8%a7%d8%aa%db%8c%da%a9/"
+          },
+          {
+            "label": "دپارتمان برنامه نویسی و هوش مصنوعی",
+            "url": "https://khaneyeide.ir/%d8%af%d9%be%d8%a7%d8%b1%d8%aa%d9%85%d8%a7%d9%86-%d8%a8%d8%b1%d9%86%d8%a7%d9%85%d9%87-%d9%86%d9%88%db%8c%d8%b3%db%8c/"
+          },
+          {
+            "label": "دپارتمان طراحی سایت",
+            "url": "https://khaneyeide.ir/%d8%af%d9%be%d8%a7%d8%b1%d8%aa%d9%85%d8%a7%d9%86-%d8%b7%d8%b1%d8%a7%d8%ad%db%8c-%d8%b3%d8%a7%db%8c%d8%aa/"
+          },
+          {
+            "label": "دپارتمان آلتیوم دیزاین و آردوئینو",
+            "url": "https://khaneyeide.ir/%d8%af%d9%be%d8%a7%d8%b1%d8%aa%d9%85%d8%a7%d9%86-%d8%a2%d9%84%d8%aa%db%8c%d9%88%d9%85-%d8%af%db%8c%d8%b2%d8%a7%db%8c%d9%86-%d9%88-%d8%a2%d8%b1%d8%af%d9%88%d8%a6%db%8c%d9%86%d9%88/"
+          },
+          {
+            "label": "دپارتمان طراحی صنعتی و سالیدورکس",
+            "url": "https://khaneyeide.ir/%d8%af%d9%be%d8%a7%d8%b1%d8%aa%d9%85%d8%a7%d9%86-%d8%b7%d8%b1%d8%a7%d8%ad%db%8c-%d8%b5%d9%86%d8%b9%d8%aa%db%8c-%d9%88-%d8%b3%d8%a7%d9%84%db%8c%d8%af%d9%88%d8%b1%da%a9%d8%b3/"
+          },
+          {
+            "label": "دپارتمان ایده تا اختراع و خلاقیت",
+            "url": "https://khaneyeide.ir/%d8%af%d9%be%d8%a7%d8%b1%d8%aa%d9%85%d8%a7%d9%86-%d8%a7%db%8c%d8%af%d9%87-%d8%aa%d8%a7-%d8%a7%d8%ae%d8%aa%d8%b1%d8%a7%d8%b9-%d9%88-%d8%ae%d9%84%d8%a7%d9%82%db%8c%d8%aa/"
+          },
+          {
+            "label": "دپارتمان بازی سازی",
+            "url": "https://khaneyeide.ir/%d8%af%d9%be%d8%a7%d8%b1%d8%aa%d9%85%d8%a7%d9%86-%d8%a8%d8%a7%d8%b2%db%8c-%d8%b3%d8%a7%d8%b2%db%8c/"
+          }
+        ]
+      },
+      {
+        "label": "دوره های آموزشی",
+        "url": null,
+        "children": [
+          {
+            "label": "دوره رباتیک",
+            "url": "https://khaneyeide.ir/%d8%af%d9%88%d8%b1%d9%87-%d8%a2%d9%85%d9%88%d8%b2%d8%b4-%d8%b1%d8%a8%d8%a7%d8%aa%db%8c%da%a9/"
+          },
+          {
+            "label": "دوره برنامه نویسی پایتون",
+            "url": "https://khaneyeide.ir/%d8%af%d9%88%d8%b1%d9%87-%d8%a8%d8%b1%d9%86%d8%a7%d9%85%d9%87-%d9%86%d9%88%db%8c%d8%b3%db%8c-%d9%be%d8%a7%db%8c%d8%aa%d9%88%d9%86/"
+          },
+          {
+            "label": "دوره آردوینو",
+            "url": "https://khaneyeide.ir/%d8%af%d9%88%d8%b1%d9%87-%d8%a2%d8%b1%d8%af%d9%88%d8%a6%db%8c%d9%86%d9%88/"
+          },
+          {
+            "label": "دوره سالیدورکس",
+            "url": "https://khaneyeide.ir/%d8%a2%d9%85%d9%88%d8%b2%d8%b4-%d8%b1%d8%a8%d8%a7%d8%aa%db%8c%da%a9-%d8%a8%d8%a7-%d8%b3%d8%a7%d9%84%db%8c%d8%af%d9%88%d8%b1%da%a9%d8%b3/"
+          },
+          {
+            "label": "دوره هوش مصنوعی",
+            "url": "https://khaneyeide.ir/ai-course/"
+          },
+          {
+            "label": "دوره طراحی سایت",
+            "url": "https://khaneyeide.ir/%d8%af%d9%88%d8%b1%d9%87-%d8%b7%d8%b1%d8%a7%d8%ad%db%8c-%d8%b3%d8%a7%db%8c%d8%aa/"
+          },
+          {
+            "label": "دوره خلاقیت کودک و نوجوان",
+            "url": "https://khaneyeide.ir/%d8%af%d9%88%d8%b1%d9%87-%d8%ae%d9%84%d8%a7%d9%82%db%8c%d8%aa-%da%a9%d9%88%d8%af%da%a9-%d9%88-%d9%86%d9%88%d8%ac%d9%88%d8%a7%d9%86/"
+          },
+          {
+            "label": "دوره کارگاه پرینتر ۳ بعدی",
+            "url": "https://khaneyeide.ir/%d8%af%d9%88%d8%b1%d9%87-%da%a9%d8%a7%d8%b1%da%af%d8%a7%d9%87-%d9%be%d8%b1%db%8c%d9%86%d8%aa%d8%b1-%db%b3-%d8%a8%d8%b9%d8%af%db%8c/"
+          },
+          {
+            "label": "دوره آلتیوم دیزاینر",
+            "url": "https://khaneyeide.ir/%d8%af%d9%88%d8%b1%d9%87-%d8%a2%d9%84%d8%aa%db%8c%d9%88%d9%85-%d8%af%db%8c%d8%b2%d8%a7%db%8c%d9%86%d8%b1/"
+          },
+          {
+            "label": "دوره بازی سازی",
+            "url": "https://khaneyeide.ir/%d8%af%d9%88%d8%b1%d9%87-%d8%a8%d8%a7%d8%b2%db%8c-%d8%b3%d8%a7%d8%b2%db%8c/"
+          },
+          {
+            "label": "دوره ایده تا اختراع",
+            "url": "https://khaneyeide.ir/%d8%af%d9%88%d8%b1%d9%87-%d8%a7%db%8c%d8%af%d9%87-%d8%aa%d8%a7-%d8%a7%d8%ae%d8%aa%d8%b1%d8%a7%d8%b9/"
+          }
+        ]
+      },
+      {
+        "label": "افتخارات",
+        "url": "https://khaneyeide.ir/%d8%a7%d9%81%d8%aa%d8%ae%d8%a7%d8%b1%d8%a7%d8%aa-%d8%ae%d8%a7%d9%86%d9%87%db%8c-%d8%a7%db%8c%d8%af%d9%87/",
+        "children": []
+      },
+      {
+        "label": "مجله خانه ایده",
+        "url": "https://khaneyeide.ir/%d9%85%d8%ac%d9%84%d9%87-%d8%ae%d8%a7%d9%86%d9%87-%d8%a7%db%8c%d8%af%d9%87/",
+        "children": []
+      },
+      {
+        "label": "مراحل ثبت نام",
+        "url": "https://khaneyeide.ir/#courses",
+        "children": []
+      },
+      {
+        "label": "تماس با ما",
+        "url": "https://khaneyeide.ir/%d8%aa%d9%85%d8%a7%d8%b3-%d8%a8%d8%a7-%d9%85%d8%a7/",
+        "children": []
+      },
+      {
+        "label": "درباره ما",
+        "url": "https://khaneyeide.ir/%d9%be%d8%b1%d9%88%da%98%d9%87%d9%87%d8%a7%db%8c-%d8%af%d8%a7%d9%86%d8%b4%d9%be%da%98%d9%88%d9%87%d8%a7%d9%86/",
+        "children": []
+      }
+    ],
+    "footer": [
+      {
+        "label": null,
+        "url": "https://khaneyeide.ir/"
+      },
+      {
+        "label": "تلفن: 09913535191",
+        "url": "tel:09913535191"
+      },
+      {
+        "label": "ایمیل: khaneyeide@gmail.com",
+        "url": "mailto:khaneyeide@gmail.com"
+      },
+      {
+        "label": "آدرس اینستاگرام : Khane_ide_academy",
+        "url": "https://www.instagram.com/Khane_ide_academy/"
+      },
+      {
+        "label": "صفحه اصلی",
+        "url": "https://khaneyeide.ir/"
+      },
+      {
+        "label": "درباره ما",
+        "url": "https://khaneyeide.ir/%d8%aa%d9%85%d8%a7%d8%b3-%d8%a8%d8%a7-%d9%85%d8%a7/"
+      },
+      {
+        "label": "تماس با ما",
+        "url": "https://khaneyeide.ir/%d8%aa%d9%85%d8%a7%d8%b3-%d8%a8%d8%a7-%d9%85%d8%a7/"
+      },
+      {
+        "label": "افتخارات",
+        "url": "https://khaneyeide.ir/%d8%a7%d9%81%d8%aa%d8%ae%d8%a7%d8%b1%d8%a7%d8%aa-%d8%ae%d8%a7%d9%86%d9%87%db%8c-%d8%a7%db%8c%d8%af%d9%87/"
+      },
+      {
+        "label": "Whatsapp",
+        "url": "https://api.whatsapp.com/send?phone=09913535191"
+      },
+      {
+        "label": "Linkedin-in",
+        "url": "https://www.linkedin.com/company/house-of-idea-robotics-inventions-academy/"
+      },
+      {
+        "label": "Instagram",
+        "url": "https://www.instagram.com/khane_ide_academy/"
+      }
+    ]
+  },
+  "forms": [
+    {
+      "pages": [
+        "https://khaneyeide.ir/دوره-معماری/",
+        "https://khaneyeide.ir/دوره-بازیسازی/",
+        "https://khaneyeide.ir/دوره-مکاترونیک/",
+        "https://khaneyeide.ir/دوره-کواسپیس/",
+        "https://khaneyeide.ir/دوره-برنامه-نویسی/",
+        "https://khaneyeide.ir/دوره-رویاپردازی/",
+        "https://khaneyeide.ir/از-ایده-تا-اختراع/"
+      ],
+      "page": "https://khaneyeide.ir/دوره-معماری/",
+      "action": null,
+      "method": "post",
+      "id": null,
+      "fields": [
+        {
+          "tag": "input",
+          "name": "post_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "referer_title",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[name]",
+          "type": "text",
+          "label": "نام و نام خانوادگی",
+          "placeholder": "نام و نام خانوادگی"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[email]",
+          "type": "email",
+          "label": "ایمیل",
+          "placeholder": "ایمیل"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_315ca46]",
+          "type": "tel",
+          "label": "شماره تماس",
+          "placeholder": "شماره تماس"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_29282e6]",
+          "type": "text",
+          "label": "پایه تحصیلی",
+          "placeholder": "پایه تحصیلی"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_f5f30fd]",
+          "type": "text",
+          "label": "شهر",
+          "placeholder": "شهر"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_0fc471a][]",
+          "type": "checkbox",
+          "label": "آنلاین",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_0fc471a][]",
+          "type": "checkbox",
+          "label": "حضوری",
+          "placeholder": null
+        },
+        {
+          "tag": "textarea",
+          "name": "form_fields[message]",
+          "type": "textarea",
+          "label": "پیام",
+          "placeholder": "پیام"
+        },
+        {
+          "tag": "button",
+          "name": null,
+          "type": "submit",
+          "label": null,
+          "placeholder": null
+        }
+      ]
+    },
+    {
+      "pages": [
+        "https://khaneyeide.ir/دوره-طراحی-سایت/",
+        "https://khaneyeide.ir/",
+        "https://khaneyeide.ir/دوره-خلاقیت-کودک-و-نوجوان/",
+        "https://khaneyeide.ir/دوره-کارگاه-پرینتر-۳-بعدی/",
+        "https://khaneyeide.ir/دوره-آلتیوم-دیزاینر/",
+        "https://khaneyeide.ir/دوره-برنامه-نویسی-پایتون/",
+        "https://khaneyeide.ir/دوره-آموزش-رباتیک/",
+        "https://khaneyeide.ir/آموزش-رباتیک-با-سالیدورکس/",
+        "https://khaneyeide.ir/ai-course/",
+        "https://khaneyeide.ir/دوره-ایده-تا-اختراع/"
+      ],
+      "page": "https://khaneyeide.ir/دوره-طراحی-سایت/",
+      "action": null,
+      "method": "post",
+      "id": null,
+      "fields": [
+        {
+          "tag": "input",
+          "name": "post_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "referer_title",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "queried_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[name]",
+          "type": "text",
+          "label": "نام و نام خانوادگی",
+          "placeholder": "نام و نام خانوادگی "
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[email]",
+          "type": "tel",
+          "label": "شماره تماس (به انگلیسی)",
+          "placeholder": "9121234567 98+"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[message]",
+          "type": "text",
+          "label": "نام مدرسه",
+          "placeholder": "موضوع خود را وارد کنید "
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_10f624a]",
+          "type": "text",
+          "label": "پایه تحصیلی",
+          "placeholder": "پایه تحصیلی خود را بنویسید "
+        },
+        {
+          "tag": "button",
+          "name": null,
+          "type": "submit",
+          "label": null,
+          "placeholder": null
+        }
+      ]
+    },
+    {
+      "pages": [
+        "https://khaneyeide.ir/دوره-رباتیک/"
+      ],
+      "page": "https://khaneyeide.ir/دوره-رباتیک/",
+      "action": null,
+      "method": "post",
+      "id": null,
+      "fields": [
+        {
+          "tag": "input",
+          "name": "post_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "referer_title",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "queried_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[name]",
+          "type": "text",
+          "label": "نام و نام خانوادگی",
+          "placeholder": "نام و نام خانوادگی"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[email]",
+          "type": "email",
+          "label": "ایمیل",
+          "placeholder": "ایمیل"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_315ca46]",
+          "type": "tel",
+          "label": "شماره تماس",
+          "placeholder": "شماره تماس"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_29282e6]",
+          "type": "text",
+          "label": "پایه تحصیلی",
+          "placeholder": "پایه تحصیلی"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_f5f30fd]",
+          "type": "text",
+          "label": "شهر",
+          "placeholder": "شهر"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_0fc471a][]",
+          "type": "checkbox",
+          "label": "آنلاین",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_0fc471a][]",
+          "type": "checkbox",
+          "label": "حضوری",
+          "placeholder": null
+        },
+        {
+          "tag": "textarea",
+          "name": "form_fields[message]",
+          "type": "textarea",
+          "label": "پیام",
+          "placeholder": "پیام"
+        },
+        {
+          "tag": "button",
+          "name": null,
+          "type": "submit",
+          "label": null,
+          "placeholder": null
+        }
+      ]
+    },
+    {
+      "pages": [
+        "https://khaneyeide.ir/خلاقیت-کودک/"
+      ],
+      "page": "https://khaneyeide.ir/خلاقیت-کودک/",
+      "action": null,
+      "method": "post",
+      "id": null,
+      "fields": [
+        {
+          "tag": "input",
+          "name": "post_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "referer_title",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[name]",
+          "type": "text",
+          "label": "نام و نام خانوادگی",
+          "placeholder": "نام و نام خانوادگی"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[email]",
+          "type": "email",
+          "label": "ایمیل",
+          "placeholder": "ایمیل"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_315ca46]",
+          "type": "tel",
+          "label": "شماره تماس",
+          "placeholder": "شماره تماس"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_29282e6]",
+          "type": "text",
+          "label": "پایه تحصیلی",
+          "placeholder": "پایه تحصیلی"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_f5f30fd]",
+          "type": "text",
+          "label": "شهر",
+          "placeholder": "شهر"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_0fc471a][]",
+          "type": "checkbox",
+          "label": "آنلاین",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_0fc471a][]",
+          "type": "checkbox",
+          "label": "حضوری:",
+          "placeholder": null
+        },
+        {
+          "tag": "textarea",
+          "name": "form_fields[message]",
+          "type": "textarea",
+          "label": "پیام",
+          "placeholder": "پیام"
+        },
+        {
+          "tag": "button",
+          "name": null,
+          "type": "submit",
+          "label": null,
+          "placeholder": null
+        }
+      ]
+    },
+    {
+      "pages": [
+        "https://khaneyeide.ir/مراحل-ثبت-نام/"
+      ],
+      "page": "https://khaneyeide.ir/مراحل-ثبت-نام/",
+      "action": null,
+      "method": "post",
+      "id": null,
+      "fields": [
+        {
+          "tag": "input",
+          "name": "post_id",
+          "type": "hidden",
+          "label": "نام",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_id",
+          "type": "hidden",
+          "label": "نام",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "referer_title",
+          "type": "hidden",
+          "label": "نام",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[name]",
+          "type": "text",
+          "label": "نام",
+          "placeholder": "نام"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_3756b6d]",
+          "type": "text",
+          "label": "نام خانوادگی",
+          "placeholder": "نام خانوادگی"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_7ef1b6b]",
+          "type": "tel",
+          "label": "شماره تلفن",
+          "placeholder": "شماره تلفن"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[email]",
+          "type": "email",
+          "label": "ایمیل",
+          "placeholder": "ایمیل"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_68b4244]",
+          "type": "radio",
+          "label": "خانم",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_68b4244]",
+          "type": "radio",
+          "label": "آقا",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_0c34a07]",
+          "type": "text",
+          "label": "علاقمند هستید در چه دوره ای از کلاسها شرکت کنید؟",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_522fecd]",
+          "type": "text",
+          "label": "در صورتی که مهارتی دارید میتوانید در کادر پایین شرح دهید.",
+          "placeholder": null
+        },
+        {
+          "tag": "textarea",
+          "name": "form_fields[message]",
+          "type": "textarea",
+          "label": "پیام",
+          "placeholder": "پیام"
+        },
+        {
+          "tag": "button",
+          "name": null,
+          "type": "submit",
+          "label": null,
+          "placeholder": null
+        }
+      ]
+    },
+    {
+      "pages": [
+        "https://khaneyeide.ir/ثبت-نام/"
+      ],
+      "page": "https://khaneyeide.ir/ثبت-نام/",
+      "action": null,
+      "method": "post",
+      "id": null,
+      "fields": [
+        {
+          "tag": "input",
+          "name": "post_id",
+          "type": "hidden",
+          "label": "نام",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_id",
+          "type": "hidden",
+          "label": "نام",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "referer_title",
+          "type": "hidden",
+          "label": "نام",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[name]",
+          "type": "text",
+          "label": "نام",
+          "placeholder": "نام"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_f99bbac]",
+          "type": "text",
+          "label": "نام خانوادگی",
+          "placeholder": "نام خانوادگی"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_bc1971b]",
+          "type": "tel",
+          "label": "تلفن",
+          "placeholder": "تلفن"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[email]",
+          "type": "email",
+          "label": "ایمیل",
+          "placeholder": "ایمیل"
+        },
+        {
+          "tag": "textarea",
+          "name": "form_fields[message]",
+          "type": "textarea",
+          "label": "پیام",
+          "placeholder": "پیام"
+        },
+        {
+          "tag": "button",
+          "name": null,
+          "type": "submit",
+          "label": null,
+          "placeholder": null
+        }
+      ]
+    },
+    {
+      "pages": [
+        "https://khaneyeide.ir/تماس-با-ما/"
+      ],
+      "page": "https://khaneyeide.ir/تماس-با-ما/",
+      "action": null,
+      "method": "post",
+      "id": null,
+      "fields": [
+        {
+          "tag": "input",
+          "name": "post_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "referer_title",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "queried_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[name]",
+          "type": "text",
+          "label": "نام و نام خانوادگی",
+          "placeholder": "نام و نام خانوادگی "
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[email]",
+          "type": "tel",
+          "label": "شماره تماس (به انگلیسی)",
+          "placeholder": "9121234567 98+"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[message]",
+          "type": "email",
+          "label": "آدرس ایمیل",
+          "placeholder": "ایمیل "
+        },
+        {
+          "tag": "textarea",
+          "name": "form_fields[field_10f624a]",
+          "type": "textarea",
+          "label": "پیام",
+          "placeholder": "متن خود را بنویسید "
+        },
+        {
+          "tag": "button",
+          "name": null,
+          "type": "submit",
+          "label": null,
+          "placeholder": null
+        }
+      ]
+    },
+    {
+      "pages": [
+        "https://khaneyeide.ir/تماس-با-ما/"
+      ],
+      "page": "https://khaneyeide.ir/تماس-با-ما/",
+      "action": null,
+      "method": "post",
+      "id": null,
+      "fields": [
+        {
+          "tag": "input",
+          "name": "post_id",
+          "type": "hidden",
+          "label": "نام",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_id",
+          "type": "hidden",
+          "label": "نام",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "referer_title",
+          "type": "hidden",
+          "label": "نام",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "queried_id",
+          "type": "hidden",
+          "label": "نام",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[name]",
+          "type": "text",
+          "label": "نام",
+          "placeholder": "نام"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_19cd8e6]",
+          "type": "text",
+          "label": "نام خانوادگی",
+          "placeholder": "نام خانوادگی"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_c47bc3c]",
+          "type": "tel",
+          "label": "تلفن",
+          "placeholder": "تلفن"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[email]",
+          "type": "email",
+          "label": "ایمیل",
+          "placeholder": "ایمیل"
+        },
+        {
+          "tag": "textarea",
+          "name": "form_fields[message]",
+          "type": "textarea",
+          "label": "پیام",
+          "placeholder": "پیام"
+        },
+        {
+          "tag": "button",
+          "name": null,
+          "type": "submit",
+          "label": null,
+          "placeholder": null
+        }
+      ]
+    },
+    {
+      "pages": [
+        "https://khaneyeide.ir/دوره-آردوئینو/",
+        "https://khaneyeide.ir/دوره-بازی-سازی/"
+      ],
+      "page": "https://khaneyeide.ir/دوره-آردوئینو/",
+      "action": null,
+      "method": "post",
+      "id": null,
+      "fields": [
+        {
+          "tag": "input",
+          "name": "post_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_id",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "referer_title",
+          "type": "hidden",
+          "label": "نام و نام خانوادگی",
+          "placeholder": null
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[name]",
+          "type": "text",
+          "label": "نام و نام خانوادگی",
+          "placeholder": "نام و نام خانوادگی "
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[email]",
+          "type": "tel",
+          "label": "شماره تماس (به انگلیسی)",
+          "placeholder": "9121234567 98+"
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[message]",
+          "type": "text",
+          "label": "نام مدرسه",
+          "placeholder": "موضوع خود را وارد کنید "
+        },
+        {
+          "tag": "input",
+          "name": "form_fields[field_10f624a]",
+          "type": "text",
+          "label": "پایه تحصیلی",
+          "placeholder": "پایه تحصیلی خود را بنویسید "
+        },
+        {
+          "tag": "button",
+          "name": null,
+          "type": "submit",
+          "label": null,
+          "placeholder": null
+        }
+      ]
+    }
+  ]
+}

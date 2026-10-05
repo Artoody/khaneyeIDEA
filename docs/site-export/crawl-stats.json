@@ -1,0 +1,97 @@
+{
+  "http_requests_this_run_uncached": 16,
+  "pages": 70,
+  "errors": [],
+  "minor_pages": [
+    {
+      "url": "https://khaneyeide.ir/what-is-robotic/",
+      "title": "ربات چیست و علم رباتیک چیست؟و چه کاربردها و مزایایی دارد ؟",
+      "page_type": "article"
+    },
+    {
+      "url": "https://khaneyeide.ir/why-should-you-learn-robotics-online/",
+      "title": "چرا در دوره های آنلاین رباتیک آموزشگاه خانه ایده شرکت کنیم ؟",
+      "page_type": "course"
+    },
+    {
+      "url": "https://khaneyeide.ir/روانشناسی-کودک-و-نوجوان/",
+      "title": "روانشناسی کودک و نوجوان - خانه ی ایده",
+      "page_type": "article"
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-زیست-شناس-نوجوان/",
+      "title": "دوره زیست شناس نوجوان - خانه ی ایده",
+      "page_type": "course"
+    },
+    {
+      "url": "https://khaneyeide.ir/خلاقیت-کودک/",
+      "title": "دوره خلاقیت کودک - خانه ی ایده",
+      "page_type": "course"
+    },
+    {
+      "url": "https://khaneyeide.ir/پروژههای-دانشپژوهان/",
+      "title": "پروژه‌های دانش‌پژوهان - خانه ی ایده",
+      "page_type": "project"
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-روانشناسی-کودک-و-نوجوان/",
+      "title": "دپارتمان روانشناسی کودک و نوجوان - خانه ی ایده",
+      "page_type": "department"
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-خلاقیت-کودک-و-نوجوان/",
+      "title": "دپارتمان خلاقیت کودک و نوجوان - خانه ی ایده",
+      "page_type": "department"
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمان-نانو-زیست-نوجوان/",
+      "title": "دپارتمان نانو- زیست نوجوان - خانه ی ایده",
+      "page_type": "department"
+    },
+    {
+      "url": "https://khaneyeide.ir/دورههای-خانهی-ایده/",
+      "title": "دوره‌های آموزشی - خانه ی ایده",
+      "page_type": "course"
+    },
+    {
+      "url": "https://khaneyeide.ir/دپارتمانهای-خانهی-ایده/",
+      "title": "دپارتمانهای خانه‌ی ایده - خانه ی ایده",
+      "page_type": "department"
+    },
+    {
+      "url": "https://khaneyeide.ir/افتخارات-خانهی-ایده/",
+      "title": "افتخارات خانه‌ی ایده - خانه ی ایده",
+      "page_type": "achievement"
+    },
+    {
+      "url": "https://khaneyeide.ir/",
+      "title": "آموزشگاه رباتیک خانه ایده - معتبرترین آموزشگاه رباتیک کشور",
+      "page_type": "home"
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-خلاقیت-کودک-و-نوجوان/",
+      "title": "دوره خلاقیت کودک و نوجوان - خانه ی ایده",
+      "page_type": "course"
+    },
+    {
+      "url": "https://khaneyeide.ir/مجله-خانه-ایده/",
+      "title": "مجله خانه ایده - خانه ی ایده",
+      "page_type": "page"
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-آموزش-رباتیک/",
+      "title": "آموزش رباتیک | مبتدی تا حرفه ای + مسابقات | آنلاین و حضوری",
+      "page_type": "course"
+    },
+    {
+      "url": "https://khaneyeide.ir/دوره-ایده-تا-اختراع/",
+      "title": "دوره ایده تا اختراع - خانه ی ایده",
+      "page_type": "course"
+    },
+    {
+      "url": "https://khaneyeide.ir/category/دستهبندی-نشده/",
+      "title": "بایگانی‌های دسته‌بندی نشده - خانه ی ایده",
+      "page_type": "category"
+    }
+  ]
+}

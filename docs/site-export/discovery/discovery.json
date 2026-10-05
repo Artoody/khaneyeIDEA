@@ -1,0 +1,93 @@
+{
+  "robots_status": 200,
+  "robots_final_url": "https://khaneyeide.ir/robots.txt",
+  "robots_error": null,
+  "robots_applies_to_our_agent": true,
+  "sitemap_requests": [
+    {
+      "url": "https://khaneyeide.ir/sitemap.xml",
+      "status": 200,
+      "final_url": "https://khaneyeide.ir/sitemap_index.xml",
+      "error": null,
+      "bytes": 770
+    },
+    {
+      "url": "https://khaneyeide.ir/wp-sitemap.xml",
+      "status": 200,
+      "final_url": "https://khaneyeide.ir/sitemap_index.xml",
+      "error": null,
+      "bytes": 770
+    },
+    {
+      "url": "https://khaneyeide.ir/sitemap_index.xml",
+      "status": 200,
+      "final_url": "https://khaneyeide.ir/sitemap_index.xml",
+      "error": null,
+      "bytes": 770
+    }
+  ],
+  "child_sitemaps": [
+    {
+      "url": "https://khaneyeide.ir/post-sitemap.xml",
+      "status": 200,
+      "final_url": "https://khaneyeide.ir/post-sitemap.xml",
+      "error": null
+    },
+    {
+      "url": "https://khaneyeide.ir/page-sitemap.xml",
+      "status": 200,
+      "final_url": "https://khaneyeide.ir/page-sitemap.xml",
+      "error": null
+    },
+    {
+      "url": "https://khaneyeide.ir/category-sitemap.xml",
+      "status": 200,
+      "final_url": "https://khaneyeide.ir/category-sitemap.xml",
+      "error": null
+    },
+    {
+      "url": "https://khaneyeide.ir/author-sitemap.xml",
+      "status": 200,
+      "final_url": "https://khaneyeide.ir/author-sitemap.xml",
+      "error": null
+    }
+  ],
+  "wp_json": {
+    "status": 200,
+    "final_url": "https://khaneyeide.ir/wp-json/",
+    "error": null,
+    "bytes": 599184,
+    "name": "خانه ی ایده",
+    "description": "از ایده تا اختراع",
+    "url": "https://khaneyeide.ir",
+    "gmt_offset": 3.5,
+    "timezone_string": "Asia/Tehran",
+    "page_on_front": 8,
+    "show_on_front": "page",
+    "namespaces": [
+      "oembed/1.0",
+      "yoast/v1",
+      "elementor-mcp-composer/v1.0.18",
+      "elementor-one/v1",
+      "image-optimizer/v1",
+      "elementor/v1",
+      "wp-rocket/v1",
+      "elementor-hello-elementor/v1",
+      "elementor/v1/documents",
+      "elementor-ai/v1",
+      "elementor/v1/feedback",
+      "elementor-pro/v1",
+      "wp/v2",
+      "wp-site-health/v1",
+      "wp-block-editor/v1",
+      "wp-abilities/v1"
+    ]
+  },
+  "cms": {
+    "detected": "WordPress",
+    "signals": [
+      "wp-json namespaces",
+      "Yoast sitemap stylesheet"
+    ]
+  }
+}

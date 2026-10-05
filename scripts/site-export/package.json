@@ -1,0 +1,15 @@
+{
+  "name": "site-export",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Read-only public export of khaneyeide.ir",
+  "scripts": {
+    "export": "node export.mjs",
+    "screenshots": "node screenshots.mjs"
+  },
+  "dependencies": {
+    "cheerio": "^1.1.2",
+    "playwright": "^1.63.0"
+  }
+}

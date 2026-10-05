@@ -14,6 +14,7 @@ import {
   WhatsappLogo,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
+import type { DeptIconKey } from "@/lib/dept-icons";
 import type { Localized } from "@khaneyeidea/db/schema";
 import { getDict, href, num, pick, type Locale } from "@/lib/i18n";
 import {
@@ -27,7 +28,7 @@ import {
 import { HeroCanvas } from "./hero-canvas";
 import { LogoMark } from "./logo-mark";
 
-const DEPT_ICON: Record<string, Icon> = {
+const DEPT_ICON: Record<DeptIconKey, Icon> & Record<string, Icon | undefined> = {
   robot: Robot,
   code: Code,
   browser: Browser,

@@ -1,7 +1,6 @@
 // Admin e2e: create, validate, publish and deactivate a branch; checks the public site updates instantly.
 // Needs a saved owner session (owner-state.json) in the given directory. Usage: node e2e/admin-branches.e2e.mjs <dir>
 import { chromium } from "playwright-core";
-import fs from "node:fs";
 const [,, OUT] = process.argv;
 const base = "http://localhost:3000";
 const b = await chromium.launch({ executablePath: process.env.CHROME_PATH || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" });
@@ -43,7 +42,7 @@ check("deactivated branch removed from the public site", !html.includes(DIST));
 // permission: a parent session cannot run the action
 const pctx = await b.newContext();
 const pp = await pctx.newPage();
-const r = await pp.goto(base + "/app/admin/branches"); 
+await pp.goto(base + "/app/admin/branches"); 
 check("anonymous cannot open branch admin", pp.url().endsWith("/login"));
 await pctx.close();
 await p.screenshot({ path: OUT + "/adm-branch-edit.png", fullPage: true });

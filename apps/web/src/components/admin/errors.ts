@@ -12,6 +12,8 @@ export function errorText(code: string | undefined, a: AdminDict): string | unde
       return a.common.slugTaken;
     case "number":
       return a.common.numberInvalid;
+    case "too_long":
+      return "≤ 600";
     case "https_required":
       return "https://…";
     default:

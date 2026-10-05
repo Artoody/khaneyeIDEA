@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import {
   Buildings,
   ChalkboardTeacher,
@@ -30,8 +30,21 @@ const ICONS = {
 
 export type NavItem = { key: keyof typeof ICONS; href: string; label: string };
 
-function Links({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
-  const path = usePathname();
+// The active-link highlight reads the URL, which is request data: keep it behind Suspense so the
+// panel frame still prerenders, and show the same links without a highlight until it resolves.
+function Links(props: { items: NavItem[]; onNavigate?: () => void }) {
+  return (
+    <Suspense fallback={<LinkList {...props} path="" />}>
+      <ActiveLinks {...props} />
+    </Suspense>
+  );
+}
+
+function ActiveLinks(props: { items: NavItem[]; onNavigate?: () => void }) {
+  return <LinkList {...props} path={usePathname()} />;
+}
+
+function LinkList({ items, onNavigate, path }: { items: NavItem[]; onNavigate?: () => void; path: string }) {
   return (
     <ul className="flex flex-col gap-0.5">
       {items.map((it) => {

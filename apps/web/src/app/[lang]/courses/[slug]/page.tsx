@@ -141,7 +141,7 @@ export default async function CoursePage({ params }: PageProps<"/[lang]/courses/
         )}
 
         {c.syllabus.length > 0 && (
-          <section className="border-y border-line bg-surface">
+          <section className="glass border-y border-line">
             <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-24">
               <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{tc.syllabus}</h2>
               <ol className={`mt-12 grid gap-x-12 ${c.syllabus.length > 6 ? "lg:grid-cols-2" : "max-w-2xl"}`}>
@@ -160,14 +160,14 @@ export default async function CoursePage({ params }: PageProps<"/[lang]/courses/
           </section>
         )}
 
-        {((inPerson && branches.length > 0) || online) && (
+        {(inPerson || online) && (
           <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-24">
             <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{tc.branches}</h2>
             <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {inPerson &&
                 branches.map((b) => (
                   <Reveal key={b.id}>
-                    <article className="h-full rounded-[var(--radius-card)] border border-line bg-surface p-6">
+                    <article className="h-full rounded-[var(--radius-card)] border border-line bg-surface/80 p-6">
                       <MapPin weight="duotone" className="size-6 text-accent-text" />
                       <h3 className="mt-6 font-display text-xl font-extrabold">{pick(b.district, lang) || pick(b.name, lang)}</h3>
                       <p className="mt-1 text-sm text-muted">{pick(b.address, lang)}</p>
@@ -177,6 +177,15 @@ export default async function CoursePage({ params }: PageProps<"/[lang]/courses/
                     </article>
                   </Reveal>
                 ))}
+              {inPerson && branches.length === 0 && (
+                <Reveal>
+                  <Link href={href(lang, "/#branches")} className="block h-full rounded-[var(--radius-card)] border border-line bg-surface/80 p-6 transition hover:border-accent/60">
+                    <MapPin weight="duotone" className="size-6 text-accent-text" />
+                    <h3 className="mt-6 font-display text-xl font-extrabold">{t.modes.in_person}</h3>
+                    <p className="mt-1 text-sm text-muted">{tc.inPersonAny}</p>
+                  </Link>
+                </Reveal>
+              )}
               {online && (
                 <Reveal>
                   <article className="h-full rounded-[var(--radius-card)] border border-accent/40 bg-accent/10 p-6">

@@ -29,6 +29,7 @@ async function Catalog({ lang }: { lang: Locale }) {
     title: pick(c.title, lang),
     summary: pick(c.summary, lang),
     dept: c.departmentId ? (deptSlug.get(c.departmentId) ?? null) : null,
+    depts: [c.departmentId, ...c.alsoIn].map((id) => (id ? deptSlug.get(id) : undefined)).filter((x): x is string => !!x),
     ageMin: c.ageMin,
     ageMax: c.ageMax,
     ages: ageRange(c.ageMin, c.ageMax, lang),
@@ -36,7 +37,7 @@ async function Catalog({ lang }: { lang: Locale }) {
     price: priceText(c, settings.showPrices, lang, { toman: t.toman, contact: "" }) || null,
   }));
   // Only departments that have published courses become filters.
-  const used = new Set(list.map((c) => c.dept));
+  const used = new Set(list.flatMap((c) => c.depts));
   const depts: CatalogDept[] = departments.filter((d) => used.has(d.slug)).map((d) => ({ slug: d.slug, title: pick(d.title, lang), icon: d.icon }));
   const labels = { ...t.catalog, modes: t.modes };
   return (

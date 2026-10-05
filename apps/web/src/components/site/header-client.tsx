@@ -1,26 +1,53 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { List, Moon, Sun, X } from "@phosphor-icons/react";
+import { useEffect, useId, useState } from "react";
+import { List, X } from "@phosphor-icons/react";
 
 export function ThemeToggle({ label }: { label: string }) {
-  const toggle = () => {
-    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    try {
-      localStorage.setItem("theme", next);
-    } catch {}
+  const mask = useId();
+  const toggle = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const html = document.documentElement;
+    const next = html.dataset.theme === "dark" ? "light" : "dark";
+    const apply = () => {
+      html.dataset.theme = next;
+      try {
+        localStorage.setItem("theme", next);
+      } catch {}
+    };
+    const doc = document as Document & { startViewTransition?: (cb: () => void) => { ready: Promise<void> } };
+    if (!doc.startViewTransition || matchMedia("(prefers-reduced-motion: reduce)").matches) return apply();
+    // The new theme grows as a circle from the button.
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = r.left + r.width / 2;
+    const y = r.top + r.height / 2;
+    const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    doc.startViewTransition(apply).ready.then(() => {
+      html.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+        { duration: 650, easing: "cubic-bezier(0.16, 1, 0.3, 1)", pseudoElement: "::view-transition-new(root)" },
+      );
+    });
   };
   return (
     <button
       type="button"
       onClick={toggle}
       aria-label={label}
-      className="grid size-10 place-items-center rounded-full text-muted transition hover:bg-ink/5 hover:text-ink active:scale-95"
+      className="theme-toggle grid size-10 place-items-center rounded-full text-muted transition hover:bg-ink/5 hover:text-ink active:scale-90"
     >
-      <Sun weight="bold" className="size-[18px] [[data-theme=light]_&]:hidden" />
-      <Moon weight="bold" className="size-[18px] [[data-theme=dark]_&]:hidden" />
+      <svg viewBox="0 0 24 24" className="theme-icon size-[19px]" aria-hidden>
+        <mask id={mask}>
+          <rect width="24" height="24" fill="white" />
+          <circle className="cut" cx="25" cy="-1" r="6" fill="black" />
+        </mask>
+        <circle className="core" cx="12" cy="12" r="5" fill="currentColor" mask={`url(#${mask})`} />
+        <g className="rays" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => (
+            <line key={a} x1="12" y1="2.5" x2="12" y2="4.5" transform={`rotate(${a} 12 12)`} />
+          ))}
+        </g>
+      </svg>
     </button>
   );
 }

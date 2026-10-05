@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { courseBranches, courses, getDb } from "@khaneyeidea/db";
+import { courseBranches, courseDepartments, courses, getDb } from "@khaneyeidea/db";
 import { href, isLocale, pick, type Locale } from "@/lib/i18n";
 import { getAdminDict } from "@/lib/admin-i18n";
 import { requirePermissionPage } from "@/server/auth";
@@ -17,8 +17,9 @@ async function Edit({ lang, id }: { lang: Locale; id: string }) {
   const db = getDb();
   const [c] = await db.select().from(courses).where(and(eq(courses.id, id), eq(courses.tenantId, user.tenantId)));
   if (!c) notFound();
-  const [links, opts] = await Promise.all([
+  const [links, extra, opts] = await Promise.all([
     db.select({ id: courseBranches.branchId }).from(courseBranches).where(eq(courseBranches.courseId, id)),
+    db.select({ id: courseDepartments.departmentId }).from(courseDepartments).where(eq(courseDepartments.courseId, id)),
     courseOptions(user.tenantId, lang),
   ]);
   return (
@@ -28,7 +29,7 @@ async function Edit({ lang, id }: { lang: Locale; id: string }) {
         description={c.legacyUrl ? `${a.course.legacy}: ${c.legacyUrl}` : undefined}
         back={{ href: href(lang, "/app/admin/courses"), label: a.nav.courses }}
       />
-      <CourseForm course={c} branchIds={links.map((l) => l.id)} {...opts} a={a} lang={lang} />
+      <CourseForm course={c} branchIds={links.map((l) => l.id)} alsoIn={extra.map((x) => x.id)} {...opts} a={a} lang={lang} />
     </div>
   );
 }

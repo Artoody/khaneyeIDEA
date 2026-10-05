@@ -1,10 +1,11 @@
 import "server-only";
-import { and, asc, count, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, ne, or } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import {
   achievements,
   branches,
   courseBranches,
+  courseDepartments,
   courses,
   departments,
   getDb,
@@ -70,27 +71,26 @@ export async function getDepartmentsWithCounts() {
   cacheLife("days");
   const db = getDb();
   const tid = await tenantId();
-  const depts = await db
-    .select()
-    .from(departments)
-    .where(and(eq(departments.tenantId, tid), eq(departments.active, true)))
-    .orderBy(asc(departments.sortOrder));
-  const counts = await db
-    .select({ departmentId: courses.departmentId, n: count() })
-    .from(courses)
-    .where(and(eq(courses.tenantId, tid), eq(courses.status, "published")))
-    .groupBy(courses.departmentId);
-  const byDept = new Map(counts.map((c) => [c.departmentId, c.n]));
-  const published = await db
-    .select({ id: courses.id, slug: courses.slug, title: courses.title, departmentId: courses.departmentId })
-    .from(courses)
-    .where(and(eq(courses.tenantId, tid), eq(courses.status, "published")))
-    .orderBy(asc(courses.sortOrder));
-  return depts.map((d) => ({
-    ...d,
-    courseCount: byDept.get(d.id) ?? 0,
-    courses: published.filter((c) => c.departmentId === d.id),
-  }));
+  const [depts, published, extras] = await Promise.all([
+    db
+      .select()
+      .from(departments)
+      .where(and(eq(departments.tenantId, tid), eq(departments.active, true)))
+      .orderBy(asc(departments.sortOrder)),
+    db
+      .select({ id: courses.id, slug: courses.slug, title: courses.title, departmentId: courses.departmentId })
+      .from(courses)
+      .where(and(eq(courses.tenantId, tid), eq(courses.status, "published")))
+      .orderBy(asc(courses.sortOrder)),
+    db.select().from(courseDepartments).innerJoin(departments, eq(departments.id, courseDepartments.departmentId)).where(eq(departments.tenantId, tid)),
+  ]);
+  // A department lists its own courses first, then the courses it shares with other paths.
+  return depts.map((d) => {
+    const own = published.filter((c) => c.departmentId === d.id);
+    const shared = published.filter((c) => c.departmentId !== d.id && extras.some((e) => e.course_departments.courseId === c.id && e.course_departments.departmentId === d.id));
+    const list = [...own, ...shared];
+    return { ...d, courseCount: list.length, courses: list };
+  });
 }
 
 export async function getFeaturedAchievements(limit = 12) {
@@ -165,9 +165,12 @@ export async function getCatalog() {
       .orderBy(asc(departments.sortOrder)),
   ]);
   const active = new Set(depts.map((d) => d.id));
+  const extras = rows.length ? await db.select().from(courseDepartments).where(inArray(courseDepartments.courseId, rows.map((r) => r.id))) : [];
   return {
     // A course in an inactive department is hidden with its department.
-    courses: rows.filter((c) => !c.departmentId || active.has(c.departmentId)),
+    courses: rows
+      .filter((c) => !c.departmentId || active.has(c.departmentId))
+      .map((c) => ({ ...c, alsoIn: extras.filter((e) => e.courseId === c.id && active.has(e.departmentId)).map((e) => e.departmentId) })),
     departments: depts,
   };
 }
@@ -210,7 +213,18 @@ export async function getCourse(slug: string) {
       ? db
           .select({ slug: courses.slug, title: courses.title, ageMin: courses.ageMin, ageMax: courses.ageMax })
           .from(courses)
-          .where(and(eq(courses.tenantId, tid), eq(courses.departmentId, course.departmentId), eq(courses.status, "published"), ne(courses.id, course.id)))
+          .where(
+            and(
+              eq(courses.tenantId, tid),
+              eq(courses.status, "published"),
+              ne(courses.id, course.id),
+              // same main department, or listed in this course's department as part of its path
+              or(
+                eq(courses.departmentId, course.departmentId),
+                inArray(courses.id, db.select({ id: courseDepartments.courseId }).from(courseDepartments).where(eq(courseDepartments.departmentId, course.departmentId))),
+              ),
+            ),
+          )
           .orderBy(asc(courses.sortOrder))
       : Promise.resolve([]),
   ]);

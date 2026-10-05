@@ -9,6 +9,7 @@ import type { Dict, Locale } from "@/lib/i18n";
 import { href, num } from "@/lib/i18n";
 import { fill } from "@/lib/format";
 import { DeptIcon } from "../dept-icon";
+import { PillTabs } from "../pill-tabs";
 
 export type CatalogCourse = {
   id: string;
@@ -16,6 +17,8 @@ export type CatalogCourse = {
   title: string;
   summary: string;
   dept: string | null;
+  /** main department plus the paths it is also listed under */
+  depts: string[];
   ageMin: number | null;
   ageMax: number | null;
   ages: string | null;
@@ -33,7 +36,7 @@ export function CourseCard({ c, dept, lang, labels }: { c: CatalogCourse; dept?:
   return (
     <Link
       href={href(lang, `/courses/${c.slug}`)}
-      className="group flex h-full flex-col rounded-[var(--radius-card)] border border-line bg-surface p-6 transition duration-500 ease-[var(--ease-out-expo)] hover:-translate-y-1 hover:border-accent/60"
+      className="group flex h-full flex-col rounded-[var(--radius-card)] border border-line bg-surface/80 p-6 transition duration-500 ease-[var(--ease-out-expo)] hover:-translate-y-1 hover:border-accent/60"
     >
       <div className="flex items-center justify-between gap-3 text-sm text-muted">
         <span className="inline-flex min-w-0 items-center gap-2">
@@ -122,7 +125,7 @@ export function CatalogBrowser({ courses, depts, lang, labels }: { courses: Cata
 
   const shown = courses.filter(
     (c) =>
-      (!dept || c.dept === dept) &&
+      (!dept || c.depts.includes(dept)) &&
       (!age || ((c.ageMin ?? 0) <= age && age <= (c.ageMax ?? 99))) &&
       (!mode || c.modes.includes(mode) || c.modes.includes("hybrid")),
   );
@@ -132,19 +135,27 @@ export function CatalogBrowser({ courses, depts, lang, labels }: { courses: Cata
   return (
     <>
       <div className="sticky top-[68px] z-20 -mx-4 border-b border-line bg-bg/85 px-4 py-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-0.5 [scrollbar-width:none] lg:mx-0 lg:px-0" role="group" aria-label={labels.filterDept}>
-            <button type="button" aria-pressed={!dept} onClick={() => update({ d: null })} className={pill}>
-              {labels.all}
-            </button>
-            {depts.map((d) => (
-              <button key={d.slug} type="button" aria-pressed={dept === d.slug} onClick={() => update({ d: dept === d.slug ? null : d.slug })} className={pill}>
-                <DeptIcon icon={d.icon} className="size-4" />
-                {d.title}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-2 lg:ms-auto">
+        <div className="flex flex-col gap-3">
+          <PillTabs
+            group="dept"
+            label={labels.filterDept}
+            value={dept ?? "__all"}
+            onChange={(v) => update({ d: v === "__all" ? null : v })}
+            className="isolate -mx-4 overflow-x-auto px-4 pb-0.5 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0"
+            items={[
+              { value: "__all", label: labels.all },
+              ...depts.map((d) => ({
+                value: d.slug,
+                label: (
+                  <>
+                    <DeptIcon icon={d.icon} className="size-4" />
+                    {d.title}
+                  </>
+                ),
+              })),
+            ]}
+          />
+          <div className="flex items-center gap-2">
             <label className="relative">
               <span className="sr-only">{labels.filterAge}</span>
               <select
@@ -161,18 +172,21 @@ export function CatalogBrowser({ courses, depts, lang, labels }: { courses: Cata
               </select>
               <CaretDown weight="bold" aria-hidden className={`pointer-events-none absolute end-3.5 top-1/2 size-3.5 -translate-y-1/2 ${age ? "text-bg" : "text-muted"}`} />
             </label>
-            <div className="flex rounded-full border border-line p-1" role="group" aria-label={labels.filterMode}>
-              {(["in_person", "online"] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  aria-pressed={mode === m}
-                  onClick={() => update({ mode: mode === m ? null : m })}
-                  className="h-8 rounded-full px-3.5 text-sm text-muted transition aria-pressed:bg-accent aria-pressed:font-medium aria-pressed:text-on-accent"
-                >
-                  {labels.modes[m]}
-                </button>
-              ))}
+            <div className="isolate rounded-full border border-line p-1">
+              <PillTabs
+                group="mode"
+                size="sm"
+                tone="accent"
+                label={labels.filterMode}
+                value={mode ?? "__any"}
+                onChange={(v) => update({ mode: v === "__any" ? null : v })}
+                className="[&_button>span.-z-20]:hidden"
+                items={[
+                  { value: "__any", label: labels.all },
+                  { value: "in_person", label: labels.modes.in_person },
+                  { value: "online", label: labels.modes.online },
+                ]}
+              />
             </div>
           </div>
         </div>

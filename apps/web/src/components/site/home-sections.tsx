@@ -27,6 +27,7 @@ import {
 } from "@/server/content";
 import { HeroCanvas } from "./hero-canvas";
 import { LogoMark } from "./logo-mark";
+import { DeptScene } from "./dept-scenes";
 
 const DEPT_ICON: Record<DeptIconKey, Icon> & Record<string, Icon | undefined> = {
   robot: Robot,
@@ -89,7 +90,7 @@ export async function Proof({ lang }: { lang: Locale }) {
   const shown = lang === "en" ? featured.filter((a) => a.title.en) : featured;
   const label = (a: (typeof featured)[number]) => pick(a.title, lang);
   return (
-    <section id="achievements" className="scroll-mt-20 border-y border-line bg-surface">
+    <section id="achievements" className="glass scroll-mt-20 border-y border-line">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
         <h2 className="max-w-2xl font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
           {t.proof.title}
@@ -123,21 +124,6 @@ export async function Proof({ lang }: { lang: Locale }) {
   );
 }
 
-// Circuit motif for department tiles: a few PCB traces that echo the logo.
-function Traces({ seed, strong }: { seed: number; strong?: boolean }) {
-  const ys = [28, 52, 76].map((y) => y + ((seed * 7) % 11));
-  return (
-    <svg aria-hidden viewBox="0 0 200 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full">
-      {ys.map((y, i) => (
-        <g key={i} stroke="var(--accent)" strokeOpacity={strong ? 0.35 : 0.16} strokeWidth="0.8" fill="none">
-          <path d={`M${-10} ${y} H${60 + i * 22 + (seed % 5) * 6} l${10} ${-10} H${210}`} vectorEffect="non-scaling-stroke" />
-          <circle cx={60 + i * 22 + (seed % 5) * 6} cy={y} r="1.6" fill="var(--accent)" fillOpacity={strong ? 0.6 : 0.3} stroke="none" />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
 export async function Departments({ lang }: { lang: Locale }) {
   const t = getDict(lang);
   const depts = await getDepartmentsWithCounts();
@@ -154,19 +140,22 @@ export async function Departments({ lang }: { lang: Locale }) {
             return (
               <article
                 key={d.id}
-                className={`group relative flex min-h-56 flex-col overflow-hidden rounded-[var(--radius-card)] border border-line p-6 transition duration-500 ease-[var(--ease-out-expo)] hover:-translate-y-1 hover:border-accent/50 sm:p-7 ${spans[i] ?? "lg:col-span-4"} ${hero ? "bg-elevated" : "bg-surface"}`}
+                className={`group relative flex min-h-56 flex-col overflow-hidden rounded-[var(--radius-card)] border border-line p-6 transition duration-500 ease-[var(--ease-out-expo)] hover:-translate-y-1 hover:border-accent/50 sm:p-7 ${spans[i] ?? "lg:col-span-4"} ${hero ? "bg-elevated/85" : "bg-surface/80"}`}
               >
-                <Traces seed={i + 3} strong={hero} />
                 {hero && <div className="pointer-events-none absolute -end-16 -top-16 size-56 rounded-full bg-accent/15 blur-3xl" />}
+                {/* Header: icon and count on the start side, the department's scene on the end side (in flow, never over text). */}
                 <div className="relative flex items-start justify-between gap-4">
-                  <span className="grid size-12 place-items-center rounded-2xl bg-accent/15 text-accent-text">
-                    <Ico weight="duotone" className="size-6" />
-                  </span>
-                  <span className="rounded-full border border-line bg-bg/60 px-3 py-1 text-xs text-muted">
-                    {num(d.courseCount, lang)} {t.departments.courses}
-                  </span>
+                  <div className="flex items-center gap-2.5">
+                    <span className="grid size-12 place-items-center rounded-2xl bg-accent/15 text-accent-text">
+                      <Ico weight="duotone" className="size-6" />
+                    </span>
+                    <span className="rounded-full border border-line bg-bg/60 px-3 py-1 text-xs text-muted">
+                      {num(d.courseCount, lang)} {t.departments.courses}
+                    </span>
+                  </div>
+                  <DeptScene icon={d.icon} className={`pointer-events-none -mb-6 shrink-0 transition-colors duration-500 ${hero ? "h-36 w-48 sm:h-40 sm:w-56" : "h-28 w-36 sm:w-40"}`} />
                 </div>
-                <h3 className="relative mt-auto pt-10 font-display text-2xl font-extrabold tracking-tight">{pick(d.title, lang)}</h3>
+                <h3 className="relative mt-auto pt-6 font-display text-2xl font-extrabold tracking-tight">{pick(d.title, lang)}</h3>
                 {d.courses.length > 0 && (
                   <ul className="relative mt-3 flex flex-wrap gap-2">
                     {d.courses.map((c) => (
@@ -194,7 +183,7 @@ export async function Portal({ lang }: { lang: Locale }) {
   const t = getDict(lang);
   const blocks = await getBlocks();
   return (
-    <section className="relative overflow-hidden border-y border-line bg-surface">
+    <section className="glass relative overflow-hidden border-y border-line">
       <div className="mx-auto flex max-w-7xl flex-col items-start gap-8 px-4 py-20 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:py-24">
         <div className="max-w-2xl">
           <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{pick(blocks["home.portal.title"], lang)}</h2>
@@ -245,7 +234,7 @@ export async function SiteFooter({ lang }: { lang: Locale }) {
   const [s, branches] = await Promise.all([getSettings(), getBranches()]);
   const socials = s.socials.filter((x) => x.enabled && x.url);
   return (
-    <footer id="contact" className="scroll-mt-20 border-t border-line bg-surface">
+    <footer id="contact" className="glass scroll-mt-20 border-t border-line">
       <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.3fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-3">

@@ -149,3 +149,8 @@ export const APPOINTMENT_TYPES = [
     description: L("کارگاه‌ها و پروژه‌های بچه‌ها را از نزدیک ببینید.", "See the workshops and the children's projects up close."),
   },
 ];
+
+/** Extra paths a course is listed under, by department slug -> course slugs. */
+export const ALSO_IN: Record<string, string[]> = {
+  robotics: ["python", "arduino", "ai", "altium", "solidworks", "idea-to-invention"],
+};

@@ -36,6 +36,7 @@ const dict = {
     switchLang: "English",
     theme: { light: "روشن", dark: "تیره", toggle: "تغییر تم" },
     hero: { secondary: "مشاهده‌ی دوره‌ها" },
+    intro: { skip: "رد شدن", soundOn: "روشن کردن صدا", soundOff: "قطع صدا" },
     proof: {
       title: "سابقه‌ای که روی سکوی جهانی ساخته شده",
       worldFirsts: "مقام اول و طلای جهانی",
@@ -96,6 +97,7 @@ const dict = {
       syllabus: "در این دوره چه می‌سازند",
       branches: "کجا برگزار می‌شود",
       onlineEverywhere: "آنلاین، از هر جای ایران",
+      inPersonAny: "در شعبه‌های خانه ایده؛ برای انتخاب شعبه تماس بگیرید.",
       related: "دوره‌های دیگر همین حوزه",
       call: "سؤال دارید؟ تماس بگیرید",
       about: "درباره‌ی دوره",
@@ -110,6 +112,9 @@ const dict = {
       untranslated: "",
       noYear: "بدون سال",
       countries: "کشور میزبان",
+      expandAll: "باز کردن همه",
+      collapseAll: "بستن همه",
+      tops: "{n} مقام اول و طلا",
     },
     book: {
       title: "یک وقت رزرو کنید",
@@ -179,6 +184,7 @@ const dict = {
     switchLang: "فارسی",
     theme: { light: "Light", dark: "Dark", toggle: "Toggle theme" },
     hero: { secondary: "Explore courses" },
+    intro: { skip: "Skip", soundOn: "Turn sound on", soundOff: "Mute" },
     proof: {
       title: "A track record built on world stages",
       worldFirsts: "world titles and golds",
@@ -239,6 +245,7 @@ const dict = {
       syllabus: "What they build",
       branches: "Where it runs",
       onlineEverywhere: "Online, from anywhere in Iran",
+      inPersonAny: "At our branches; call us to pick one.",
       related: "More in this area",
       call: "Questions? Call us",
       about: "About the course",
@@ -253,6 +260,9 @@ const dict = {
       untranslated: "Titles that are not translated yet are shown in Persian.",
       noYear: "Undated",
       countries: "host countries",
+      expandAll: "Expand all",
+      collapseAll: "Collapse all",
+      tops: "{n} firsts and golds",
     },
     book: {
       title: "Book a visit",

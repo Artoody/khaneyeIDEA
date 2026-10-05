@@ -30,6 +30,7 @@ function NumberField({ name, label, value, error }: { name: string; label: strin
 export function CourseForm({
   course,
   branchIds,
+  alsoIn,
   departments,
   branches,
   a,
@@ -37,6 +38,7 @@ export function CourseForm({
 }: {
   course?: Course;
   branchIds: string[];
+  alsoIn: string[];
   departments: Opt[];
   branches: Opt[];
   a: AdminDict;
@@ -95,6 +97,18 @@ export function CourseForm({
                     <label key={m} className={chip}>
                       <input type="checkbox" name="modes" value={m} defaultChecked={course?.modes.includes(m)} className="sr-only" />
                       {t[m]}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend className="mb-1 text-sm font-medium">{t.alsoIn}</legend>
+                <p className="mb-2 text-xs text-muted">{t.alsoInHelp}</p>
+                <div className="flex flex-wrap gap-2">
+                  {departments.map((d) => (
+                    <label key={d.id} className={chip}>
+                      <input type="checkbox" name="alsoIn" value={d.id} defaultChecked={alsoIn.includes(d.id)} className="sr-only" />
+                      {d.label}
                     </label>
                   ))}
                 </div>

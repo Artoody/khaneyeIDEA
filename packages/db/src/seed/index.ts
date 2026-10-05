@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { closeDb, getDb } from "../index";
 import * as s from "../schema";
 import type { Localized } from "../schema";
-import { APPOINTMENT_TYPES, BRANCHES, COURSES, DEPARTMENTS, PAGE_BLOCKS, SAMPLE_TEACHERS } from "./data";
+import { ALSO_IN, APPOINTMENT_TYPES, BRANCHES, COURSES, DEPARTMENTS, PAGE_BLOCKS, SAMPLE_TEACHERS } from "./data";
 
 config({ path: fileURLToPath(new URL("../../../../.env", import.meta.url)) });
 
@@ -89,7 +89,7 @@ await db.transaction(async (tx) => {
 
   await tx.insert(s.pageBlocks).values(Object.entries(PAGE_BLOCKS).map(([key, value]) => ({ tenantId, key, value })));
 
-  await tx.insert(s.branches).values(BRANCHES.map((b, i) => ({ tenantId, ...b, sortOrder: i })));
+  const branchRows = await tx.insert(s.branches).values(BRANCHES.map((b, i) => ({ tenantId, ...b, sortOrder: i }))).returning({ id: s.branches.id });
 
   const depts = await tx
     .insert(s.departments)
@@ -98,7 +98,7 @@ await db.transaction(async (tx) => {
   const deptId = new Map(depts.map((d) => [d.slug, d.id]));
 
   const syllabusByPath = new Map(exported.courses.map((c) => [decodePath(c.page_url), c.syllabus ?? []]));
-  await tx.insert(s.courses).values(
+  const courseRows = await tx.insert(s.courses).values(
     COURSES.map((c, i) => ({
       tenantId,
       slug: c.slug,
@@ -111,7 +111,18 @@ await db.transaction(async (tx) => {
       legacyUrl: c.legacyPath,
       sortOrder: i,
     })),
+  ).returning({ id: s.courses.id, slug: s.courses.slug, modes: s.courses.modes });
+  const courseId = new Map(courseRows.map((c) => [c.slug, c.id]));
+
+  // Courses that are also part of another path (the Robotics path spans programming, electronics, design and invention).
+  const extra = Object.entries(ALSO_IN).flatMap(([dept, slugs]) =>
+    slugs.filter((slug) => courseId.has(slug)).map((slug) => ({ courseId: courseId.get(slug)!, departmentId: deptId.get(dept)! })),
   );
+  if (extra.length) await tx.insert(s.courseDepartments).values(extra);
+
+  // In-person courses start out offered at every branch; the admin narrows this per course.
+  const offered = courseRows.filter((c) => c.modes.some((m) => m !== "online")).flatMap((c) => branchRows.map((b) => ({ courseId: c.id, branchId: b.id })));
+  if (offered.length) await tx.insert(s.courseBranches).values(offered);
   await tx.insert(s.redirects).values(
     COURSES.map((c) => ({ tenantId, fromPath: c.legacyPath, toPath: `/courses/${c.slug}`, permanent: true })),
   );

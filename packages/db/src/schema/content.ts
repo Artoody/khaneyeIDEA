@@ -146,6 +146,23 @@ export const courseBranches = pgTable(
   (t) => [primaryKey({ columns: [t.courseId, t.branchId] })],
 );
 
+/**
+ * Extra departments a course is also listed under (besides its main departmentId).
+ * E.g. Arduino lives in Electronics but is also part of the Robotics path.
+ */
+export const courseDepartments = pgTable(
+  "course_departments",
+  {
+    courseId: uuid("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    departmentId: uuid("department_id")
+      .notNull()
+      .references(() => departments.id, { onDelete: "cascade" }),
+  },
+  (t) => [primaryKey({ columns: [t.courseId, t.departmentId] })],
+);
+
 export const teachers = pgTable("teachers", {
   id: id(),
   tenantId: tenantId(),

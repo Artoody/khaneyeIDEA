@@ -4,7 +4,7 @@ import { and, eq, inArray, ne } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { branches, courseBranches, courses, departments, getDb } from "@khaneyeidea/db";
+import { branches, courseBranches, courseDepartments, courses, departments, getDb } from "@khaneyeidea/db";
 import { requirePermission } from "@/server/auth";
 import { TAGS } from "@/server/content";
 import { href, isLocale } from "@/lib/i18n";
@@ -43,6 +43,11 @@ export async function saveCourse(_: ActionState, f: FormData): Promise<ActionSta
   if (departmentId) {
     const ok = await db.select({ id: departments.id }).from(departments).where(and(eq(departments.id, departmentId), eq(departments.tenantId, user.tenantId)));
     if (!ok.length) errors["departmentId"] = "invalid";
+  }
+  const alsoIn = [...new Set(f.getAll("alsoIn").map(String))].filter((d) => d !== departmentId);
+  if (alsoIn.length) {
+    const ok = await db.select({ id: departments.id }).from(departments).where(and(eq(departments.tenantId, user.tenantId), inArray(departments.id, alsoIn)));
+    if (ok.length !== alsoIn.length) errors["alsoIn"] = "invalid";
   }
   const branchIds = f.getAll("branchIds").map(String);
   if (branchIds.length) {
@@ -87,10 +92,12 @@ export async function saveCourse(_: ActionState, f: FormData): Promise<ActionSta
     }
     await tx.delete(courseBranches).where(eq(courseBranches.courseId, cid));
     if (branchIds.length) await tx.insert(courseBranches).values(branchIds.map((branchId) => ({ courseId: cid!, branchId })));
+    await tx.delete(courseDepartments).where(eq(courseDepartments.courseId, cid));
+    if (alsoIn.length) await tx.insert(courseDepartments).values(alsoIn.map((departmentId) => ({ courseId: cid!, departmentId })));
     return cid;
   });
   if (!courseId) return { error: "not_found" };
-  await audit(user.tenantId, user.userId, id ? "update" : "create", "course", courseId, { ...values, branchIds });
+  await audit(user.tenantId, user.userId, id ? "update" : "create", "course", courseId, { ...values, branchIds, alsoIn });
   updateTag(TAGS.catalog);
   if (!id) redirect(href(isLocale(lang) ? lang : "fa", `/app/admin/courses/${courseId}`));
   return { ok: true, savedAt: Date.now() };

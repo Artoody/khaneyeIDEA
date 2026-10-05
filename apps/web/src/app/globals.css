@@ -70,7 +70,7 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg);
+  /* No background here: <html> paints it, so the fixed scroll backdrop (z-index -1) can show through. */
   color: var(--ink);
 }
 
@@ -118,4 +118,154 @@ body {
   *::after {
     scroll-behavior: auto !important;
   }
+}
+
+/* Intro overlay safety net: even if scripts never run, it fades out by itself. */
+@keyframes intro-safety {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+html[data-intro] .intro-splash {
+  animation: intro-safety 0.6s 10s forwards;
+}
+
+/* Theme toggle: sun <-> moon morph. Shows the moon in light mode (tap for dark) and the sun in dark mode. */
+.theme-icon .core,
+.theme-icon .cut,
+.theme-icon .rays {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+}
+.theme-icon .rays { transform-box: view-box; }
+[data-theme="light"] .theme-icon .core { transform: scale(1.75); }
+[data-theme="light"] .theme-icon .cut { transform: translate(-7px, 7px); }
+[data-theme="light"] .theme-icon .rays { transform: rotate(-90deg) scale(0.4); opacity: 0; }
+[data-theme="dark"] .theme-icon .rays { transform: rotate(0) scale(1); opacity: 1; }
+.theme-toggle:hover .theme-icon { transform: rotate(-12deg); }
+.theme-icon { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* Theme switch: the new theme spreads from the button (View Transitions; instant where unsupported). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-icon .core,
+  .theme-icon .cut,
+  .theme-icon .rays,
+  .theme-icon { transition: none; }
+}
+
+/* Scroll backdrop (components/site/scroll-backdrop.tsx): low contrast so it never competes with text. */
+.scroll-backdrop { transition: opacity 0.2s linear; }
+.backdrop-line {
+  fill: none;
+  stroke: color-mix(in oklab, var(--ink) 22%, transparent);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.backdrop-node {
+  fill: var(--bg);
+  stroke: color-mix(in oklab, var(--ink) 14%, transparent);
+  stroke-width: 2;
+  transition: fill 0.5s, stroke 0.5s;
+}
+.backdrop-node[data-on="true"] { fill: color-mix(in oklab, var(--accent) 70%, transparent); stroke: var(--accent); }
+.backdrop-chip rect,
+.backdrop-chip line {
+  fill: none;
+  stroke: color-mix(in oklab, var(--ink) 14%, transparent);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  transition: stroke 0.8s;
+}
+.backdrop-chip-led { fill: color-mix(in oklab, var(--ink) 10%, transparent); transition: fill 0.8s, filter 0.8s; }
+.backdrop-chip[data-on="true"] rect,
+.backdrop-chip[data-on="true"] line { stroke: color-mix(in oklab, var(--accent) 70%, transparent); }
+.backdrop-chip[data-on="true"] .backdrop-chip-led { fill: var(--accent); filter: drop-shadow(0 0 18px var(--accent)); }
+.backdrop-trace-base { stroke: color-mix(in oklab, var(--ink) 9%, transparent); }
+.backdrop-trace { stroke: color-mix(in oklab, var(--accent) 60%, transparent); }
+
+/* Panels over the scroll backdrop: translucent, with a soft blur where it is cheap (larger screens). */
+.glass {
+  background-color: color-mix(in oklab, var(--surface) 72%, transparent);
+}
+@media (min-width: 1024px) {
+  .glass {
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    backdrop-filter: blur(14px) saturate(1.2);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass { background-color: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+
+/* ---------- Department scenes (components/site/dept-scenes.tsx) ---------- */
+.dept-scene { color: color-mix(in oklab, var(--ink) 38%, transparent); }
+.dept-scene * { animation-play-state: paused !important; }
+.dept-scene[data-play="true"] * { animation-play-state: running !important; }
+.dept-scene :is(g, rect, circle, path, line) { transform-box: fill-box; transform-origin: center; }
+
+@keyframes sc-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes sc-led { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@keyframes sc-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+@keyframes sc-panel { 0%, 100% { opacity: 0.25; } 33% { opacity: 1; } }
+@keyframes sc-wave { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-22deg); } }
+@keyframes sc-spin { to { transform: rotate(360deg); } }
+@keyframes sc-current { from { stroke-dashoffset: 100; } to { stroke-dashoffset: -100; } }
+@keyframes sc-type { 0% { transform: scaleX(0); opacity: 0; } 8% { opacity: 1; } 18%, 85% { transform: scaleX(1); opacity: 1; } 95%, 100% { transform: scaleX(1); opacity: 0; } }
+@keyframes sc-caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes sc-build { 0% { transform: translateY(10px) scale(0.92); opacity: 0; } 12%, 80% { transform: none; opacity: 1; } 92%, 100% { opacity: 0; } }
+@keyframes sc-cursor {
+  0% { transform: translate(150px, 130px); }
+  25% { transform: translate(110px, 60px); }
+  32% { transform: translate(110px, 60px) scale(0.85); }
+  38% { transform: translate(110px, 60px); }
+  65% { transform: translate(60px, 110px); }
+  72% { transform: translate(60px, 110px) scale(0.85); }
+  78%, 100% { transform: translate(60px, 110px); }
+}
+@keyframes sc-cube { from { transform: rotateX(-22deg) rotateY(0deg); } to { transform: rotateX(-22deg) rotateY(360deg); } }
+@keyframes sc-filament { 0% { stroke-dashoffset: 100; } 35%, 100% { stroke-dashoffset: 0; } }
+@keyframes sc-glow { 0%, 35% { opacity: 0; } 50%, 80% { opacity: 0.22; } 100% { opacity: 0; } }
+@keyframes sc-rays { 0%, 40% { opacity: 0; transform: scale(0.8); } 55%, 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; } }
+@keyframes sc-jump {
+  0%, 30% { transform: translateY(0); }
+  42% { transform: translateY(-46px) rotate(90deg); }
+  55%, 100% { transform: translateY(0) rotate(180deg); }
+}
+@keyframes sc-obstacle { from { transform: translateX(0); } to { transform: translateX(-240px); } }
+@keyframes sc-coin { 0%, 100% { transform: translateY(0) scaleX(1); } 50% { transform: translateY(-6px) scaleX(0.3); } }
+
+.sc-robot-bob { animation: sc-bob 3s ease-in-out infinite; }
+.sc-led { animation: sc-led 1.8s ease-in-out infinite; }
+.sc-blink { animation: sc-blink 4s infinite; }
+.sc-panel { animation: sc-panel 1.8s infinite; }
+.sc-panel-2 { animation-delay: 0.6s; }
+.sc-panel-3 { animation-delay: 1.2s; }
+.sc-wave { transform-origin: 0% 100% !important; animation: sc-wave 2.4s ease-in-out infinite; }
+.sc-wheel { transform-box: view-box !important; animation: sc-spin 4s linear infinite; }
+.sc-current { stroke-dasharray: 18 182; animation: sc-current 2.6s linear infinite; }
+.sc-type { transform-box: view-box !important; animation: sc-type 6s cubic-bezier(0.16, 1, 0.3, 1) infinite both; }
+.sc-caret { animation: sc-caret 1s steps(1) infinite; }
+.sc-build { animation: sc-build 5s cubic-bezier(0.16, 1, 0.3, 1) infinite both; }
+.sc-cursor { transform-box: view-box !important; transform-origin: 0 0 !important; animation: sc-cursor 5s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+.sc-cube { animation: sc-cube 14s linear infinite; }
+.sc-filament { stroke-dasharray: 100; animation: sc-filament 4s ease-out infinite; }
+.sc-glow { animation: sc-glow 4s ease-in-out infinite; }
+.sc-rays { transform-box: view-box !important; transform-origin: 100px 68px !important; animation: sc-rays 4s ease-out infinite; }
+.sc-jump { animation: sc-jump 1.6s cubic-bezier(0.33, 0, 0.2, 1) infinite; }
+.sc-obstacle { animation: sc-obstacle 1.6s linear infinite; }
+.sc-coin { animation: sc-coin 1.2s ease-in-out infinite; }
+
+/* Hover: the scene comes forward a little. */
+.group:hover .dept-scene { color: color-mix(in oklab, var(--ink) 55%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dept-scene * { animation: none !important; }
+  .sc-filament { stroke-dashoffset: 0; }
 }

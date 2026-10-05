@@ -14,7 +14,7 @@ async function New({ lang }: { lang: Locale }) {
   return (
     <div className="max-w-4xl">
       <PageHeader title={a.course.new} back={{ href: href(lang, "/app/admin/courses"), label: a.nav.courses }} />
-      <CourseForm branchIds={[]} {...opts} a={a} lang={lang} />
+      <CourseForm branchIds={[]} alsoIn={[]} {...opts} a={a} lang={lang} />
     </div>
   );
 }

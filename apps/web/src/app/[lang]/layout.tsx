@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans";
 import { notFound } from "next/navigation";
 import { dirOf, isLocale, LOCALES, pick, type Locale } from "@/lib/i18n";
 import { getSettings } from "@/server/content";
+import { InlineScript } from "@/components/inline-script";
 import "../globals.css";
 
 const display = localFont({
@@ -42,8 +43,9 @@ export const viewport: Viewport = {
   ],
 };
 
-// Applies the saved or system theme before first paint (no flash).
-const themeScript = `(function(){try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme="light"}})()`;
+// Before first paint: applies the saved or system theme (no flash), and flags the one-time intro video for
+// first-time visitors on the home page (skipped for reduced motion and data saver).
+const themeScript = `(function(){var d=document.documentElement;try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.dataset.theme=t}catch(e){d.dataset.theme="light"}try{var p=location.pathname.replace(/\\/$/,"");var c=navigator.connection;if((p===""||p==="/en")&&!localStorage.getItem("intro-seen")&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&!(c&&c.saveData)){d.dataset.intro="1"}}catch(e){}})()`;
 
 export default async function RootLayout({ children, params }: LayoutProps<"/[lang]">) {
   const { lang } = await params;
@@ -58,9 +60,9 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       style={{ ["--font-latin" as string]: "var(--font-geist-sans)" }}
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <InlineScript html={themeScript} />
       </head>
-      <body className="min-h-[100dvh] bg-bg text-ink">{children}</body>
+      <body className="min-h-[100dvh] text-ink">{children}</body>
     </html>
   );
 }

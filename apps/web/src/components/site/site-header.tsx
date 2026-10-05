@@ -4,16 +4,32 @@ import { getDict, href, pick, type Locale } from "@/lib/i18n";
 import { getBlocks, getSettings } from "@/server/content";
 import { HeaderShell, MobileMenu, ThemeToggle } from "./header-client";
 import { LogoMark } from "./logo-mark";
+import { NavLinks, type NavLink } from "./nav-links";
+import { ScrollBackdrop } from "./scroll-backdrop";
+import { LangSwitch } from "./lang-switch";
 
 export async function SiteHeader({ lang }: { lang: Locale }) {
   const t = getDict(lang);
   const [settings, blocks] = await Promise.all([getSettings(), getBlocks()]);
-  const other: Locale = lang === "fa" ? "en" : "fa";
-  const links = [
-    { href: href(lang, "/courses"), label: t.nav.courses },
-    { href: href(lang, "/achievements"), label: t.nav.achievements },
-    { href: href(lang, "/#branches"), label: t.nav.branches },
-    { href: href(lang, "/#contact"), label: t.nav.contact },
+  const links: NavLink[] = [
+    {
+      href: href(lang, "/courses"),
+      label: t.nav.courses,
+      page: "/courses",
+      section: "courses",
+    },
+    {
+      href: href(lang, "/achievements"),
+      label: t.nav.achievements,
+      page: "/achievements",
+      section: "achievements",
+    },
+    {
+      href: href(lang, "/#branches"),
+      label: t.nav.branches,
+      section: "branches",
+    },
+    { href: href(lang, "/#contact"), label: t.nav.contact, section: "contact" },
   ];
   const cta = pick(blocks["home.hero.cta"], lang);
 
@@ -36,42 +52,50 @@ export async function SiteHeader({ lang }: { lang: Locale }) {
   );
 
   return (
-    <HeaderShell>
-      <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-6 px-4 sm:px-6">
-        <Link href={href(lang)} className="flex items-center gap-3" aria-label={pick(settings.name, lang)}>
-          <LogoMark className="h-8 w-auto" title={pick(settings.name, lang)} />
-          <span className="font-display text-[17px] font-extrabold tracking-tight">{pick(settings.name, lang)}</span>
-        </Link>
-
-        <nav className="hidden items-center gap-1 lg:flex">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="rounded-full px-3.5 py-2 text-[15px] text-muted transition hover:bg-ink/5 hover:text-ink"
-            >
-              {l.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="ms-auto flex items-center gap-1.5">
+    <>
+      {/* Every public page has this header, so the scroll backdrop is mounted here once. */}
+      <ScrollBackdrop />
+      <HeaderShell>
+        <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-6 px-4 sm:px-6">
           <Link
-            href={href(other)}
-            hrefLang={other}
-            className="hidden h-10 items-center rounded-full px-3 text-sm text-muted transition hover:bg-ink/5 hover:text-ink sm:inline-flex"
+            href={href(lang)}
+            className="flex items-center gap-3"
+            aria-label={pick(settings.name, lang)}
           >
-            {t.switchLang}
+            <LogoMark
+              className="h-8 w-auto"
+              title={pick(settings.name, lang)}
+            />
+            <span className="font-display text-[17px] font-extrabold tracking-tight">
+              {pick(settings.name, lang)}
+            </span>
           </Link>
-          <ThemeToggle label={t.theme.toggle} />
-          <div className="ms-2 hidden items-center gap-2 lg:flex">{actions}</div>
-          <MobileMenu
-            links={[...links, { href: href(other), label: t.switchLang }]}
-            labels={{ menu: t.menu, close: t.close }}
-            extra={actions}
-          />
+
+          <NavLinks links={links} />
+
+          <div className="ms-auto flex items-center gap-1.5">
+            <div className="hidden sm:block">
+              <LangSwitch lang={lang} />
+            </div>
+            <ThemeToggle label={t.theme.toggle} />
+            <div className="ms-2 hidden items-center gap-2 lg:flex">
+              {actions}
+            </div>
+            <MobileMenu
+              links={links}
+              labels={{ menu: t.menu, close: t.close }}
+              extra={
+                <>
+                  <div className="flex justify-center">
+                    <LangSwitch lang={lang} />
+                  </div>
+                  {actions}
+                </>
+              }
+            />
+          </div>
         </div>
-      </div>
-    </HeaderShell>
+      </HeaderShell>
+    </>
   );
 }

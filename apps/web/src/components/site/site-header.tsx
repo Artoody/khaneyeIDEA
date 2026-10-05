@@ -10,8 +10,8 @@ export async function SiteHeader({ lang }: { lang: Locale }) {
   const [settings, blocks] = await Promise.all([getSettings(), getBlocks()]);
   const other: Locale = lang === "fa" ? "en" : "fa";
   const links = [
-    { href: href(lang, "/#courses"), label: t.nav.courses },
-    { href: href(lang, "/#achievements"), label: t.nav.achievements },
+    { href: href(lang, "/courses"), label: t.nav.courses },
+    { href: href(lang, "/achievements"), label: t.nav.achievements },
     { href: href(lang, "/#branches"), label: t.nav.branches },
     { href: href(lang, "/#contact"), label: t.nav.contact },
   ];

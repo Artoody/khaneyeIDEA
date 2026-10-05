@@ -2,16 +2,14 @@
 
 import type { Localized } from "@khaneyeidea/db/schema";
 import type { AdminDict } from "@/lib/admin-i18n";
-import { MULTILINE_BLOCKS, PAGE_BLOCK_KEYS } from "@/lib/page-blocks";
+import { MULTILINE_BLOCKS, PAGE_BLOCK_GROUPS, PAGE_BLOCK_KEYS } from "@/lib/page-blocks";
 import { savePageBlocks } from "@/app/[lang]/app/admin/pages/actions";
 import { AdminForm, LocalizedInput } from "./fields";
 import { errorText } from "./errors";
 
 export function PagesForm({ blocks, a }: { blocks: Record<string, Localized>; a: AdminDict }) {
-  const groups = [
-    { title: a.pages.groupHome, keys: PAGE_BLOCK_KEYS.filter((k) => k.startsWith("home.hero")) },
-    { title: a.pages.groupPortal, keys: PAGE_BLOCK_KEYS.filter((k) => k.startsWith("home.portal")) },
-  ];
+  const titles = { home: a.pages.groupHome, portal: a.pages.groupPortal, courses: a.pages.groupCourses, achievements: a.pages.groupAchievements };
+  const groups = PAGE_BLOCK_GROUPS.map((g) => ({ title: titles[g.id], keys: PAGE_BLOCK_KEYS.filter((k) => k.startsWith(g.prefix)) }));
   return (
     <AdminForm action={savePageBlocks} labels={{ save: a.common.save, saved: a.common.saved, error: a.common.error }}>
       {(s) => (

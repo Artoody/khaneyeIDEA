@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { findLegacyRedirect } from "./server/legacy-redirects";
 
 // Persian is the default locale and lives at the root (/courses -> internally /fa/courses).
 // English lives under /en. A visit to /fa/... is redirected to the canonical unprefixed URL.
@@ -6,9 +7,21 @@ import { NextResponse, type NextRequest } from "next/server";
 // visitors a real HTTP redirect; the authoritative check (valid session + role) runs on the server in each page.
 const SESSION_COOKIE = "kh_session";
 const PANEL = /^(\/en)?\/app(\/|$)/;
+// First path segments that belong to this app. Anything else may be an old-site URL with a stored redirect.
+const APP_ROUTES = new Set(["", "en", "fa", "app", "login", "courses", "achievements", "book"]);
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (!APP_ROUTES.has(pathname.split("/")[1] ?? "")) {
+    const hit = await findLegacyRedirect(pathname);
+    if (hit) {
+      const url = request.nextUrl.clone();
+      url.pathname = hit.to;
+      url.search = "";
+      return NextResponse.redirect(url, hit.permanent ? 308 : 307);
+    }
+  }
 
   const panel = PANEL.exec(pathname);
   if (panel && !request.cookies.has(SESSION_COOKIE)) {

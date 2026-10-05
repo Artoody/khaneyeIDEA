@@ -1,16 +1,15 @@
 "use client";
 
-import { Browser, Code, Cpu, Cube, GameController, Lightbulb, Robot, type Icon } from "@phosphor-icons/react";
 import type { departments } from "@khaneyeidea/db/schema";
 import type { AdminDict } from "@/lib/admin-i18n";
 import type { Locale } from "@/lib/i18n";
-import { DEPT_ICON_KEYS, type DeptIconKey } from "@/lib/dept-icons";
+import { DEPT_ICON_KEYS } from "@/lib/dept-icons";
+import { DEPT_ICONS as ICONS } from "@/components/site/dept-icon";
 import { saveDepartment } from "@/app/[lang]/app/admin/departments/actions";
 import { AdminForm, Field, inputCls, LocalizedInput, Toggle } from "./fields";
 import { errorText } from "./errors";
 
 type Department = typeof departments.$inferSelect;
-const ICONS: Record<DeptIconKey, Icon> = { robot: Robot, code: Code, browser: Browser, cpu: Cpu, cube: Cube, lightbulb: Lightbulb, "game-controller": GameController };
 
 export function DepartmentForm({ dept, a, lang }: { dept?: Department; a: AdminDict; lang: Locale }) {
   const t = a.department;

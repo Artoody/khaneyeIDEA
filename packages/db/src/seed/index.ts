@@ -22,16 +22,24 @@ const exported: Exported = JSON.parse(
 );
 
 const L = (fa: string, en = ""): Localized => ({ fa, en });
-const clean = (t: string) => t.replace(/\s*-\s*$/, "").replace(/\s+/g, " ").trim();
+// Titles from the old WordPress export sometimes carry Markdown image-link remnants: "title](https://...jpg)".
+const clean = (t: string) =>
+  t
+    .replace(/^!\[/, "")
+    .replace(/\]\(https?:\/\/\S*\)?.*$/, "")
+    .replace(/\s*[-–]\s*$/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+/** A cleaned title that is only a caption fragment (e.g. "رتبه ها شدند)") is not an achievement. */
+const isFragment = (t: string) => t.length < 12 || /^[^(]*\)$/.test(t);
 const decodePath = (url: string) => decodeURIComponent(new URL(url).pathname);
 
 function rankOf(title: string): string | null {
   if (title.includes("طلا")) return "gold";
   if (title.includes("نقره")) return "silver";
   if (title.includes("برنز")) return "bronze";
-  if (title.includes("رتبه اول") || title.includes("مقام اول")) return "1";
-  if (title.includes("رتبه دوم") || title.includes("مقام دوم")) return "2";
-  if (title.includes("رتبه سوم") || title.includes("مقام سوم")) return "3";
+  const place = /(?:رتبه|مقام)\s*(?:ی\s*)?(اول|دوم|سوم)/.exec(title)?.[1];
+  if (place) return { اول: "1", دوم: "2", سوم: "3" }[place]!;
   return null;
 }
 function scopeOf(title: string): string | null {
@@ -112,10 +120,19 @@ await db.transaction(async (tx) => {
     SAMPLE_TEACHERS.map((t, i) => ({ tenantId, ...t, isSample: true, sortOrder: i })),
   );
 
-  const achs = exported.achievements.map((a) => clean(a.title));
+  // Drop caption fragments and duplicates (the export lists some photos twice, thumbnail and full size).
+  const seen = new Set<string>();
+  const achs = exported.achievements
+    .map((a) => ({ ...a, title: clean(a.title) }))
+    .filter((a) => {
+      const key = `${a.year}|${a.title}`;
+      if (isFragment(a.title) || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   await tx.insert(s.achievements).values(
-    exported.achievements.map((a, i) => {
-      const title = achs[i]!;
+    achs.map((a, i) => {
+      const title = a.title;
       const rank = rankOf(title);
       const scope = scopeOf(title);
       return {

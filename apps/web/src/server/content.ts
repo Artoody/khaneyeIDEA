@@ -1,9 +1,10 @@
 import "server-only";
-import { and, asc, count, eq, inArray } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, ne } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import {
   achievements,
   branches,
+  courseBranches,
   courses,
   departments,
   getDb,
@@ -142,4 +143,87 @@ export async function getTeachers() {
     .orderBy(asc(teachers.sortOrder));
   // Sample profiles never reach the production site.
   return process.env.NODE_ENV === "production" ? rows.filter((t) => !t.isSample) : rows;
+}
+
+/** Published courses with their department, for the catalog page. */
+export async function getCatalog() {
+  "use cache";
+  cacheTag(TAGS.catalog);
+  cacheLife("days");
+  const db = getDb();
+  const tid = await tenantId();
+  const [rows, depts] = await Promise.all([
+    db
+      .select()
+      .from(courses)
+      .where(and(eq(courses.tenantId, tid), eq(courses.status, "published")))
+      .orderBy(asc(courses.sortOrder)),
+    db
+      .select()
+      .from(departments)
+      .where(and(eq(departments.tenantId, tid), eq(departments.active, true)))
+      .orderBy(asc(departments.sortOrder)),
+  ]);
+  const active = new Set(depts.map((d) => d.id));
+  return {
+    // A course in an inactive department is hidden with its department.
+    courses: rows.filter((c) => !c.departmentId || active.has(c.departmentId)),
+    departments: depts,
+  };
+}
+
+export async function getPublishedCourseSlugs() {
+  "use cache";
+  cacheTag(TAGS.catalog);
+  cacheLife("days");
+  const rows = await getDb()
+    .select({ slug: courses.slug })
+    .from(courses)
+    .where(and(eq(courses.tenantId, await tenantId()), eq(courses.status, "published")));
+  return rows.map((r) => r.slug);
+}
+
+/** One published course with its department, the active branches that offer it and sibling courses. */
+export async function getCourse(slug: string) {
+  "use cache";
+  cacheTag(TAGS.catalog, TAGS.branches);
+  cacheLife("days");
+  const db = getDb();
+  const tid = await tenantId();
+  const [course] = await db
+    .select()
+    .from(courses)
+    .where(and(eq(courses.tenantId, tid), eq(courses.slug, slug), eq(courses.status, "published")));
+  if (!course) return null;
+  const [dept] = course.departmentId
+    ? await db.select().from(departments).where(and(eq(departments.id, course.departmentId), eq(departments.active, true)))
+    : [];
+  if (course.departmentId && !dept) return null;
+  const [offered, siblings] = await Promise.all([
+    db
+      .select({ b: branches })
+      .from(courseBranches)
+      .innerJoin(branches, eq(branches.id, courseBranches.branchId))
+      .where(and(eq(courseBranches.courseId, course.id), eq(branches.active, true)))
+      .orderBy(asc(branches.sortOrder)),
+    course.departmentId
+      ? db
+          .select({ slug: courses.slug, title: courses.title, ageMin: courses.ageMin, ageMax: courses.ageMax })
+          .from(courses)
+          .where(and(eq(courses.tenantId, tid), eq(courses.departmentId, course.departmentId), eq(courses.status, "published"), ne(courses.id, course.id)))
+          .orderBy(asc(courses.sortOrder))
+      : Promise.resolve([]),
+  ]);
+  return { course, department: dept ?? null, branches: offered.map((o) => o.b), siblings };
+}
+
+export async function getAllAchievements() {
+  "use cache";
+  cacheTag(TAGS.achievements);
+  cacheLife("days");
+  return getDb()
+    .select()
+    .from(achievements)
+    .where(eq(achievements.tenantId, await tenantId()))
+    .orderBy(desc(achievements.year), desc(achievements.featured), asc(achievements.sortOrder));
 }

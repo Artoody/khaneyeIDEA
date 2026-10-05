@@ -63,7 +63,7 @@ export async function Hero({ lang }: { lang: Locale }) {
               {pick(blocks["home.hero.cta"], lang)}
             </Link>
             <Link
-              href={href(lang, "/#courses")}
+              href={href(lang, "/courses")}
               className="inline-flex h-13 items-center justify-center gap-2 rounded-full px-5 text-base font-medium text-ink transition hover:bg-ink/5"
             >
               {t.hero.secondary}

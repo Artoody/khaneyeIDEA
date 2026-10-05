@@ -158,12 +158,18 @@ const fa = {
     help: "متن بخش‌های ثابت سایت. چیدمان و طراحی ثابت می‌ماند و فقط متن عوض می‌شود.",
     groupHome: "صفحه‌ی اول، بالای صفحه",
     groupPortal: "بخش پرتال والدین",
+    groupCourses: "صفحه‌ی دوره‌ها",
+    groupAchievements: "صفحه‌ی افتخارات",
     "home.hero.title": "تیتر اصلی صفحه‌ی اول",
     "home.hero.subtitle": "زیرتیتر صفحه‌ی اول",
     "home.hero.cta": "متن دکمه‌ی اصلی",
     "home.portal.title": "تیتر بخش پرتال والدین",
     "home.portal.body": "متن بخش پرتال والدین",
-  } as { help: string; groupHome: string; groupPortal: string } & Record<string, string>,
+    "courses.title": "تیتر صفحه‌ی دوره‌ها",
+    "courses.subtitle": "زیرتیتر صفحه‌ی دوره‌ها",
+    "achievements.title": "تیتر صفحه‌ی افتخارات",
+    "achievements.subtitle": "زیرتیتر صفحه‌ی افتخارات",
+  } as { help: string; groupHome: string; groupPortal: string; groupCourses: string; groupAchievements: string } & Record<string, string>,
 };
 
 type AdminDict = typeof fa;
@@ -325,11 +331,17 @@ const en: AdminDict = {
     help: "Texts of the fixed site sections. The layout and design stay; only the words change.",
     groupHome: "Home page, top",
     groupPortal: "Parent portal section",
+    groupCourses: "Courses page",
+    groupAchievements: "Achievements page",
     "home.hero.title": "Home page headline",
     "home.hero.subtitle": "Home page subheadline",
     "home.hero.cta": "Main button text",
     "home.portal.title": "Parent portal section title",
     "home.portal.body": "Parent portal section text",
+    "courses.title": "Courses page headline",
+    "courses.subtitle": "Courses page subheadline",
+    "achievements.title": "Achievements page headline",
+    "achievements.subtitle": "Achievements page subheadline",
   },
 };
 

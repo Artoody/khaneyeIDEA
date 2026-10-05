@@ -105,4 +105,14 @@ export const PAGE_BLOCKS: Record<string, Localized> = {
     "برنامه‌ی کلاس، گزارش هر جلسه، تکلیف‌ها و پیشرفت فرزندتان را از پرتال والدین یا داخل بله ببینید.",
     "See your child's schedule, session reports, homework and progress in the parent portal or right inside Bale.",
   ),
+  "courses.title": L("دوره‌ای که به سن و علاقه‌ی فرزندتان می‌خورد", "A course that fits your child's age and interests"),
+  "courses.subtitle": L(
+    "سن فرزندتان و حوزه‌ای را که دوست دارد انتخاب کنید تا دوره‌های مناسب را ببینید.",
+    "Pick your child's age and an area they enjoy to see the courses that fit.",
+  ),
+  "achievements.title": L("افتخارات شاگردان خانه ایده", "What our students have won"),
+  "achievements.subtitle": L(
+    "مسابقه‌های جهانی، آسیایی و کشوری. هر مورد با سال و رتبه ثبت شده است.",
+    "World, Asian and national competitions, each recorded with its year and placing.",
+  ),
 };

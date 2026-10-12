@@ -17,7 +17,10 @@ pnpm --filter @khaneyeidea/db grant-role 09xxxxxxxxx owner "Your name"
 pnpm dev                      # site on http://localhost:3000, panel at /app/admin
 ```
 
-Sign-in codes are printed in the terminal while `OTP_PROVIDER=console`.
+The one `.env` at the repository root is used by the site, the bot and the db scripts (no copy into `apps/web` needed).
+If every page shows a 500 error, the usual cause is a missing `.env` (`DATABASE_URL is not set`) or a database that is not running or not migrated: run `docker compose up -d` and `pnpm db:migrate`.
+
+Sign-in codes are printed in the terminal while `OTP_PROVIDER=console` (or use `OTP_DEV_CODE=1234` in development).
 
 ## Bots (Bale and Telegram)
 

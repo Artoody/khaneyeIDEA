@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
+import { Play, SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 import { InlineScript } from "../inline-script";
 
 // The 5-second brand intro on the home page, once per visit (browser session).
@@ -20,6 +20,8 @@ export function IntroSplash({ labels }: { labels: { skip: string; soundOn: strin
   const root = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
+  // The browser refused to start the video by itself (autoplay policy, power saver): offer a play button.
+  const [blocked, setBlocked] = useState(false);
   const done = useRef(false);
 
   useEffect(() => {
@@ -57,8 +59,16 @@ export function IntroSplash({ labels }: { labels: { skip: string; soundOn: strin
     const onTime = () => v.duration && v.currentTime >= v.duration - 0.45 && reveal();
     v.addEventListener("timeupdate", onTime);
     v.addEventListener("ended", reveal);
-    v.addEventListener("error", reveal);
-    if (v.paused) v.play().catch(reveal); // the inline script may have been blocked
+    const onError = () => {
+      console.warn(`[intro] video error ${v.error?.code ?? "?"} ${v.error?.message ?? ""} (${v.currentSrc})`);
+      reveal();
+    };
+    v.addEventListener("error", onError);
+    if (v.paused)
+      v.play().catch((e) => {
+        console.warn("[intro] autoplay blocked", e);
+        setBlocked(true);
+      });
     if (v.ended) reveal();
     const safety = setTimeout(reveal, 9000);
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && reveal();
@@ -68,7 +78,7 @@ export function IntroSplash({ labels }: { labels: { skip: string; soundOn: strin
       clearTimeout(safety);
       v.removeEventListener("timeupdate", onTime);
       v.removeEventListener("ended", reveal);
-      v.removeEventListener("error", reveal);
+      v.removeEventListener("error", onError);
       window.removeEventListener("keydown", onKey);
     };
   }, []);
@@ -88,10 +98,25 @@ export function IntroSplash({ labels }: { labels: { skip: string; soundOn: strin
         poster="/media/intro/start.jpg"
         aria-label="Idea House Academy"
       >
+        {/* H.264 first: it plays (hardware-decoded) in every browser; WebM is only a fallback. */}
+        <source src="/media/intro/intro-1080.mp4" type="video/mp4" media="(min-width: 1024px)" />
+        <source src="/media/intro/intro-720.mp4" type="video/mp4" />
         <source src="/media/intro/intro-1080.webm" type="video/webm" media="(min-width: 1024px)" />
         <source src="/media/intro/intro-720.webm" type="video/webm" />
-        <source src="/media/intro/intro-720.mp4" type="video/mp4" />
       </video>
+      {blocked && (
+        <button
+          type="button"
+          onClick={() => {
+            setBlocked(false);
+            void video.current?.play();
+          }}
+          aria-label="Play"
+          className="absolute left-1/2 top-1/2 grid size-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur transition hover:bg-white/20"
+        >
+          <Play weight="fill" className="size-8" />
+        </button>
+      )}
       <InlineScript html={startScript} />
       <div className="intro-controls absolute bottom-6 end-6 flex items-center gap-2 sm:bottom-8 sm:end-8">
         <button

@@ -83,7 +83,9 @@ export function IntroSplash({ labels }: { labels: { skip: string; soundOn: strin
         className="intro-video h-full w-full object-contain sm:object-cover"
         playsInline
         muted
-        preload="none"
+        preload="auto"
+        // First visible frame of the film (not the end frame): something is on screen before the video has buffered.
+        poster="/media/intro/start.jpg"
         aria-label="Idea House Academy"
       >
         <source src="/media/intro/intro-1080.webm" type="video/webm" media="(min-width: 1024px)" />

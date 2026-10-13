@@ -77,7 +77,7 @@ const teacher = await login("09120000101");
 check("teacher lands on coach panel", teacher.url().includes("/teacher"));
 await teacher.waitForSelector("main h1", { timeout: 60000 });
 await teacher.screenshot({ path: `${S}/ops-teacher.png`, fullPage: true });
-check("teacher sees own panel", (await teacher.textContent("main")).includes("پنل دبیر"));
+check("teacher sees own panel", (await teacher.textContent("main h1")).includes("سلام") && (await teacher.textContent("body")).includes("پنل مربی"));
 // teacher cannot open the admin board
 const r = await teacher.goto(base + "/app/admin/sessions");
 await teacher.waitForURL(/no-access/);

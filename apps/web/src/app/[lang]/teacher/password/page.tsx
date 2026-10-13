@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { getDb, users } from "@khaneyeidea/db";
 import { href, isLocale } from "@/lib/i18n";
 import { getUser } from "@/server/auth";
+import { AuthFrame } from "@/components/teacher/auth-frame";
 import { PasswordForm } from "../password-form";
 
 export default function Page({ params }: PageProps<"/[lang]/teacher/password">) {
@@ -14,12 +15,14 @@ export default function Page({ params }: PageProps<"/[lang]/teacher/password">) 
         const user = await getUser();
         if (!user) redirect(href(lang, "/teacher/login"));
         const [row] = await getDb().select({ must: users.mustChangePassword }).from(users).where(eq(users.id, user.userId));
+        const fa = lang === "fa";
         return (
-          <main className="mx-auto flex min-h-[100dvh] max-w-md flex-col justify-center px-5 py-16">
-            <h1 className="font-display text-3xl font-extrabold">رمز جدید</h1>
-            <p className="mt-2 text-sm text-muted">{row?.must ? "قبل از ادامه، رمز اولیه‌ای که آموزشگاه داده را عوض کنید." : "رمز پنل دبیر را عوض کنید."}</p>
+          <AuthFrame
+            title={fa ? "رمز جدید" : "New password"}
+            help={row?.must ? (fa ? "قبل از ادامه، رمز اولیه‌ای که آموزشگاه داده را عوض کنید." : "Before you continue, change the first password the academy gave you.") : fa ? "رمز پنل مربی را عوض کنید." : "Change your coach app password."}
+          >
             <PasswordForm lang={lang} forced={!!row?.must} />
-          </main>
+          </AuthFrame>
         );
       })}
     </Suspense>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { BellRinging, DownloadSimple } from "@phosphor-icons/react";
+import type { OpsDict } from "@/lib/ops-i18n";
 
 function standalone() {
   return window.matchMedia("(display-mode: standalone)").matches || ("standalone" in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone));
@@ -8,7 +10,7 @@ function standalone() {
 
 const iosNow = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
 
-export function TeacherPwa() {
+export function TeacherPwa({ t }: { t: OpsDict["tp"]["push"] }) {
   const [install, setInstall] = useState<BeforeInstallPromptEvent | null>(null);
   const ios = useSyncExternalStore(() => () => {}, iosNow, () => false);
   const [hint, setHint] = useState("");
@@ -25,23 +27,23 @@ export function TeacherPwa() {
 
   async function enablePush() {
     if (!("Notification" in window) || !("serviceWorker" in navigator)) {
-      setHint("این مرورگر اعلان را پشتیبانی نمی‌کند.");
+      setHint(t.unsupported);
       return;
     }
     if (ios && !standalone()) {
-      setHint("در آیفون اول با Share و Add to Home Screen برنامه را نصب کنید، بعد از آیکون خانه وارد شوید.");
+      setHint(t.ios);
       return;
     }
     const perm = await Notification.requestPermission();
     if (perm !== "granted") {
-      setHint("اجازه اعلان داده نشد.");
+      setHint(t.denied);
       return;
     }
     const reg = await navigator.serviceWorker.ready;
     const keyRes = await fetch("/api/teacher/push");
     const { publicKey } = (await keyRes.json()) as { publicKey?: string };
     if (!publicKey) {
-      setHint("کلید اعلان روی سرور تنظیم نشده.");
+      setHint(t.noKey);
       return;
     }
     const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) });
@@ -51,33 +53,46 @@ export function TeacherPwa() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ endpoint: sub.endpoint, keys: json.keys, platform: navigator.platform, standalone: standalone() }),
     });
-    setHint("اعلان روشن شد.");
+    setHint(t.on);
   }
 
   return (
-    <div className="mt-6 flex flex-col gap-2 rounded-2xl border border-line bg-surface/80 p-4 text-sm">
-      <p className="font-medium">اعلان روی گوشی</p>
-      <p className="text-muted">اگر گزارش کلاس تا آخر روز نرسد، یا در گروه از شما سؤال شود، همین‌جا خبر می‌دهد.</p>
-      <div className="flex flex-wrap gap-2">
-        {install && (
-          <button
-            type="button"
-            className="h-10 rounded-full bg-ink px-4 text-bg"
-            onClick={() => {
-              void install.prompt();
-              setInstall(null);
-            }}
-          >
-            افزودن به صفحه خانه
-          </button>
-        )}
-        {ios && !standalone() && <p className="text-muted">آیفون: Share، بعد Add to Home Screen.</p>}
-        <button type="button" className="h-10 rounded-full border border-line px-4" onClick={() => void enablePush()}>
-          روشن کردن اعلان
-        </button>
+    <section className="rounded-2xl border border-line bg-surface p-4">
+      <div className="flex items-start gap-3.5">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent-text">
+          <BellRinging className="size-6" weight="duotone" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-semibold">{t.title}</h2>
+          <p className="mt-0.5 text-sm leading-relaxed text-muted">{t.body}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" className="inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-sm font-semibold text-bg transition active:scale-[0.98]" onClick={() => void enablePush()}>
+              <BellRinging className="size-4" />
+              {t.enable}
+            </button>
+            {install && (
+              <button
+                type="button"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-line px-5 text-sm transition hover:border-ink/30 active:scale-[0.98]"
+                onClick={() => {
+                  void install.prompt();
+                  setInstall(null);
+                }}
+              >
+                <DownloadSimple className="size-4" />
+                {t.install}
+              </button>
+            )}
+          </div>
+          {ios && !standalone() && <p className="mt-3 text-sm text-muted">{t.ios}</p>}
+          {hint && (
+            <p className="mt-3 text-sm text-accent-text" role="status">
+              {hint}
+            </p>
+          )}
+        </div>
       </div>
-      {hint && <p className="text-accent-text">{hint}</p>}
-    </div>
+    </section>
   );
 }
 

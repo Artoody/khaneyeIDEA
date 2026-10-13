@@ -23,7 +23,7 @@ const login = async (phone) => {
   await p.fill('input[name="phone"]', phone);
   await p.click("form button[type=submit]");
   await p.fill('input[name="code"]', "1234");
-  await Promise.all([p.waitForURL(/\/app\//), p.click("form button[type=submit]")]);
+  await Promise.all([p.waitForURL(/\/(app\/|teacher)/), p.click("form button[type=submit]")]);
   return p;
 };
 const V = (sel) => `${sel}:visible`;
@@ -156,33 +156,45 @@ await admin.goto(base + classHref);
 await admin.waitForSelector('[data-testid="class-sessions"]');
 check("and deleted", (await admin.locator('[data-testid="class-sessions"] a', { hasText: "جبرانی" }).count()) === 0);
 
-// 7. Teacher: week view, connect card, two cancellation requests
+// 7. Teacher: the phone app (today, week by day, profile with the bot card), two cancellation requests
 const t = await login("09120000101");
-await t.goto(base + "/app/teacher");
+await t.goto(base + "/teacher");
+await t.waitForSelector('[data-testid="today"]');
+check("teacher lands on the today page", /\/teacher$/.test(t.url()));
+check("with a tab bar for today, week and profile", (await t.locator('nav[aria-label] a:visible').count()) >= 3);
+await t.goto(base + "/teacher/profile");
+await t.waitForSelector('[data-testid="connect-card"]');
+check("teacher connect card (profile)", (await t.locator('[data-testid="connect-card"]').count()) > 0);
+await t.goto(base + "/teacher/week");
 await t.waitForSelector('[data-testid="week"]');
-check("teacher connect card", (await t.locator('[data-testid="connect-card"]').count()) > 0);
 await t.locator('a[aria-label="هفته‌ی بعد"]').first().click();
 await t.waitForURL(/w=/);
-await t.waitForSelector('[data-testid="week"] details');
-const cards = t.locator('[data-testid="week"] details');
-check("next week has this teacher's classes", (await cards.count()) >= 2, `(${await cards.count()})`);
-const askFor = async (i, reason) => {
-  const card = t.locator('[data-testid="week"] details').nth(i);
-  await card.locator("summary").click();
-  check(`card ${i + 1} opens with the class students`, (await card.textContent()).includes("دانش‌آموزان"));
-  await card.locator("a", { hasText: "درخواست لغو" }).click();
+await t.waitForSelector('[data-testid="week"]');
+const chipHrefs = await t.locator('[data-testid="day-chips"] a').evaluateAll((els) => els.map((e) => e.getAttribute("href")));
+const targets = [];
+for (const h of chipHrefs) {
+  await t.goto(base + h);
+  await t.waitForSelector('[data-testid="week"]');
+  if ((await t.locator('[data-testid="week"] li a').count()) > 0) targets.push(h);
+  if (targets.length === 2) break;
+}
+check("next week has this teacher's classes on two days", targets.length === 2, `(${targets.length})`);
+const askFor = async (h, reason) => {
+  await t.goto(base + h);
+  await t.waitForSelector('[data-testid="week"] li a');
+  await t.waitForTimeout(1200); // hydration
+  await t.locator('[data-testid="week"] li a').first().click();
   await t.waitForSelector(V('[data-testid="session-panel"]'));
+  check("a class opens in the sheet", true);
   const sp = t.locator(V('[data-testid="session-panel"]'));
   await sp.locator("summary", { hasText: "لغو این جلسه" }).click();
   await sp.locator('input[name="reason"]').fill(reason);
   await sp.locator("button", { hasText: "لغو جلسه" }).click();
   await sp.locator('[role="status"]').waitFor();
-  await t.goto(t.url().replace(/[?&]s=[^&]+/, "").replace(/\?$/, ""));
-  await t.waitForSelector('[data-testid="week"] details');
 };
 const reasonA = `سرماخوردگی ${Date.now() % 1000}`;
-await askFor(0, reasonA);
-await askFor(1, "جلسه‌ی دانشگاه");
+await askFor(targets[0], reasonA);
+await askFor(targets[1], "جلسه‌ی دانشگاه");
 await t.context().close();
 
 // 8. Admin decides the requests

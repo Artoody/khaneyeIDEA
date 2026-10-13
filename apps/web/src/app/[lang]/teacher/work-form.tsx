@@ -1,92 +1,123 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useActionState } from "react";
-import { Microphone, Stop, Trash } from "@phosphor-icons/react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { CircleNotch, Microphone, NotePencil, Stop, Trash } from "@phosphor-icons/react";
+import { fill } from "@/lib/format";
+import { num, type Locale } from "@/lib/i18n";
+import type { OpsDict } from "@/lib/ops-i18n";
 import { submitClassWork } from "./actions";
+
+type Work = OpsDict["tp"]["work"];
+
+const score = "grid h-11 w-full place-items-center rounded-xl border border-line text-sm font-semibold tabular-nums text-muted transition peer-checked:border-ink peer-checked:bg-ink peer-checked:text-bg peer-focus-visible:ring-4 peer-focus-visible:ring-accent/30 active:scale-95";
+const field = "w-full rounded-2xl border border-line bg-surface px-4 py-3 text-[15px] outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15";
+
+/** One row of 0..max chips. Plain radios, so the form still posts the value the server already expects. */
+function Scale({ name, max, def, label, lang }: { name: string; max: number; def: number; label: string; lang: Locale }) {
+  return (
+    <div>
+      <span className="mb-1.5 block text-xs text-muted">{label}</span>
+      <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${max + 1}, minmax(0, 1fr))` }} role="radiogroup" aria-label={label}>
+        {Array.from({ length: max + 1 }, (_, n) => (
+          <label key={n} className="cursor-pointer">
+            <input type="radio" name={name} value={n} defaultChecked={n === def} className="peer sr-only" />
+            <span className={score}>{num(n, lang)}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function WorkForm({
   lang,
   sessionId,
   students,
   aiOn,
+  t,
 }: {
-  lang: string;
+  lang: Locale;
   sessionId: string;
   students: { id: string; name: string }[];
   aiOn: boolean;
+  t: Work;
 }) {
   const [state, action, pending] = useActionState(submitClassWork, {});
   const [voiceKey, setVoiceKey] = useState("");
   const [homeworkVoiceKey, setHomeworkVoiceKey] = useState("");
+  const [absent, setAbsent] = useState(0);
+  const errors: Record<string, string> = { empty: t.errEmpty, voice: t.errVoice, ai: t.errAi, missing: t.errMissing };
   return (
-    <form action={action} className="mt-6 flex flex-col gap-5">
+    <form action={action} onChange={(e) => setAbsent(new FormData(e.currentTarget).getAll("absent").length)} className="flex flex-col gap-7">
       <input type="hidden" name="lang" value={lang} />
       <input type="hidden" name="sessionId" value={sessionId} />
       <input type="hidden" name="voiceKey" value={voiceKey} />
       <input type="hidden" name="homeworkVoiceKey" value={homeworkVoiceKey} />
+
       <fieldset>
-        <legend className="text-sm font-medium">حضور، فعالیت (۰ تا ۵)، تکلیف (۰ تا ۳) و توضیحات</legend>
-        <ul className="mt-3 flex flex-col gap-3">
-          {students.map((s) => (
-            <li key={s.id} className="rounded-2xl border border-line px-3 py-3">
-              <div className="flex flex-wrap items-center gap-3">
-                <label className="inline-flex min-w-24 cursor-pointer items-center gap-2 text-sm has-[:checked]:text-red-500">
-                  <input type="checkbox" name="absent" value={s.id} className="accent-red-500" />
-                  غایب
-                </label>
-                <span className="min-w-0 flex-1 font-medium">{s.name}</span>
-                <label className="flex items-center gap-1 text-xs text-muted">
-                  فعالیت
-                  <select name={`activity_${s.id}`} defaultValue="4" className="h-9 rounded-xl border border-line bg-surface px-2 text-sm text-ink">
-                    {[0, 1, 2, 3, 4, 5].map((n) => (
-                      <option key={n} value={n}>
-                        {n}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="flex items-center gap-1 text-xs text-muted">
-                  تکلیف
-                  <select name={`homeworkScore_${s.id}`} defaultValue="2" className="h-9 rounded-xl border border-line bg-surface px-2 text-sm text-ink">
-                    {[0, 1, 2, 3].map((n) => (
-                      <option key={n} value={n}>
-                        {n}
-                      </option>
-                    ))}
-                  </select>
+        <legend className="flex w-full items-baseline justify-between gap-3">
+          <span className="font-display text-lg font-bold">{t.attendance}</span>
+          <span className="text-sm text-muted" aria-live="polite">
+            {fill(t.count, { p: num(students.length - absent, lang), a: num(absent, lang) })}
+          </span>
+        </legend>
+        {students.length === 0 && <p className="mt-3 rounded-2xl border border-dashed border-line p-4 text-sm text-muted">{t.empty}</p>}
+        <ul className="mt-3 flex flex-col gap-2.5">
+          {students.map((s, i) => (
+            <li key={s.id} className="rise group/row rounded-2xl border border-line bg-surface p-3.5 transition has-[input[name=absent]:checked]:border-red-500/40 has-[input[name=absent]:checked]:bg-red-500/[0.06]" style={{ "--i": i } as React.CSSProperties}>
+              <div className="flex items-center gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent/20 font-display text-sm font-extrabold text-accent-text">{[...s.name][0]}</span>
+                <span className="min-w-0 flex-1 truncate font-semibold">{s.name}</span>
+                <label className="cursor-pointer">
+                  <input type="checkbox" name="absent" value={s.id} className="peer sr-only" />
+                  <span className="inline-flex h-11 min-w-[5.5rem] items-center justify-center rounded-full bg-emerald-500/15 px-4 text-sm font-semibold text-emerald-700 transition peer-checked:hidden peer-focus-visible:ring-4 peer-focus-visible:ring-accent/30 dark:text-emerald-300">{t.present}</span>
+                  <span className="hidden h-11 min-w-[5.5rem] items-center justify-center rounded-full bg-red-500 px-4 text-sm font-semibold text-white transition peer-checked:inline-flex peer-focus-visible:ring-4 peer-focus-visible:ring-accent/30">{t.absent}</span>
                 </label>
               </div>
-              <label className="mt-2 block text-xs text-muted">
-                توضیحات اضافه (اگر موردی دارد، با نام در گروه می‌آید)
-                <input
-                  name={`note_${s.id}`}
-                  maxLength={500}
-                  placeholder="مثلاً نیاز به تمرین بیشتر روی سنسور…"
-                  className="mt-1 h-10 w-full rounded-xl border border-line bg-surface px-3 text-sm text-ink placeholder:text-muted/70"
-                />
-              </label>
+              <div className="mt-3 flex flex-col gap-2.5 group-has-[input[name=absent]:checked]/row:hidden">
+                <Scale name={`activity_${s.id}`} max={5} def={4} label={t.activity} lang={lang} />
+                <Scale name={`homeworkScore_${s.id}`} max={3} def={2} label={t.homework} lang={lang} />
+                <details className="group/note">
+                  <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-1.5 rounded-full text-xs text-muted hover:text-ink [&::-webkit-details-marker]:hidden">
+                    <NotePencil className="size-4" />
+                    {t.addNote}
+                  </summary>
+                  <input name={`note_${s.id}`} maxLength={500} placeholder={t.notePh} aria-label={t.addNote} className={`${field} mt-1.5 !py-2.5 text-sm`} />
+                  <p className="mt-1 text-xs text-muted">{t.noteHelp}</p>
+                </details>
+              </div>
             </li>
           ))}
         </ul>
       </fieldset>
-      <label className="flex flex-col gap-1.5 text-sm">
-        گزارش کلاس
-        <textarea name="report" rows={4} className="rounded-2xl border border-line bg-surface p-3" placeholder={aiOn ? "هرچه شد بنویسید؛ متن مرتب می‌شود." : "گزارش را بنویسید."} />
-      </label>
-      <Recorder label="ویس گزارش" onKey={setVoiceKey} voiceKey={voiceKey} />
-      <label className="flex flex-col gap-1.5 text-sm">
-        تکلیف هفته
-        <textarea name="homework" rows={3} className="rounded-2xl border border-line bg-surface p-3" />
-      </label>
-      <Recorder label="ویس تکلیف" onKey={setHomeworkVoiceKey} voiceKey={homeworkVoiceKey} />
-      {state.error === "empty" && <p className="text-sm text-red-500">گزارش را بنویسید یا ویس بگذارید.</p>}
-      {state.error === "voice" && <p className="text-sm text-red-500">ویس خوانده نشد؛ دوباره ضبط کنید یا متن بنویسید.</p>}
-      {state.error === "ai" && <p className="text-sm text-red-500">سرویس هوش مصنوعی برای رونویسی ویس تنظیم نشده.</p>}
-      {state.error === "missing" && <p className="text-sm text-red-500">این جلسه برای شما نیست.</p>}
-      <button disabled={pending} className="h-12 rounded-full bg-accent text-sm font-semibold text-on-accent">
-        {pending ? "..." : "ثبت گزارش"}
-      </button>
+
+      <div className="flex flex-col gap-3">
+        <label htmlFor={`report-${sessionId}`} className="font-display text-lg font-bold">
+          {t.report}
+        </label>
+        <textarea id={`report-${sessionId}`} name="report" rows={4} className={field} placeholder={aiOn ? t.reportAi : t.reportPlain} />
+        <Recorder label={t.voice} onKey={setVoiceKey} voiceKey={voiceKey} w={t} />
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <label htmlFor={`hw-${sessionId}`} className="font-display text-lg font-bold">
+          {t.homeworkText}
+        </label>
+        <textarea id={`hw-${sessionId}`} name="homework" rows={3} className={field} />
+        <Recorder label={t.voiceHomework} onKey={setHomeworkVoiceKey} voiceKey={homeworkVoiceKey} w={t} />
+      </div>
+
+      {state.error && errors[state.error] && (
+        <p className="rounded-2xl border border-red-500/40 bg-red-500/10 p-3.5 text-sm text-red-700 dark:text-red-300" role="alert">
+          {errors[state.error]}
+        </p>
+      )}
+      <div className="sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-20 md:bottom-4">
+        <button disabled={pending} className="inline-flex h-14 w-full items-center justify-center gap-2.5 rounded-full bg-accent text-base font-bold text-on-accent shadow-[0_10px_30px_-10px_color-mix(in_srgb,var(--accent)_70%,transparent)] transition hover:bg-accent-strong active:scale-[0.98] disabled:opacity-70">
+          {pending && <CircleNotch className="size-5 animate-spin" />}
+          {t.submit}
+        </button>
+      </div>
     </form>
   );
 }
@@ -97,7 +128,7 @@ function formatTime(sec: number) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-function Recorder({ label, onKey, voiceKey }: { label: string; onKey: (key: string) => void; voiceKey: string }) {
+function Recorder({ label, onKey, voiceKey, w }: { label: string; onKey: (key: string) => void; voiceKey: string; w: Work }) {
   const rec = useRef<MediaRecorder | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const [on, setOn] = useState(false);
@@ -137,7 +168,7 @@ function Recorder({ label, onKey, voiceKey }: { label: string; onKey: (key: stri
         const res = await fetch("/api/teacher/voice", { method: "POST", body });
         setUploading(false);
         if (!res.ok) {
-          setErr("ضبط ذخیره نشد.");
+          setErr(w.errSave);
           return;
         }
         const data = (await res.json()) as { key: string };
@@ -149,7 +180,7 @@ function Recorder({ label, onKey, voiceKey }: { label: string; onKey: (key: stri
       setErr("");
       timer.current = setInterval(() => setSec((n) => n + 1), 1000);
     } catch {
-      setErr("دسترسی میکروفون داده نشد.");
+      setErr(w.errMic);
     }
   }
 
@@ -164,38 +195,43 @@ function Recorder({ label, onKey, voiceKey }: { label: string; onKey: (key: stri
   const playSrc = localUrl ?? (voiceKey ? `/api/teacher/voice?key=${encodeURIComponent(voiceKey)}` : null);
 
   return (
-    <div className="rounded-2xl border border-line p-3">
+    <div className="rounded-2xl border border-line bg-surface p-3">
       <div className="flex flex-wrap items-center gap-3 text-sm">
         <button
           type="button"
           onClick={toggle}
           disabled={uploading}
-          className={`inline-flex h-11 items-center gap-2 rounded-full px-4 transition ${
-            on ? "bg-red-500/15 text-red-600 ring-1 ring-red-500/40" : "border border-line"
+          data-sfx={on ? "close" : "open"}
+          className={`inline-flex h-12 items-center gap-2.5 rounded-full px-5 font-medium transition active:scale-[0.98] ${
+            on ? "bg-red-500 text-white" : "border border-line hover:border-ink/30"
           }`}
         >
-          {on ? <Stop className="size-4" weight="fill" /> : <Microphone className="size-4" />}
-          {on ? "توقف ضبط" : label}
+          {on ? <Stop className="size-5" weight="fill" /> : <Microphone className="size-5" weight="duotone" />}
+          {on ? w.stop : label}
         </button>
         {on && (
-          <span className="inline-flex items-center gap-2 font-mono text-red-600" aria-live="polite">
+          <span className="inline-flex items-center gap-2 font-mono text-red-600 dark:text-red-400" aria-live="polite">
             <span className="relative flex size-2.5">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-500 opacity-60" />
               <span className="relative inline-flex size-2.5 rounded-full bg-red-500" />
             </span>
-            در حال ضبط · {formatTime(sec)}
+            {w.recording} {formatTime(sec)}
           </span>
         )}
-        {uploading && <span className="text-muted">در حال ذخیره…</span>}
-        {!on && voiceKey && !uploading && <span className="text-accent-text">آماده پخش</span>}
-        {err && <span className="text-red-500">{err}</span>}
+        {uploading && <span className="text-muted">{w.saving}</span>}
+        {!on && voiceKey && !uploading && <span className="text-accent-text">{w.ready}</span>}
+        {err && (
+          <span className="text-red-600 dark:text-red-400" role="alert">
+            {err}
+          </span>
+        )}
       </div>
       {playSrc && !on && (
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <audio controls src={playSrc} className="h-10 max-w-full flex-1" preload="metadata" />
-          <button type="button" onClick={clear} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-line px-3 text-xs text-muted">
+          <button type="button" onClick={clear} data-sfx="remove" className="inline-flex h-10 items-center gap-1.5 rounded-full border border-line px-3.5 text-xs text-muted hover:text-ink">
             <Trash className="size-3.5" />
-            حذف
+            {w.remove}
           </button>
         </div>
       )}

@@ -360,3 +360,18 @@ html[data-intro="reveal"] .hero-enter-canvas { transition-delay: 150ms; transiti
 @media (prefers-reduced-motion: reduce) {
   .rise, .shimmer { animation: none; }
 }
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes sheet-side { from { transform: translateX(calc(var(--sheet-dir, 1) * 40px)); opacity: 0; } to { transform: none; opacity: 1; } }
+.sheet { animation: sheet-up 0.32s cubic-bezier(0.2, 0.9, 0.25, 1) both; }
+@media (min-width: 640px) {
+  .sheet { --sheet-dir: -1; animation-name: sheet-side; }
+  [dir="rtl"] .sheet { --sheet-dir: -1; }
+  [dir="ltr"] .sheet { --sheet-dir: 1; }
+}
+@keyframes live-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
+.live-dot { animation: live-pulse 1.6s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .sheet, .live-dot { animation: none; }
+}

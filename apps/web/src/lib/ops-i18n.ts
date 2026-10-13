@@ -476,6 +476,7 @@ const fa = {
       locked: "به خاطر چند تلاش نادرست، ورود برای چند دقیقه بسته است.",
       inactive: "این حساب غیرفعال است.",
       not_teacher: "این ورود فقط برای مربی‌هاست.",
+      not_staff: "این ورود برای مربی‌ها نیست.",
     },
   },
   bkc: {
@@ -1000,6 +1001,7 @@ const en: OpsDict = {
       locked: "Too many wrong attempts. Sign in is closed for a few minutes.",
       inactive: "This account is inactive.",
       not_teacher: "This sign in is for coaches only.",
+      not_staff: "This sign in is not for coaches.",
     },
   },
   bkc: {

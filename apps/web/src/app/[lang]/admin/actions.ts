@@ -21,7 +21,7 @@ export async function loginStaffAction(_prev: StaffLoginState, form: FormData): 
       audience: "staff",
       ...meta,
     });
-    if (!result.ok) return { error: result.reason };
+    if (!result.ok) return { error: result.reason === "not_teacher" ? "not_staff" : result.reason };
     await setSessionCookie(result.token);
     redirect(href(locale, result.mustChangePassword ? "/admin/password" : "/app/admin"));
   } catch (e) {

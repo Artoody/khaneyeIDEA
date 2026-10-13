@@ -24,7 +24,7 @@ import { href, isLocale, type Locale } from "@/lib/i18n";
 import { clientMeta, requirePermission, requireUser, setSessionCookie } from "@/server/auth";
 import { tenantId } from "@/server/content";
 
-export type TeacherLoginState = { error?: "invalid" | "locked" | "inactive" | "not_teacher" };
+export type TeacherLoginState = { error?: "invalid" | "locked" | "inactive" | "not_teacher" | "not_staff" };
 
 export async function teacherLoginAction(_prev: TeacherLoginState, form: FormData): Promise<TeacherLoginState> {
   const lang = String(form.get("lang") ?? "fa");

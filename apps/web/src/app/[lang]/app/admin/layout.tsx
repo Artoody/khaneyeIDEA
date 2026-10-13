@@ -36,6 +36,7 @@ async function PermittedNav({
   siteLabel: string;
   menuLabel: string;
   collapseLabel: string;
+  expandLabel: string;
 }) {
   const user = await getUser();
   const counts = user && can(user, "schedule.manage") ? await navCounts(user.tenantId) : { requests: 0, waiting: 0 };

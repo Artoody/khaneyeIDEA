@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState, useSyncExternalStore } from "react";
 import {
   Buildings,
   ChalkboardTeacher,
@@ -156,6 +156,12 @@ function BottomBar({ items, onMore, menuLabel }: { items: NavItem[]; onMore: () 
   );
 }
 
+const watchNavAttr = (cb: () => void) => {
+  const o = new MutationObserver(cb);
+  o.observe(document.documentElement, { attributes: true, attributeFilter: ["data-admin-nav"] });
+  return () => o.disconnect();
+};
+
 export function AdminNav({
   items,
   siteHref,
@@ -172,20 +178,11 @@ export function AdminNav({
   expandLabel: string;
 }) {
   const [open, setOpen] = useState(false);
-  // Match the InlineScript restore so the first client paint does not flash the wide menu.
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof document === "undefined") return false;
-    return document.documentElement.dataset.adminNav === "collapsed";
-  });
-
-  useEffect(() => {
-    const on = document.documentElement.dataset.adminNav === "collapsed";
-    setCollapsed(on);
-  }, []);
+  // The collapsed state lives on <html data-admin-nav> (an inline script restores it before first paint).
+  const collapsed = useSyncExternalStore(watchNavAttr, () => document.documentElement.dataset.adminNav === "collapsed", () => false);
 
   const toggle = () => {
     const next = !collapsed;
-    setCollapsed(next);
     const html = document.documentElement;
     if (next) html.dataset.adminNav = "collapsed";
     else delete html.dataset.adminNav;

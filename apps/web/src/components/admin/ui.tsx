@@ -59,13 +59,57 @@ export function Badge({ children, tone = "neutral" }: { children: React.ReactNod
   return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>{children}</span>;
 }
 
+/** The bar that slides along the top while a panel page loads: the page is working, not frozen. */
+function LoadBar() {
+  return (
+    <div className="relative h-0.5 w-full overflow-hidden rounded-full bg-ink/5" role="progressbar" aria-busy="true">
+      <span className="absolute inset-y-0 start-0 w-2/5 rounded-full bg-accent" style={{ animation: "load-bar 1.2s ease-in-out infinite" }} />
+    </div>
+  );
+}
+
 export function ListSkeleton() {
   return (
-    <div className="animate-pulse">
-      <div className="h-8 w-48 rounded-lg bg-ink/10" />
+    <div>
+      <LoadBar />
+      <div className="mt-6 h-8 w-48 rounded-lg bg-ink/[0.07]" />
       <div className="mt-8 flex flex-col gap-2">
         {[0, 1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-16 rounded-2xl bg-ink/5" />
+          <div key={i} className="rise h-16 overflow-hidden rounded-2xl bg-ink/[0.04]" style={{ "--i": i } as React.CSSProperties}>
+            <div className="shimmer size-full" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** The classes page while it loads: a toolbar and a few rows of class-shaped blocks. */
+export function ClassesSkeleton() {
+  const rows = [
+    [38, 26, 18],
+    [22, 40],
+    [30, 30, 24],
+    [44, 20],
+  ];
+  return (
+    <div aria-busy="true">
+      <LoadBar />
+      <div className="mt-6 h-9 w-40 rounded-lg bg-ink/[0.07]" />
+      <div className="mt-6 flex gap-2">
+        <div className="h-11 w-64 rounded-full bg-ink/[0.05]" />
+        <div className="h-11 flex-1 rounded-full bg-ink/[0.04]" />
+      </div>
+      <div className="mt-6 flex flex-col gap-3">
+        {rows.map((r, i) => (
+          <div key={i} className="rise flex items-center gap-3 rounded-2xl border border-line p-3" style={{ "--i": i } as React.CSSProperties}>
+            <div className="h-10 w-24 shrink-0 rounded-xl bg-ink/[0.06]" />
+            {r.map((w, j) => (
+              <div key={j} className="h-14 overflow-hidden rounded-xl bg-ink/[0.045]" style={{ width: `${w}%` }}>
+                <div className="shimmer size-full" style={{ animationDelay: `${(i + j) * 140}ms` }} />
+              </div>
+            ))}
+          </div>
         ))}
       </div>
     </div>

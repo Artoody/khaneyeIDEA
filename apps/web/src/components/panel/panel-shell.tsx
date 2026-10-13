@@ -4,6 +4,7 @@ import type { SessionUser } from "@khaneyeidea/core";
 import { logoutAction } from "@/app/[lang]/login/actions";
 import { getDict, href, num, type Locale } from "@/lib/i18n";
 import { LogoMark } from "@/components/site/logo-mark";
+import { PanelSfx, SoundToggle } from "@/components/ops/sfx";
 
 const ROLE_LABEL = {
   fa: { owner: "مدیر کل", admin: "ادمین", content_manager: "مدیر محتوا", teacher: "مربی", parent: "ولی", student: "دانش‌آموز" },
@@ -15,6 +16,7 @@ export function PanelShell({ lang, user, title, children }: { lang: Locale; user
   const phone = `0${user.phone.slice(2)}`;
   return (
     <div className="min-h-[100dvh]">
+      <PanelSfx />
       <header className="sticky top-0 z-30 border-b border-line bg-bg/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
           <Link href={href(lang)} className="flex items-center gap-2.5">
@@ -22,6 +24,7 @@ export function PanelShell({ lang, user, title, children }: { lang: Locale; user
           </Link>
           <span className="font-display text-base font-bold">{title}</span>
           <div className="ms-auto flex items-center gap-3">
+            <SoundToggle onLabel={lang === "fa" ? "صدای رابط روشن است؛ برای خاموش کردن بزنید" : "Interface sounds are on; press to turn off"} offLabel={lang === "fa" ? "صدای رابط خاموش است؛ برای روشن کردن بزنید" : "Interface sounds are off; press to turn on"} />
             <span className="hidden text-sm text-muted sm:inline" dir="ltr">{num(phone, lang)}</span>
             <form action={logoutAction}>
               <input type="hidden" name="lang" value={lang} />

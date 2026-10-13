@@ -61,19 +61,19 @@ check("connection code for the bot", /^\/start \d{6}$/.test((await admin.textCon
 
 // 3. Class cards by weekday
 await admin.goto(base + "/app/admin/classes");
-await admin.waitForSelector('[data-testid="class-days"]');
-const total = await admin.locator('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])').count();
+await admin.waitForSelector('[data-testid="day-timeline"]:visible');
+const total = await admin.locator('[data-testid="day-timeline"] a[data-class-id]').count();
 check("classes grouped by weekday", total >= 6, `(${total})`);
 await admin.locator('[data-testid="teacher-chips"] button').nth(1).click();
 await admin.waitForURL(/t=/);
-const filtered = await admin.locator('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])').count();
+const filtered = await admin.locator('[data-testid="day-timeline"] a[data-class-id]').count();
 check("coach filter narrows the list", filtered > 0 && filtered < total, `(${filtered}/${total})`);
 
 // 4. A class page: bot code, roster picker
 await admin.goto(base + "/app/admin/classes");
-await admin.waitForSelector('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])');
+await admin.waitForSelector('[data-testid="day-timeline"] a[data-class-id]:visible');
 // Robotics 1 (Saturday 16:00): its coach also teaches Robotics 2 on Wednesdays at the same hour
-const classHref = await admin.locator('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])', { hasText: "رباتیک ۱" }).first().getAttribute("href");
+const classHref = await admin.locator('[data-testid="day-timeline"] a[data-class-id]', { hasText: "رباتیک ۱" }).first().getAttribute("href");
 await admin.goto(base + classHref);
 await admin.waitForSelector('[data-testid="groups"]');
 await admin.click('[data-testid="groups"] button:has-text("ساخت کد اتصال")');
@@ -90,8 +90,8 @@ check("student added from the picker", after === before + 1, `(${before} -> ${af
 // take them out again
 const added = admin.locator('[data-testid="roster"] li', { hasText: pickedName.split(" ")[0] }).last();
 await added.locator("button", { hasText: "خارج کردن" }).click();
-await admin.waitForTimeout(800);
-check("and removed again", (await admin.locator('[data-testid="roster"] li').count()) === before);
+await admin.waitForFunction((n) => document.querySelectorAll('[data-testid="roster"]:not([hidden]) li').length === n, before, { timeout: 8000 }).catch(() => {});
+check("and removed again", (await admin.locator('[data-testid="roster"]:visible li').count()) === before);
 
 // 5. Move one session: clash warning, then a real move and back
 // a regular weekly session (not one moved or added by an earlier run)
@@ -275,7 +275,8 @@ await admin.waitForTimeout(400);
 const wRail = (await admin.locator('[data-testid="admin-sidebar"]:visible').boundingBox()).width;
 check("the menu collapses to an icon rail", wRail < wOpen / 2, `(${wOpen} -> ${wRail})`);
 await admin.reload();
-await admin.waitForTimeout(500);
+await admin.waitForSelector('[data-testid="admin-sidebar"]:visible');
+await admin.waitForTimeout(300);
 check("and stays collapsed after a reload", (await admin.locator('[data-testid="admin-sidebar"]:visible').boundingBox()).width === wRail);
 await admin.goto(base + "/app/admin/classes?v=grid");
 await admin.waitForSelector('[data-testid="timetable"]');
@@ -283,6 +284,63 @@ const blocks = await admin.locator('[data-testid="timetable"] a[href*="/classes/
 check("timetable shows every class, overlapping ones side by side", blocks >= 15, `(${blocks})`);
 await admin.click('[data-testid="collapse-nav"]:visible'); // leave the menu open again
 await admin.waitForTimeout(300);
+
+// 11. The weekday view is a timeline, and a class can be changed in place: coach, day and time, students
+await admin.goto(base + "/app/admin/classes");
+await admin.waitForSelector('[data-testid="day-timeline"]:visible');
+check("weekday view is a timeline with a row per day", (await admin.locator('[data-testid="timeline-day"]').count()) === 7);
+const tl = '[data-testid="day-timeline"] a[data-class-id]';
+check("every class is a block on it", (await admin.locator(tl).count()) >= 15);
+const sat = await admin.locator('[data-testid="timeline-day"]').nth(0).locator("a[data-class-id]").count();
+const widths = await admin.locator(tl).evaluateAll((els) => els.map((e) => e.getBoundingClientRect().width));
+check("blocks have a width that follows their hours", new Set(widths.map((w) => Math.round(w / 10))).size > 1, `(${sat} on Saturday)`);
+await admin.waitForTimeout(1500); // hydration: a click before it would follow the link
+const target = admin.locator(tl, { hasText: "آلتیوم" }).first();
+const qid = await target.getAttribute("data-class-id");
+await target.click();
+await admin.waitForSelector('[data-testid="quick-roster"]');
+check("clicking a class opens the quick panel, address keeps it", /open=/.test(admin.url()));
+const rosterN = () => admin.locator('[data-testid="quick-roster"] li').count();
+const n0 = await rosterN();
+check("it lists the class's students", n0 >= 1, `(${n0})`);
+
+// coach: pick another one, see it on the timeline, put it back
+const pressed = admin.locator('[data-testid="quick-teachers"] button[aria-pressed="true"]');
+const nameOf = (l) => l.evaluate((el) => el.lastChild.textContent.trim());
+const oldCoach = await nameOf(pressed);
+const other = admin.locator('[data-testid="quick-teachers"] button[aria-pressed="false"]').nth(1);
+const newCoach = await nameOf(other);
+await other.click();
+await admin.waitForFunction((n) => document.querySelector('[data-testid="quick-teachers"] button[aria-pressed="true"]')?.lastChild?.textContent?.trim() === n, newCoach);
+await admin.waitForFunction(([id, n]) => document.querySelector(`[data-testid="day-timeline"] a[data-class-id="${id}"]`)?.textContent?.includes(n), [qid, newCoach]);
+check("changing the coach shows on the timeline at once", true, `(${oldCoach} -> ${newCoach})`);
+await admin.locator('[data-testid="quick-teachers"] button', { hasText: oldCoach }).first().click();
+await admin.waitForFunction(([id, n]) => document.querySelector(`[data-testid="day-timeline"] a[data-class-id="${id}"]`)?.textContent?.includes(n), [qid, oldCoach]);
+
+// day: Sunday, then back to the original day
+const dayIdx = await admin.locator('[data-testid="quick-days"] button').evaluateAll((els) => els.findIndex((e) => e.getAttribute("aria-pressed") === "true"));
+const toDay = dayIdx === 1 ? 2 : 1;
+await admin.locator('[data-testid="quick-days"] button').nth(toDay).click();
+await admin.locator("button", { hasText: "ذخیره‌ی زمان" }).click();
+await admin.waitForFunction(([id, d]) => document.querySelectorAll('[data-testid="timeline-day"]')[d]?.querySelector(`a[data-class-id="${id}"]`), [qid, toDay]);
+check("changing the day moves the block to that row", true);
+await admin.locator('[data-testid="quick-days"] button').nth(dayIdx).click();
+await admin.locator("button", { hasText: "ذخیره‌ی زمان" }).click();
+await admin.waitForFunction(([id, d]) => document.querySelectorAll('[data-testid="timeline-day"]')[d]?.querySelector(`a[data-class-id="${id}"]`), [qid, dayIdx]);
+
+// students: remove one, then add the same one back by searching its name
+const who = (await admin.locator('[data-testid="quick-roster"] li button').first().getAttribute("aria-label")).split(": ")[1];
+await admin.locator('[data-testid="quick-roster"] li button').first().click();
+await admin.waitForFunction((n) => document.querySelectorAll('[data-testid="quick-roster"] li').length === n, n0 - 1).catch(() => {});
+check("a student can be taken out of the class", (await rosterN()) === n0 - 1 || n0 === 1);
+await admin.fill('input[aria-label="جست‌وجوی دانش‌آموز"]', who);
+await admin.locator('[data-testid="quick-available"] button', { hasText: who }).first().click();
+await admin.waitForFunction((n) => document.querySelectorAll('[data-testid="quick-roster"] li').length === n, n0);
+check("and put back by searching", (await rosterN()) === n0, who);
+
+await admin.keyboard.press("Escape");
+await admin.waitForSelector('[data-testid="class-quick"]', { state: "detached" });
+check("Escape closes the panel and the address forgets it", !/open=/.test(admin.url()));
 
 console.log(R.join("\n"));
 console.log("errors:", errs);

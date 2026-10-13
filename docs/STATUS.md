@@ -1,6 +1,6 @@
 # Project status (handover for people and AI agents)
 
-Last updated: 2026-10-05, branch `claude/fervent-gauss-cdro10`.
+Last updated: 2026-10-13, branch `claude/fervent-gauss-cdro10`.
 Read `CLAUDE.md` first (rules), then this file (what exists and what is missing), then the spec for the area you touch.
 
 ## 1. What the project is
@@ -69,6 +69,8 @@ pnpm bot:check && pnpm bot:dev     # needs BALE_BOT_TOKEN / TELEGRAM_BOT_TOKEN i
 | Admin CMS | Done. Settings and contacts, branches, departments, courses (prices with show/hide), teachers, achievements, page texts, blog posts. All with audit log. |
 | Booking | Done. Appointment types, weekly time templates, closed days, public `/book` flow with phone code, admin list. |
 | Desktop menu | The side menu collapses to an icon rail (button at its bottom; remembered per browser, restored before first paint). Class cards are compact (time block, name, course, coach and place, a ring for seats). The timetable gives busy days wider columns and shows coach and title for up to five classes at the same hour. |
+| Class timeline and quick panel | On a desktop the weekday view is a timeline: one row per day, each class as wide as its hours, overlapping classes in their own lanes, coach name on top, a "now" line on today. Clicking a class (any view) opens a side panel to change its coach, day and time (clash warning, future sessions follow) and its students (remove, search and add) without leaving the list; Ctrl/Cmd-click still opens the full class page. The panel is kept in the address (`?open=`). Items rise in one after another, the view switch has an animated pill, the loading state is a shimmering skeleton with a progress bar (all respect reduced motion). |
+| UI sounds | Short synthesized sounds (tick, pop, open, close, success, error, remove) on choices, saves and errors; a speaker button in the header turns them off (remembered). |
 | Phone navigation | A bottom tab bar (dashboard, session board, classes, students) plus a menu button, instead of a floating button. |
 | Auth and permissions | Done. OTP login (fixed code `OTP_DEV_CODE` in development, no rate limit then; first sign-in becomes owner when no owner exists, development only), roles, every page and action checks permission on the server. A signed-in account without permission lands on `/app/no-access` (friendly page), never a bare 404. |
 | Admin dashboard | Done. Today's sessions, unanswered sessions, teachers' cancellation requests (approve with editable notice, or decline), upcoming bookings, quick actions, bot connection card, site content health. Navigation has icons and a badge on the session board. |

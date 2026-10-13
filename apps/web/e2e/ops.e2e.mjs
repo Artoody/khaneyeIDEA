@@ -59,9 +59,9 @@ await admin.waitForSelector('[data-testid="session-panel"]:visible summary');
 check("canceled session restored", true);
 // classes & students lists
 await admin.goto(base + "/app/admin/classes");
-await admin.waitForSelector('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])');
-check("classes list", (await admin.locator('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])').count()) >= 6);
-await admin.locator('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])').first().click();
+await admin.waitForSelector('[data-testid="day-timeline"] a[data-class-id]:visible');
+check("classes list", (await admin.locator('[data-testid="day-timeline"] a[data-class-id]').count()) >= 6);
+await admin.goto(base + (await admin.locator('[data-testid="day-timeline"] a[data-class-id]').first().getAttribute("href")));
 await admin.waitForSelector('[data-testid="roster"]');
 check("class page shows roster", (await admin.locator('[data-testid="roster"] li').count()) >= 3);
 await admin.screenshot({ path: `${S}/ops-class.png`, fullPage: true });

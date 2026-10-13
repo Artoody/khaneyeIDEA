@@ -13,6 +13,7 @@ import { LogoMark } from "@/components/site/logo-mark";
 import { AdminNav, type NavItem } from "@/components/admin/admin-nav";
 import { ThemeToggle } from "@/components/site/header-client";
 import { InlineScript } from "@/components/inline-script";
+import { PanelSfx, SoundToggle } from "@/components/ops/sfx";
 
 // Layout only draws the frame. Authorization happens in every page and every action (never here).
 async function UserChip({ lang }: { lang: Locale }) {
@@ -80,6 +81,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
     <div className="min-h-[100dvh]">
       {/* restores the icon-only menu before first paint */}
       <InlineScript html={`try{if(localStorage.getItem("admin-nav")==="collapsed")document.documentElement.dataset.adminNav="collapsed"}catch(e){}`} />
+      <PanelSfx />
       <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-bg/85 px-4 backdrop-blur-xl sm:px-6">
         <Link href={base} className="flex items-center gap-2.5">
           <LogoMark className="h-7 w-auto" />
@@ -89,6 +91,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
           <Suspense>
             <UserChip lang={lang} />
           </Suspense>
+          <SoundToggle onLabel={o.nav2.soundOn} offLabel={o.nav2.soundOff} />
           <ThemeToggle label={t.theme.toggle} />
           <form action={logoutAction}>
             <input type="hidden" name="lang" value={lang} />

@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { CalendarBlank, ChalkboardTeacher, MagnifyingGlass, MapPin, Monitor, Plus, SquaresFour, X } from "@phosphor-icons/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { ClassQuick } from "./class-quick";
+import { CalendarBlank, ChalkboardTeacher, Clock, MagnifyingGlass, MapPin, Monitor, Plus, SquaresFour, X } from "@phosphor-icons/react";
 import type { OpsDict } from "@/lib/ops-i18n";
 import { num, type Locale } from "@/lib/i18n";
 import { fill } from "@/lib/format";
@@ -33,17 +35,42 @@ const VIEWS: View[] = ["weekday", "teacher", "branch", "grid"];
 // One colour per coach (muted, translucent so it works on light and dark). The index is the coach's position.
 const HUES = [28, 205, 150, 285, 350, 85, 235, 60];
 const hue = (i: number) => HUES[((i % HUES.length) + HUES.length) % HUES.length]!;
-const tone = (i: number) => ({
-  background: `hsl(${hue(i)} 70% 52% / 0.12)`,
-  borderColor: `hsl(${hue(i)} 60% 46% / 0.4)`,
-  ["--strip" as string]: `hsl(${hue(i)} 65% 50%)`,
-});
-
 const mins = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
 const hoursOf = (rows: ClassRow[]) => rows.reduce((s, r) => s + (mins(r.end) - mins(r.start)) / 60, 0);
 const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map((w) => [...w][0]).join("");
 
-type Ctx = { tIndex: Map<string, number>; lang: Locale; c: OpsDict["cb"] };
+type Ctx = { tIndex: Map<string, number>; lang: Locale; c: OpsDict["cb"]; weekdays: readonly string[]; onOpen: (id: string) => void };
+
+/** A plain click opens the quick panel; a modified click (new tab, new window) still goes to the class page. */
+const openProps = (r: ClassRow, ctx: Ctx) => ({
+  href: r.href,
+  "data-class-id": r.id,
+  "data-sfx": "swoosh",
+  onClick: (e: React.MouseEvent) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    ctx.onOpen(r.id);
+  },
+});
+
+/** Minutes since midnight in Tehran, or null until the browser has said (keeps the server and first paint equal). */
+function useTehranMinutes(): number | null {
+  const [m, setM] = useState<number | null>(null);
+  useEffect(() => {
+    const tick = () => {
+      const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Tehran", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date());
+      const get = (t: string) => Number(parts.find((p) => p.type === t)?.value ?? 0);
+      setM(get("hour") * 60 + get("minute"));
+    };
+    const first = setTimeout(tick, 0);
+    const every = setInterval(tick, 30_000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(every);
+    };
+  }, []);
+  return m;
+}
 
 function Avatar({ name, idx, size = "size-11" }: { name: string; idx: number; size?: string }) {
   return (
@@ -84,43 +111,48 @@ function SeatRing({ n, capacity, color }: { n: number; capacity: number; color: 
   );
 }
 
-function ClassCard({ r, showTeacher = true, ctx }: { r: ClassRow; showTeacher?: boolean; ctx: Ctx }) {
-  const { tIndex, lang, c } = ctx;
+/**
+ * A class as a card. The top band names who it is about (the coach, or the weekday when the page is already grouped
+ * by coach): that is what people scan for. Time, place and seats sit below the class name.
+ */
+function ClassCard({ r, showTeacher = true, ctx, i = 0 }: { r: ClassRow; showTeacher?: boolean; ctx: Ctx; i?: number }) {
+  const { tIndex, lang, c, weekdays } = ctx;
   const idx = r.teacherId ? (tIndex.get(r.teacherId) ?? 0) : 0;
   const h = hue(idx);
   const accent = r.teacherId ? `hsl(${h} 65% 48%)` : "var(--muted)";
+  const band = r.teacherId ? { background: `hsl(${h} 70% 52% / 0.14)`, color: `hsl(${h} 55% 26%)` } : { background: "hsl(0 0% 50% / 0.1)" };
   return (
     <Link
-      href={r.href}
-      className={`group flex items-center gap-3.5 rounded-2xl border border-line bg-surface p-3 transition hover:-translate-y-px hover:border-ink/25 hover:shadow-[0_6px_18px_-10px_rgb(0_0_0/0.25)] ${r.active ? "" : "opacity-55"}`}
+      {...openProps(r, ctx)}
+      style={{ "--i": i } as React.CSSProperties}
+      className={`rise group flex flex-col overflow-hidden rounded-2xl border border-line bg-surface transition hover:-translate-y-px hover:border-ink/25 hover:shadow-[0_8px_20px_-12px_rgb(0_0_0/0.3)] ${r.active ? "" : "opacity-55"}`}
     >
-      <span
-        className="flex w-14 shrink-0 flex-col items-center justify-center self-stretch rounded-xl py-1.5 leading-none"
-        style={{ background: r.teacherId ? `hsl(${h} 70% 52% / 0.13)` : "hsl(0 0% 50% / 0.1)", color: r.teacherId ? `hsl(${h} 55% 30%)` : undefined }}
-      >
-        <span className="font-display text-[15px] font-black tabular-nums">{num(r.start, lang)}</span>
-        <span className="mt-1.5 text-[11px] tabular-nums opacity-65">{num(r.end, lang)}</span>
+      <span className="flex items-center gap-2.5 px-3.5 py-2.5" style={band}>
+        {showTeacher ? (
+          <span className="grid size-7 shrink-0 place-items-center rounded-full bg-white/70 text-[11px] font-extrabold dark:bg-black/30">{r.teacher ? initials(r.teacher) : "-"}</span>
+        ) : (
+          <CalendarBlank weight="duotone" className="size-5 shrink-0" />
+        )}
+        <span className="min-w-0 flex-1 truncate text-[15px] font-bold">{showTeacher ? (r.teacher ?? c.noTeacherGroup) : (weekdays[r.weekday] ?? "")}</span>
+        {!r.active && <span className="rounded-full bg-ink/10 px-2 py-0.5 text-[11px] text-ink">{c.inactive}</span>}
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block font-semibold leading-snug [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">{r.title}</span>
-        <span className="block truncate text-[13px] text-muted">{r.course}</span>
-        <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted">
-          {showTeacher && (
-            <span className="inline-flex max-w-full items-center gap-1.5">
-              <span className="grid size-5 shrink-0 place-items-center rounded-full text-[10px] font-extrabold" style={{ background: `hsl(${h} 65% 50% / 0.2)`, color: `hsl(${h} 60% 30%)` }}>
-                {r.teacher ? initials(r.teacher) : "-"}
-              </span>
-              <span className="truncate">{r.teacher ?? c.noTeacherGroup}</span>
+      <span className="flex items-start gap-3 p-3.5">
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold leading-snug [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">{r.title}</span>
+          <span className="block truncate text-[13px] text-muted">{r.course}</span>
+          <span className="mt-2.5 flex flex-wrap gap-1.5 text-[12.5px]">
+            <span className="inline-flex items-center gap-1 rounded-full bg-ink/[0.06] px-2.5 py-1 font-medium tabular-nums">
+              <Clock weight="duotone" className="size-3.5" />
+              {num(r.start, lang)} - {num(r.end, lang)}
             </span>
-          )}
-          <span className="inline-flex shrink-0 items-center gap-1">
-            {r.online ? <Monitor weight="duotone" className="size-3.5" /> : <MapPin weight="duotone" className="size-3.5" />}
-            <span>{r.online ? c.onlineGroup : r.branch}</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-ink/[0.06] px-2.5 py-1">
+              {r.online ? <Monitor weight="duotone" className="size-3.5" /> : <MapPin weight="duotone" className="size-3.5" />}
+              {r.online ? c.onlineGroup : r.branch}
+            </span>
           </span>
-          {!r.active && <span className="rounded-full bg-ink/10 px-2 py-0.5 text-[11px]">{c.inactive}</span>}
         </span>
+        <SeatRing n={r.n} capacity={r.capacity} color={accent} />
       </span>
-      <SeatRing n={r.n} capacity={r.capacity} color={accent} />
     </Link>
   );
 }
@@ -146,12 +178,15 @@ export function ClassBrowser({
   weekdays: readonly string[];
   base: string;
   todayWd: number;
-  initial: { v?: string; t?: string; m?: string; q?: string };
+  initial: { v?: string; t?: string; m?: string; q?: string; open?: string };
 }) {
   const [view, setView] = useState<View>(VIEWS.includes(initial.v as View) ? (initial.v as View) : "weekday");
   const [teacher, setTeacher] = useState<string | null>(initial.t && teachers.some((t) => t.id === initial.t) ? initial.t : null);
   const [mode, setMode] = useState<"all" | "in_person" | "online">(initial.m === "online" || initial.m === "in_person" ? initial.m : "all");
   const [q, setQ] = useState(initial.q ?? "");
+  const [openId, setOpenId] = useState<string | null>(initial.open && rows.some((r) => r.id === initial.open) ? initial.open : null);
+  const nowMin = useTehranMinutes();
+  const reduce = useReducedMotion();
   const c = o.cb;
 
   useEffect(() => {
@@ -160,11 +195,12 @@ export function ClassBrowser({
     if (teacher) p.set("t", teacher);
     if (mode !== "all") p.set("m", mode);
     if (q.trim()) p.set("q", q.trim());
+    if (openId) p.set("open", openId);
     window.history.replaceState(null, "", p.size ? `${base}?${p}` : base);
-  }, [view, teacher, mode, q, base]);
+  }, [view, teacher, mode, q, openId, base]);
 
   const tIndex = useMemo(() => new Map(teachers.map((t, i) => [t.id, i])), [teachers]);
-  const ctx: Ctx = { tIndex, lang, c };
+  const ctx: Ctx = { tIndex, lang, c, weekdays, onOpen: setOpenId };
   const filtered = useMemo(() => {
     const needle = q.trim();
     return rows.filter(
@@ -192,43 +228,48 @@ export function ClassBrowser({
     const lo = Math.max(0, first - 1);
     const hi = Math.min(24, Math.max(last + 1, lo + 6));
     const PX = 60;
+    const HDR = 26; // height of a card's coach band: the part of a stacked card that always stays visible
     const height = (hi - lo) * PX;
     const hours = Array.from({ length: hi - lo + 1 }, (_, i) => lo + i);
+    const yOf = (t: string) => ((mins(t) - lo * 60) / 60) * PX;
 
-    // Lay each day out: classes that overlap in time sit side by side in lanes.
+    // Every column has the same width. Classes that overlap in time are stacked like a deck of cards: each one is
+    // pushed down just enough that its coach band stays readable, and hovering brings a card to the front.
     const days = weekdays.map((d, wd) => {
-      const day = list.filter((r) => r.weekday === wd).sort((a, b) => mins(a.start) - mins(b.start) || mins(b.end) - mins(a.end));
-      const laneEnd: number[] = [];
-      const placed = day.map((r) => {
-        let lane = laneEnd.findIndex((end) => end <= mins(r.start));
-        if (lane < 0) lane = laneEnd.length;
-        laneEnd[lane] = mins(r.end);
-        return { r, lane, lanes: 1 };
+      const day = list.filter((r) => r.weekday === wd).sort((a, b) => mins(a.start) - mins(b.start) || (tIndex.get(a.teacherId ?? "") ?? 0) - (tIndex.get(b.teacherId ?? "") ?? 0));
+      const clusters: ClassRow[][] = [];
+      let end = -1;
+      for (const r of day) {
+        if (clusters.length && mins(r.start) < end) clusters[clusters.length - 1]!.push(r);
+        else clusters.push([r]);
+        end = Math.max(end, mins(r.end));
+      }
+      const placed = clusters.flatMap((cl) => {
+        let prev = -Infinity;
+        return cl.map((r, depth) => {
+          const top = Math.max(yOf(r.start), prev + HDR);
+          prev = top;
+          return { r, top, bottom: Math.max(yOf(r.end) - 2, top + HDR + 26), depth, count: cl.length };
+        });
       });
-      // every block shares the width of the busiest moment it takes part in
-      for (const p of placed) p.lanes = Math.max(...placed.filter((x) => mins(x.r.start) < mins(p.r.end) && mins(x.r.end) > mins(p.r.start)).map((x) => x.lane)) + 1;
-      return { d, wd, placed, lanes: Math.max(1, ...placed.map((p) => p.lanes)) };
+      return { d, wd, placed };
     });
-    // A busy day gets a wider column (roughly 5.5rem per simultaneous class), so five coaches at one hour stay readable.
-    const columns = days.map((x) => `minmax(max(7.5rem, ${x.lanes * 5.5}rem), ${x.lanes}fr)`).join(" ");
+    const tallest = Math.max(height, ...days.flatMap((x) => x.placed.map((p) => p.bottom + 4)));
 
     return (
-      <div className="hidden lg:block" data-testid="timetable">
+      <div className="rise hidden lg:block" data-testid="timetable">
         <div className="overflow-x-auto pb-2">
-          <div className="grid gap-x-2" style={{ gridTemplateColumns: `3rem ${columns}` }}>
+          <div className="grid gap-x-2" style={{ gridTemplateColumns: "3rem repeat(7, minmax(8.5rem, 1fr))" }}>
             <div />
-            {days.map(({ d, wd, lanes }) => (
+            {days.map(({ d, wd }) => (
               <div key={d} className={`mb-2 flex items-center justify-between gap-1 rounded-xl px-2.5 py-1.5 text-sm ${wd === todayWd ? "bg-accent/15 font-semibold" : "text-muted"}`}>
-                <span>
-                  {d}
-                  {lanes >= 3 && <span className="ms-1.5 rounded-full bg-ink/10 px-1.5 text-[11px] font-medium text-ink">{num(lanes, lang)}×</span>}
-                </span>
+                {d}
                 <Link href={newHref({ teacher, weekday: wd })} aria-label={fill(c.newOn, { day: d })} title={fill(c.newOn, { day: d })} className="grid size-6 place-items-center rounded-full hover:bg-ink/10">
                   <Plus weight="bold" className="size-3.5" />
                 </Link>
               </div>
             ))}
-            <div className="relative" style={{ height }}>
+            <div className="relative" style={{ height: tallest }}>
               {hours.map((h) => (
                 <span key={h} className="absolute -translate-y-1/2 text-xs tabular-nums text-muted" style={{ top: (h - lo) * PX }}>
                   {num(`${String(h).padStart(2, "0")}:00`, lang)}
@@ -239,32 +280,40 @@ export function ClassBrowser({
               <div
                 key={d}
                 className={`relative rounded-xl border ${wd === todayWd ? "border-accent/40 bg-accent/[0.04]" : "border-line"}`}
-                style={{ height, backgroundImage: "linear-gradient(to bottom, var(--line) 1px, transparent 1px)", backgroundSize: `100% ${PX}px` }}
+                style={{ height: tallest, backgroundImage: "linear-gradient(to bottom, var(--line) 1px, transparent 1px)", backgroundSize: `100% ${PX}px` }}
               >
-                {placed.map(({ r, lane, lanes }) => {
-                  const top = ((mins(r.start) - lo * 60) / 60) * PX;
-                  const h = Math.max(((mins(r.end) - mins(r.start)) / 60) * PX - 3, 34);
+                {wd === todayWd && nowMin != null && nowMin >= lo * 60 && nowMin <= hi * 60 && (
+                  <span data-testid="now-line" className="pointer-events-none absolute inset-x-0 z-20 h-px bg-accent" style={{ top: ((nowMin - lo * 60) / 60) * PX }}>
+                    <span className="absolute -top-2 start-0 rounded-full bg-accent px-1.5 text-[10px] font-bold leading-4 text-on-accent">{c.now}</span>
+                  </span>
+                )}
+                {placed.map(({ r, top, bottom, depth, count }) => {
                   const idx = r.teacherId ? (tIndex.get(r.teacherId) ?? 0) : 0;
-                  const compact = lanes >= 6; // far too narrow for text: coach initials and the time
+                  const h = hue(idx);
                   return (
                     <Link
                       key={r.id}
-                      href={r.href}
-                      style={{ ...(r.teacherId ? tone(idx) : {}), top: top + 1, height: h, insetInlineStart: `calc(${(lane / lanes) * 100}% + 1px)`, width: `calc(${100 / lanes}% - 2px)` }}
-                      className={`absolute overflow-hidden rounded-lg border text-xs leading-snug transition hover:z-10 hover:shadow-md ${compact ? "px-1 py-1" : "px-2 py-1"} ${r.active ? "" : "opacity-55"}`}
-                      title={`${num(r.start, lang)} - ${num(r.end, lang)}\n${r.title}\n${r.teacher ?? ""}`}
+                      {...openProps(r, ctx)}
+                      style={{
+                        top: top + 1,
+                        height: bottom - top,
+                        zIndex: depth + 1,
+                        insetInlineStart: 3 + depth * 5,
+                        width: `calc(100% - ${6 + (count - 1) * 5}px)`,
+                        borderColor: r.teacherId ? `hsl(${h} 60% 46% / 0.55)` : undefined,
+                      }}
+                      className={`absolute flex flex-col overflow-hidden rounded-lg border bg-surface text-xs shadow-[0_1px_3px_rgb(0_0_0/0.12)] transition hover:z-30 hover:shadow-lg focus-visible:z-30 ${r.active ? "" : "opacity-55"}`}
+                      title={`${r.teacher ?? ""}\n${r.title}\n${num(r.start, lang)} - ${num(r.end, lang)}`}
                     >
-                      <span className="absolute inset-y-0 start-0 w-1" style={{ background: r.teacherId ? "var(--strip)" : "var(--line)" }} aria-hidden />
-                      <span className="block ps-1 font-bold tabular-nums">{num(r.start, lang)}</span>
-                      {compact ? (
-                        <span className="mt-1 block ps-1 text-[11px] font-semibold">{r.teacher ? initials(r.teacher) : "-"}</span>
-                      ) : (
-                        <>
-                          {lanes >= 3 && r.teacher && <span className="block truncate ps-1 text-[11px] font-semibold">{r.teacher.split(" ")[0]}</span>}
-                          <span className={`block ps-1 [display:-webkit-box] [-webkit-box-orient:vertical] overflow-hidden ${lanes >= 3 ? "text-[11px] text-muted [-webkit-line-clamp:2]" : "font-medium [-webkit-line-clamp:2]"}`}>{r.title}</span>
-                          {lanes < 3 && h > 70 && r.teacher && <span className="block truncate ps-1 text-muted">{r.teacher}</span>}
-                        </>
-                      )}
+                      <span className="flex shrink-0 items-center gap-1.5 px-2 font-bold" style={{ height: HDR, background: r.teacherId ? `hsl(${h} 70% 52% / 0.2)` : "hsl(0 0% 50% / 0.12)", color: r.teacherId ? `hsl(${h} 55% 24%)` : undefined }}>
+                        <span className="truncate">{r.teacher ?? c.noTeacherGroup}</span>
+                      </span>
+                      <span className="block px-2 pt-1">
+                        <span className="block font-medium leading-snug [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">{r.title}</span>
+                        <span className="mt-0.5 block text-[11px] tabular-nums text-muted">
+                          {num(r.start, lang)} - {num(r.end, lang)}
+                        </span>
+                      </span>
                     </Link>
                   );
                 })}
@@ -277,8 +326,120 @@ export function ClassBrowser({
     );
   };
 
-  const byWeekday = (list: ClassRow[], keepEmpty = false) => (
-    <div className="flex flex-col gap-7" data-testid="class-days">
+  /**
+   * Weekday view on a desktop: one row per day, each class laid out along the hours so its width is its length.
+   * Classes that overlap move to their own lane inside the day instead of squeezing each other.
+   */
+  const timeline = (list: ClassRow[]) => {
+    const starts = list.map((r) => mins(r.start));
+    const ends = list.map((r) => mins(r.end));
+    const lo = Math.max(0, Math.floor(Math.min(...starts, 15 * 60) / 60));
+    const hi = Math.min(24, Math.max(Math.ceil(Math.max(...ends, 19 * 60) / 60), lo + 5));
+    const span = hi - lo;
+    const HOUR = 84;
+    const LANE = 70;
+    const pct = (m: number) => ((m - lo * 60) / (span * 60)) * 100;
+    const hours = Array.from({ length: span + 1 }, (_, i) => lo + i);
+    const rowsByDay = weekdays.map((d, wd) => {
+      const day = list.filter((r) => r.weekday === wd).sort((a, b) => mins(a.start) - mins(b.start) || mins(a.end) - mins(b.end));
+      const laneEnd: number[] = [];
+      const placed = day.map((r) => {
+        let lane = laneEnd.findIndex((e) => e <= mins(r.start));
+        if (lane < 0) lane = laneEnd.length;
+        laneEnd[lane] = mins(r.end);
+        return { r, lane };
+      });
+      return { d, wd, placed, lanes: Math.max(1, laneEnd.length) };
+    });
+    const nowShown = nowMin != null && nowMin >= lo * 60 && nowMin <= hi * 60;
+
+    return (
+      <div className="rise hidden lg:block" data-testid="day-timeline">
+        <div className="overflow-x-auto rounded-[var(--radius-card)] border border-line bg-surface">
+          <div style={{ minWidth: `calc(7.5rem + ${span * HOUR}px)` }}>
+            <div className="grid" style={{ gridTemplateColumns: "7.5rem 1fr" }}>
+              <div className="sticky start-0 z-10 border-b border-line bg-surface" />
+              <div className="relative h-8 border-b border-line">
+                {hours.filter((h) => h < hi).map((h) => (
+                  <span key={h} className="absolute top-1/2 -translate-y-1/2 ps-1.5 text-xs tabular-nums text-muted" style={{ insetInlineStart: `${((h - lo) / span) * 100}%` }}>
+                    {num(`${String(h).padStart(2, "0")}:00`, lang)}
+                  </span>
+                ))}
+              </div>
+              {rowsByDay.map(({ d, wd, placed, lanes }, di) => (
+                <div key={d} className="contents" data-testid="timeline-day">
+                  <div className={`sticky start-0 z-10 flex flex-col justify-center gap-1 border-b border-line p-3 ${wd === todayWd ? "bg-accent/10" : "bg-surface"}`}>
+                    <span className={`flex items-center gap-1.5 text-sm ${wd === todayWd ? "font-bold" : "font-semibold"}`}>
+                      {d}
+                      {wd === todayWd && <span className="rounded-full bg-accent/25 px-1.5 text-[10px] font-semibold text-accent-text">{c.today}</span>}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-xs text-muted">
+                      {fill(c.classesCount, { n: num(placed.length, lang) })}
+                      <Link href={newHref({ teacher, weekday: wd })} aria-label={fill(c.newOn, { day: d })} title={fill(c.newOn, { day: d })} className="grid size-6 place-items-center rounded-full hover:bg-ink/10 hover:text-ink">
+                        <Plus weight="bold" className="size-3.5" />
+                      </Link>
+                    </span>
+                  </div>
+                  <div
+                    className={`relative border-b border-line ${wd === todayWd ? "bg-accent/[0.04]" : ""}`}
+                    style={{
+                      height: lanes * LANE + 8,
+                      backgroundImage: "linear-gradient(to right, var(--line) 1px, transparent 1px)",
+                      backgroundSize: `${100 / span}% 100%`,
+                    }}
+                  >
+                    {placed.map(({ r, lane }, pi) => {
+                      const h = hue(r.teacherId ? (tIndex.get(r.teacherId) ?? 0) : 0);
+                      return (
+                        <Link
+                          key={r.id}
+                          {...openProps(r, ctx)}
+                          title={`${r.teacher ?? ""}\n${r.title}\n${num(r.start, lang)} - ${num(r.end, lang)}`}
+                          style={{
+                            insetInlineStart: `calc(${pct(mins(r.start))}% + 2px)`,
+                            width: `calc(${((mins(r.end) - mins(r.start)) / (span * 60)) * 100}% - 4px)`,
+                            top: 4 + lane * LANE,
+                            height: LANE - 6,
+                            "--i": di + pi,
+                            borderColor: r.teacherId ? `hsl(${h} 60% 46% / 0.5)` : undefined,
+                          } as React.CSSProperties}
+                          className={`rise absolute flex flex-col overflow-hidden rounded-xl border bg-surface text-xs shadow-[0_1px_3px_rgb(0_0_0/0.1)] transition hover:z-20 hover:-translate-y-px hover:shadow-lg focus-visible:z-20 ${r.active ? "" : "opacity-55"}`}
+                        >
+                          <span className="flex h-6 shrink-0 items-center gap-1.5 px-2.5 text-[12.5px] font-bold" style={{ background: r.teacherId ? `hsl(${h} 70% 52% / 0.2)` : "hsl(0 0% 50% / 0.12)", color: r.teacherId ? `hsl(${h} 55% 24%)` : undefined }}>
+                            <span className="truncate">{r.teacher ?? c.noTeacherGroup}</span>
+                            <span className="ms-auto shrink-0 text-[11px] font-medium tabular-nums opacity-75">
+                              {num(r.n, lang)}/{num(r.capacity, lang)}
+                            </span>
+                          </span>
+                          <span className="flex min-w-0 flex-1 flex-col justify-center px-2.5">
+                            <span className="truncate font-medium">{r.title}</span>
+                            <span className="truncate text-[11px] tabular-nums text-muted">
+                              {num(r.start, lang)} - {num(r.end, lang)}
+                            </span>
+                          </span>
+                        </Link>
+                      );
+                    })}
+                    {wd === todayWd && nowShown && (
+                      <span data-testid="now-line" className="pointer-events-none absolute inset-y-0 z-10 w-px bg-accent" style={{ insetInlineStart: `${pct(nowMin!)}%` }}>
+                        <span className="absolute -top-px start-1/2 -translate-x-1/2 rounded-b-md bg-accent px-1.5 text-[10px] font-bold leading-4 text-on-accent [html[dir=rtl]_&]:translate-x-1/2">{c.now}</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-muted">{c.timelineHint}</p>
+      </div>
+    );
+  };
+
+  const byWeekday = (list: ClassRow[], keepEmpty = false, withTimeline = false) => (
+    <>
+    {withTimeline && timeline(list)}
+    <div className={`flex flex-col gap-7 ${withTimeline ? "lg:hidden" : ""}`} data-testid="class-days">
       {weekdays.map((d, wd) => {
         const day = list.filter((r) => r.weekday === wd).sort((a, b) => a.start.localeCompare(b.start));
         if (!day.length && !keepEmpty) return null;
@@ -290,13 +451,14 @@ export function ClassBrowser({
               avatar={wd === todayWd ? <span className="rounded-full bg-accent/20 px-2.5 py-1 text-xs font-semibold text-accent-text">{c.today}</span> : undefined}
               action={{ href: newHref({ teacher, weekday: wd }), label: fill(c.newOn, { day: d }) }}
             />
-            <div className={CARD_GRID}>{day.map((r) => (
-                <ClassCard key={r.id} r={r} showTeacher={!teacher} ctx={ctx} />
+            <div className={CARD_GRID}>{day.map((r, i) => (
+                <ClassCard key={r.id} r={r} showTeacher={!teacher} ctx={ctx} i={i} />
               ))}</div>
           </section>
         );
       })}
     </div>
+    </>
   );
 
   const grouped = (kind: "teacher" | "branch") => {
@@ -330,8 +492,8 @@ export function ClassBrowser({
                 <div className={CARD_GRID}>
                   {[...g.list]
                     .sort((a, b) => a.weekday - b.weekday || a.start.localeCompare(b.start))
-                    .map((r) => (
-                      <ClassCard key={r.id} r={r} showTeacher={kind !== "teacher"} ctx={ctx} />
+                    .map((r, i) => (
+                      <ClassCard key={r.id} r={r} showTeacher={kind !== "teacher"} ctx={ctx} i={i} />
                     ))}
                 </div>
               )}
@@ -358,10 +520,11 @@ export function ClassBrowser({
                   role="tab"
                   aria-selected={view === v}
                   onClick={() => setView(v)}
-                  className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2 text-[13px] sm:px-3.5 sm:text-sm text-muted transition hover:text-ink aria-selected:bg-ink aria-selected:text-bg sm:flex-none"
+                  className="relative inline-flex h-9 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2 text-[13px] text-muted transition-colors hover:text-ink aria-selected:text-bg sm:flex-none sm:px-3.5 sm:text-sm"
                 >
-                  <Ico weight="duotone" className="hidden size-4 sm:block" />
-                  {c.views[v]}
+                  {view === v && <motion.span layoutId="view-pill" className="absolute inset-0 rounded-full bg-ink" transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 520, damping: 38 }} />}
+                  <Ico weight="duotone" className="relative hidden size-4 sm:block" />
+                  <span className="relative">{c.views[v]}</span>
                 </button>
               );
             })}
@@ -458,7 +621,7 @@ export function ClassBrowser({
           )}
         </div>
       ) : view === "weekday" ? (
-        byWeekday(filtered)
+        byWeekday(filtered, false, true)
       ) : view === "teacher" ? (
         grouped("teacher")
       ) : view === "branch" ? (
@@ -469,6 +632,21 @@ export function ClassBrowser({
           <div className="lg:hidden">{byWeekday(filtered)}</div>
         </>
       )}
+
+      <AnimatePresence>
+        {openId && (
+          <ClassQuick
+            key={openId}
+            id={openId}
+            o={o}
+            lang={lang}
+            weekdays={weekdays}
+            teachers={teachers.map((t, i) => ({ id: t.id, name: t.name, hue: hue(i) }))}
+            fullHref={rows.find((r) => r.id === openId)?.href ?? base}
+            onClose={() => setOpenId(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { and, count, eq, inArray } from "drizzle-orm";
+import { and, asc, count, eq, inArray } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -10,6 +10,7 @@ import { requirePermission } from "@/server/auth";
 import { href, isLocale } from "@/lib/i18n";
 import { audit, bool, int, text, type ActionState } from "@/server/admin";
 import { WEEKDAYS } from "@/lib/jalali";
+import { ageFromJalaliYear } from "@/lib/age";
 
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -226,4 +227,97 @@ export async function deleteClass(f: FormData) {
   await db.delete(classGroups).where(eq(classGroups.id, id));
   await audit(user.tenantId, user.userId, "delete", "class_group", id);
   redirect(href(isLocale(lang) ? lang : "fa", "/app/admin/classes"));
+}
+
+// ---- the quick panel on the classes page ---------------------------------------------------------------------
+
+export type QuickClass = {
+  id: string;
+  title: string;
+  course: string;
+  teacherId: string | null;
+  weekday: number;
+  start: string;
+  end: string;
+  capacity: number;
+  roster: { enrollmentId: string; studentId: string; name: string; age: number | null; status: string }[];
+  available: { id: string; name: string; age: number | null }[];
+};
+
+/** Everything the quick panel shows for one class: schedule, roster and the students who could still be added. */
+export async function getClassQuick(id: string): Promise<QuickClass | null> {
+  const user = await requirePermission("schedule.manage");
+  if (!z.uuid().safeParse(id).success) return null;
+  const db = getDb();
+  const [row] = await db
+    .select({ c: classGroups, course: courses.title })
+    .from(classGroups)
+    .innerJoin(courses, eq(courses.id, classGroups.courseId))
+    .where(and(eq(classGroups.id, id), eq(classGroups.tenantId, user.tenantId)));
+  if (!row) return null;
+  const [roster, all] = await Promise.all([
+    db
+      .select({ e: enrollments, s: students })
+      .from(enrollments)
+      .innerJoin(students, eq(students.id, enrollments.studentId))
+      .where(and(eq(enrollments.classGroupId, id), inArray(enrollments.status, ["active", "waitlist", "paused"])))
+      .orderBy(asc(enrollments.status), asc(students.firstName)),
+    db.select().from(students).where(eq(students.tenantId, user.tenantId)).orderBy(asc(students.firstName)),
+  ]);
+  const inClass = new Set(roster.map((r) => r.s.id));
+  const age = (y: number | null) => ageFromJalaliYear(y);
+  return {
+    id,
+    title: row.c.title,
+    course: row.course.fa,
+    teacherId: row.c.teacherId,
+    weekday: row.c.weekday,
+    start: row.c.startTime.slice(0, 5),
+    end: row.c.endTime.slice(0, 5),
+    capacity: row.c.capacity,
+    roster: roster.map(({ e, s }) => ({ enrollmentId: e.id, studentId: s.id, name: `${s.firstName} ${s.lastName}`.trim(), age: age(s.birthYear), status: e.status })),
+    available: all.filter((s) => !inClass.has(s.id)).map((s) => ({ id: s.id, name: `${s.firstName} ${s.lastName}`.trim(), age: age(s.birthYear) })),
+  };
+}
+
+/**
+ * Changes a class's coach and/or weekly time in place. Only the fields sent are changed. Coach or room clashes are
+ * reported first; "force" saves anyway. Future sessions follow the new schedule.
+ */
+export async function quickUpdateClass(_: ActionState, f: FormData): Promise<ClassState> {
+  const user = await requirePermission("schedule.manage");
+  const db = getDb();
+  const id = z.uuid().parse(f.get("id"));
+  const [c] = await db.select().from(classGroups).where(and(eq(classGroups.id, id), eq(classGroups.tenantId, user.tenantId)));
+  if (!c) return { error: "not_found" };
+  const next = { teacherId: c.teacherId, weekday: c.weekday, startTime: c.startTime.slice(0, 5), endTime: c.endTime.slice(0, 5) };
+  if (f.has("teacherId")) {
+    const t = text(f, "teacherId");
+    if (t) {
+      const [own] = await db.select({ id: teachers.id }).from(teachers).where(and(eq(teachers.id, t), eq(teachers.tenantId, user.tenantId)));
+      if (!own) return { error: "validation", fieldErrors: { teacherId: "invalid" } };
+    }
+    next.teacherId = t;
+  }
+  if (f.has("weekday")) {
+    const wd = int(f, "weekday");
+    if (wd === null || Number.isNaN(wd) || wd < 0 || wd > 6) return { error: "validation", fieldErrors: { weekday: "required" } };
+    next.weekday = wd;
+  }
+  if (f.has("startTime") || f.has("endTime")) {
+    const st = text(f, "startTime") ?? next.startTime;
+    const en = text(f, "endTime") ?? next.endTime;
+    if (!HHMM.test(st) || !HHMM.test(en) || en <= st) return { error: "validation", fieldErrors: { endTime: "time_order" } };
+    next.startTime = st;
+    next.endTime = en;
+  }
+  if (c.active && !bool(f, "force")) {
+    const clash = await classScheduleConflicts(db, user.tenantId, { id, teacherId: next.teacherId, roomId: c.roomId, weekday: next.weekday, startTime: next.startTime, endTime: next.endTime, startsOn: c.startsOn, endsOn: c.endsOn });
+    if (clash.length) return { error: "conflict", conflicts: clash.map((x) => ({ kind: x.kind, title: x.title })) };
+  }
+  await db.update(classGroups).set(next).where(eq(classGroups.id, id));
+  const synced = await syncClassSessions(db, user.tenantId, id);
+  await audit(user.tenantId, user.userId, "update", "class_group", id, { quick: next, synced });
+  refresh();
+  return { ok: true, savedAt: Date.now(), synced };
 }

@@ -334,3 +334,29 @@ html[data-intro="reveal"] .hero-enter-canvas { transition-delay: 150ms; transiti
 .prose table { width: 100%; border-collapse: collapse; font-size: 0.95em; display: block; overflow-x: auto; }
 .prose th, .prose td { border: 1px solid var(--line); padding: 0.5em 0.8em; text-align: start; }
 .prose hr { border: 0; border-top: 1px solid var(--line); margin-block: 2em; }
+
+/* Panel motion: items rise in one after another (--i is the item's position), loading bars shimmer. */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+.rise {
+  animation: rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(min(var(--i, 0), 14) * 38ms);
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.shimmer {
+  background-image: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--accent) 22%, transparent) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+@keyframes load-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(260%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise, .shimmer { animation: none; }
+}

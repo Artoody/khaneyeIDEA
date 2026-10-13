@@ -9,10 +9,10 @@ import { href, isLocale, pick, type Locale } from "@/lib/i18n";
 import { getOpsDict } from "@/lib/ops-i18n";
 import { tehranIso, WEEKDAYS } from "@/lib/jalali";
 import { requirePermissionPage } from "@/server/auth";
-import { ListSkeleton, PageHeader } from "@/components/admin/ui";
+import { ClassesSkeleton, PageHeader } from "@/components/admin/ui";
 import { ClassBrowser, type ClassRow } from "@/components/ops/class-browser";
 
-type Q = { v?: string; t?: string; m?: string; q?: string };
+type Q = { v?: string; t?: string; m?: string; q?: string; open?: string; };
 
 async function List({ lang, q }: { lang: Locale; q: Q }) {
   const user = await requirePermissionPage(lang, "schedule.manage");
@@ -90,10 +90,10 @@ export default async function Page({ params, searchParams }: PageProps<"/[lang]/
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   return (
-    <Suspense fallback={<ListSkeleton />}>
+    <Suspense fallback={<ClassesSkeleton />}>
       {searchParams.then((sp) => {
         const g = (k: keyof Q) => (typeof sp[k] === "string" ? (sp[k] as string) : undefined);
-        return <List lang={lang} q={{ v: g("v"), t: g("t"), m: g("m"), q: g("q") }} />;
+        return <List lang={lang} q={{ v: g("v"), t: g("t"), m: g("m"), q: g("q"), open: g("open") }} />;
       })}
     </Suspense>
   );

@@ -35,6 +35,7 @@ export async function teacherLoginAction(_prev: TeacherLoginState, form: FormDat
       tenantId: await tenantId(),
       username: String(form.get("username") ?? ""),
       password: String(form.get("password") ?? ""),
+      audience: "teacher",
       ...meta,
     });
     if (!result.ok) return { error: result.reason };

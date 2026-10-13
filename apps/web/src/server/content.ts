@@ -16,6 +16,7 @@ import {
   teachers,
   tenants,
 } from "@khaneyeidea/db";
+import { byTeacherName } from "@/server/teachers-order";
 
 // Public read model. Everything is cached and tagged; admin mutations call updateTag(...) on the same tags,
 // so edits appear on the site immediately while visitors get static-speed pages.
@@ -142,7 +143,7 @@ export async function getTeachers() {
     .select()
     .from(teachers)
     .where(and(eq(teachers.tenantId, await tenantId()), eq(teachers.showOnSite, true)))
-    .orderBy(asc(teachers.sortOrder));
+    .orderBy(byTeacherName);
   // Sample profiles never reach the production site.
   return process.env.NODE_ENV === "production" ? rows.filter((t) => !t.isSample) : rows;
 }

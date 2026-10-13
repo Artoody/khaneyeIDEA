@@ -30,7 +30,6 @@ describe("teacher password login", () => {
   });
   afterAll(async () => {
     await db.delete(tenants).where(eq(tenants.id, tenantId));
-    await closeDb();
   });
 
   it("rejects a short password and a bad username", async () => {
@@ -55,5 +54,39 @@ describe("teacher password login", () => {
     const still = await loginWithPassword(db, { tenantId, username: "coach.one", password: "longenough" });
     expect(locked.ok).toBe(false);
     expect(still.ok).toBe(false);
+  });
+
+  it("rejects a teacher account on the staff login", async () => {
+    await setUserPassword(db, { tenantId, userId, username: "coach.two", password: "longenough", mustChange: false });
+    const staff = await loginWithPassword(db, { tenantId, username: "coach.two", password: "longenough", audience: "staff" });
+    expect(staff.ok).toBe(false);
+    if (!staff.ok) expect(staff.reason).toBe("not_staff");
+  });
+});
+
+describe("staff password login", () => {
+  const db = getDb();
+  let tenantId = "";
+  let userId = "";
+
+  beforeAll(async () => {
+    const [t] = await db.insert(tenants).values({ slug: `staff-pw-${Date.now()}`, name: "staff-pw" }).returning();
+    tenantId = t!.id;
+    const [u] = await db.insert(users).values({ tenantId, phone: `988${Date.now().toString().slice(-9)}` }).returning();
+    userId = u!.id;
+    await db.insert(userRoles).values({ userId, role: "owner", branchId: null });
+  });
+  afterAll(async () => {
+    await db.delete(tenants).where(eq(tenants.id, tenantId));
+    await closeDb();
+  });
+
+  it("signs an owner in on staff audience and blocks teacher audience", async () => {
+    expect((await setUserPassword(db, { tenantId, userId, username: "boss.one", password: "longenough", mustChange: false })).ok).toBe(true);
+    const ok = await loginWithPassword(db, { tenantId, username: "boss.one", password: "longenough", audience: "staff" });
+    expect(ok.ok).toBe(true);
+    const asTeacher = await loginWithPassword(db, { tenantId, username: "boss.one", password: "longenough", audience: "teacher" });
+    expect(asTeacher.ok).toBe(false);
+    if (!asTeacher.ok) expect(asTeacher.reason).toBe("not_teacher");
   });
 });

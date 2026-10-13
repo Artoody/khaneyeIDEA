@@ -11,6 +11,7 @@ import { getOpsDict } from "@/lib/ops-i18n";
 import { fill } from "@/lib/format";
 import { dayLabel, tehranIso, timeLabel, WEEKDAYS } from "@/lib/jalali";
 import { requirePermissionPage } from "@/server/auth";
+import { byTeacherName } from "@/server/teachers-order";
 import { loadPendingRequests, loadSessionDetail, loadWeek, weekStart } from "@/server/sessions";
 import { RequestsInbox } from "@/components/ops/requests-inbox";
 import { ListSkeleton, PageHeader } from "@/components/admin/ui";
@@ -33,7 +34,7 @@ async function Board({ lang, q }: { lang: Locale; q: Q }) {
   const db = getDb();
   const [rows, ts, bs, requests] = await Promise.all([
     loadWeek(user.tenantId, start, { teacherId, branchId }),
-    db.select().from(teachers).where(eq(teachers.tenantId, user.tenantId)).orderBy(asc(teachers.sortOrder)),
+    db.select().from(teachers).where(eq(teachers.tenantId, user.tenantId)).orderBy(byTeacherName),
     db.select().from(branches).where(eq(branches.tenantId, user.tenantId)).orderBy(asc(branches.sortOrder)),
     loadPendingRequests(user.tenantId),
   ]);

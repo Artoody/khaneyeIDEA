@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { and, asc, count, countDistinct, eq } from "drizzle-orm";
+import { and, countDistinct, eq } from "drizzle-orm";
 import Link from "next/link";
 import { ChalkboardTeacher } from "@phosphor-icons/react/dist/ssr";
 import { classGroups, enrollments, getDb, teachers } from "@khaneyeidea/db";
@@ -9,6 +9,7 @@ import { getOpsDict } from "@/lib/ops-i18n";
 import { fill } from "@/lib/format";
 import { getAdminDict } from "@/lib/admin-i18n";
 import { requirePermissionPage } from "@/server/auth";
+import { byTeacherName } from "@/server/teachers-order";
 import { Badge, ListSkeleton, PageHeader, RowLink, RowList } from "@/components/admin/ui";
 
 async function List({ lang }: { lang: Locale }) {
@@ -16,10 +17,14 @@ async function List({ lang }: { lang: Locale }) {
   const a = getAdminDict(lang);
   const o = getOpsDict(lang);
   const db = getDb();
-  const rows = await db.select().from(teachers).where(eq(teachers.tenantId, user.tenantId)).orderBy(asc(teachers.sortOrder), asc(teachers.createdAt));
-  // what each coach teaches: classes and (active) students
+  const rows = await db.select().from(teachers).where(eq(teachers.tenantId, user.tenantId)).orderBy(byTeacherName);
+  // Weekly class groups per coach (not inflated by roster rows) + distinct active students.
   const load = await db
-    .select({ teacherId: classGroups.teacherId, classes: count(classGroups.id), students: countDistinct(enrollments.studentId) })
+    .select({
+      teacherId: classGroups.teacherId,
+      classes: countDistinct(classGroups.id),
+      students: countDistinct(enrollments.studentId),
+    })
     .from(classGroups)
     .leftJoin(enrollments, and(eq(enrollments.classGroupId, classGroups.id), eq(enrollments.status, "active")))
     .where(and(eq(classGroups.tenantId, user.tenantId), eq(classGroups.active, true)))

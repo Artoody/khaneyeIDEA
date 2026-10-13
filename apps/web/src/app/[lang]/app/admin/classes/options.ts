@@ -2,12 +2,13 @@ import "server-only";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { branches, courses, getDb, rooms, teachers, terms } from "@khaneyeidea/db";
 import { pick, type Locale } from "@/lib/i18n";
+import { byTeacherName } from "@/server/teachers-order";
 
 export async function classOptions(tenantId: string, lang: Locale) {
   const db = getDb();
   const [cs, ts, bs, rs, tms] = await Promise.all([
     db.select().from(courses).where(eq(courses.tenantId, tenantId)).orderBy(asc(courses.sortOrder)),
-    db.select().from(teachers).where(eq(teachers.tenantId, tenantId)).orderBy(asc(teachers.sortOrder)),
+    db.select().from(teachers).where(eq(teachers.tenantId, tenantId)).orderBy(byTeacherName),
     db.select().from(branches).where(eq(branches.tenantId, tenantId)).orderBy(asc(branches.sortOrder)),
     db.select().from(rooms).where(and(eq(rooms.tenantId, tenantId), eq(rooms.active, true))).orderBy(asc(rooms.name)),
     db.select().from(terms).where(eq(terms.tenantId, tenantId)).orderBy(desc(terms.startsOn)),

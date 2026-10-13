@@ -69,6 +69,7 @@ const dict = {
         unknown: "مشکلی پیش آمد. دوباره تلاش کنید.",
       },
       privacy: "با ورود، اطلاعات شما فقط برای ارائه‌ی خدمات آموزشگاه استفاده می‌شود.",
+      staffLogin: "ورود مدیران",
     },
     catalog: {
       filterDept: "حوزه",
@@ -228,6 +229,7 @@ const dict = {
         unknown: "Something went wrong. Please try again.",
       },
       privacy: "Your details are only used to provide the academy's services.",
+      staffLogin: "Staff sign in",
     },
     catalog: {
       filterDept: "Area",

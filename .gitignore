@@ -10,3 +10,5 @@ docs/site-export/_probe/
 .env.local
 *.tsbuildinfo
 .devdata/
+apps/web/public/media/teachers/*
+!apps/web/public/media/teachers/.gitkeep

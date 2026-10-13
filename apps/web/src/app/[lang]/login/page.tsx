@@ -39,6 +39,11 @@ export default async function LoginPage({ params }: PageProps<"/[lang]/login">) 
           <div className="mt-8">
             <LoginForm lang={lang} t={t.auth} devCode={devOtpCode()} />
           </div>
+          <p className="mt-6 text-center text-sm text-muted">
+            <Link href={href(lang, "/admin/login")} className="underline-offset-2 hover:text-ink hover:underline">
+              {t.auth.staffLogin}
+            </Link>
+          </p>
           <p className="mt-10 text-xs leading-relaxed text-muted">{t.auth.privacy}</p>
         </div>
       </section>

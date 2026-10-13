@@ -77,7 +77,13 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
     students: [{ key: "students", label: o.nav.students, href: `${base}/students`, group: o.nav.group }] as NavItem[],
     staff: [{ key: "staff", label: o.nav.staff, href: `${base}/staff`, group: o.nav.group }] as NavItem[],
   };
-  const navProps = { siteHref: href(lang), siteLabel: a.nav.viewSite, menuLabel: t.menu, collapseLabel: o.nav2.collapse };
+  const navProps = {
+    siteHref: href(lang),
+    siteLabel: a.nav.viewSite,
+    menuLabel: t.menu,
+    collapseLabel: o.nav2.collapse,
+    expandLabel: o.nav2.expand,
+  };
 
   return (
     <div className="min-h-[100dvh]">

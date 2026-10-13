@@ -172,7 +172,7 @@ export function ClassQuick({
                   value={start}
                   label={o.classes.start}
                   onChange={(v) => {
-                    const len = duration > 0 ? duration : 90;
+                    const len = duration > 0 ? duration : 75;
                     setStart(v);
                     setEnd(fromMin(toMin(v) + len));
                   }}
@@ -180,7 +180,7 @@ export function ClassQuick({
                 <TimeSelect name="endTime" value={end} label={o.cf.ends} onChange={setEnd} />
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
-                {[45, 60, 90, 120].map((m) => (
+                {[60, 75].map((m) => (
                   <button key={m} type="button" aria-pressed={duration === m} onClick={() => setEnd(fromMin(toMin(start) + m))} className={chip}>
                     {fill(o.cf.minutes, { n: num(m, lang) })}
                   </button>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   Buildings,
   ChalkboardTeacher,
@@ -57,7 +57,7 @@ export type NavItem = { key: keyof typeof ICONS; href: string; label: string; gr
 
 // The active-link highlight reads the URL, which is request data: keep it behind Suspense so the
 // panel frame still prerenders, and show the same links without a highlight until it resolves.
-function Links(props: { items: NavItem[]; onNavigate?: () => void }) {
+function Links(props: { items: NavItem[]; onNavigate?: () => void; collapsed?: boolean }) {
   return (
     <Suspense fallback={<LinkList {...props} path="" />}>
       <ActiveLinks {...props} />
@@ -65,11 +65,11 @@ function Links(props: { items: NavItem[]; onNavigate?: () => void }) {
   );
 }
 
-function ActiveLinks(props: { items: NavItem[]; onNavigate?: () => void }) {
+function ActiveLinks(props: { items: NavItem[]; onNavigate?: () => void; collapsed?: boolean }) {
   return <LinkList {...props} path={usePathname()} />;
 }
 
-function LinkList({ items, onNavigate, path }: { items: NavItem[]; onNavigate?: () => void; path: string }) {
+function LinkList({ items, onNavigate, path, collapsed }: { items: NavItem[]; onNavigate?: () => void; path: string; collapsed?: boolean }) {
   return (
     <ul className="flex flex-col gap-0.5">
       {items.map((it, i) => {
@@ -82,9 +82,8 @@ function LinkList({ items, onNavigate, path }: { items: NavItem[]; onNavigate?: 
           <li key={it.key}>
             {heading && (
               <>
-                <p className="px-3 pb-1.5 pt-5 text-xs font-semibold text-muted first:pt-1 lg:[html[data-admin-nav=collapsed]_&]:hidden">{heading}</p>
-                {/* in the icon-only rail a thin line separates the groups instead of the heading */}
-                {i > 0 && <span className="mx-3 my-2 hidden border-t border-line lg:[html[data-admin-nav=collapsed]_&]:block" aria-hidden />}
+                <p className={`px-3 pb-1.5 pt-5 text-xs font-semibold text-muted first:pt-1 ${collapsed ? "hidden" : ""}`}>{heading}</p>
+                {i > 0 && collapsed && <span className="mx-3 my-2 block border-t border-line" aria-hidden />}
               </>
             )}
             <Link
@@ -92,17 +91,21 @@ function LinkList({ items, onNavigate, path }: { items: NavItem[]; onNavigate?: 
               onClick={onNavigate}
               aria-current={active ? "page" : undefined}
               title={it.label}
-              className="group relative flex h-12 items-center gap-3 rounded-xl px-2 text-[15px] text-muted transition hover:bg-ink/5 hover:text-ink aria-[current=page]:bg-accent/12 aria-[current=page]:font-medium aria-[current=page]:text-ink lg:[html[data-admin-nav=collapsed]_&]:justify-center"
+              className={`group relative flex h-12 items-center gap-3 rounded-xl px-2 text-[15px] text-muted transition hover:bg-ink/5 hover:text-ink aria-[current=page]:bg-accent/12 aria-[current=page]:font-medium aria-[current=page]:text-ink ${collapsed ? "justify-center" : ""}`}
             >
               <span
                 className={`grid size-8 shrink-0 place-items-center rounded-lg transition ${active ? "bg-accent text-on-accent" : "bg-ink/5 text-muted group-hover:text-ink"}`}
               >
                 <Ico weight={active ? "fill" : "regular"} className="size-[18px]" />
               </span>
-              <span className="min-w-0 flex-1 truncate lg:[html[data-admin-nav=collapsed]_&]:hidden">{it.label}</span>
+              <span className={`min-w-0 flex-1 truncate ${collapsed ? "hidden" : ""}`}>{it.label}</span>
               {!!it.badge && (
                 <span
-                  className="grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1.5 text-[11px] font-bold tabular-nums text-on-accent lg:[html[data-admin-nav=collapsed]_&]:absolute lg:[html[data-admin-nav=collapsed]_&]:end-1 lg:[html[data-admin-nav=collapsed]_&]:top-1 lg:[html[data-admin-nav=collapsed]_&]:h-3 lg:[html[data-admin-nav=collapsed]_&]:min-w-3 lg:[html[data-admin-nav=collapsed]_&]:p-0 lg:[html[data-admin-nav=collapsed]_&]:text-[0px]"
+                  className={`grid place-items-center rounded-full bg-accent font-bold tabular-nums text-on-accent ${
+                    collapsed
+                      ? "absolute end-1 top-1 h-3 min-w-3 p-0 text-[0px]"
+                      : "h-5 min-w-5 px-1.5 text-[11px]"
+                  }`}
                   aria-label={String(it.badge)}
                 >
                   {it.badge > 99 ? "99+" : it.badge.toLocaleString("fa-IR")}
@@ -152,43 +155,81 @@ function BottomBar({ items, onMore, menuLabel }: { items: NavItem[]; onMore: () 
   );
 }
 
-export function AdminNav({ items, siteHref, siteLabel, menuLabel, collapseLabel }: { items: NavItem[]; siteHref: string; siteLabel: string; menuLabel: string; collapseLabel: string }) {
+export function AdminNav({
+  items,
+  siteHref,
+  siteLabel,
+  menuLabel,
+  collapseLabel,
+  expandLabel,
+}: {
+  items: NavItem[];
+  siteHref: string;
+  siteLabel: string;
+  menuLabel: string;
+  collapseLabel: string;
+  expandLabel: string;
+}) {
   const [open, setOpen] = useState(false);
-  const site = (
-    <a href={siteHref} target="_blank" rel="noopener" title={siteLabel} className="flex h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted transition hover:bg-ink/5 hover:text-ink lg:[html[data-admin-nav=collapsed]_&]:justify-center lg:[html[data-admin-nav=collapsed]_&]:px-0">
-      <ArrowSquareOut className="size-5 shrink-0" />
-      <span className="lg:[html[data-admin-nav=collapsed]_&]:hidden">{siteLabel}</span>
-    </a>
-  );
-  // Collapse the menu to an icon rail (the choice is remembered; the layout script restores it before first paint).
+  // Match the InlineScript restore so the first client paint does not flash the wide menu.
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof document === "undefined") return false;
+    return document.documentElement.dataset.adminNav === "collapsed";
+  });
+
+  useEffect(() => {
+    const on = document.documentElement.dataset.adminNav === "collapsed";
+    setCollapsed(on);
+  }, []);
+
   const toggle = () => {
+    const next = !collapsed;
+    setCollapsed(next);
     const html = document.documentElement;
-    const next = html.dataset.adminNav === "collapsed" ? "" : "collapsed";
-    if (next) html.dataset.adminNav = next;
+    if (next) html.dataset.adminNav = "collapsed";
     else delete html.dataset.adminNav;
     try {
-      localStorage.setItem("admin-nav", next || "open");
+      localStorage.setItem("admin-nav", next ? "collapsed" : "open");
     } catch {}
   };
+
+  const railLabel = collapsed ? expandLabel : collapseLabel;
+  const site = (
+    <a
+      href={siteHref}
+      target="_blank"
+      rel="noopener"
+      title={siteLabel}
+      className={`flex h-11 items-center gap-3 rounded-xl text-sm text-muted transition hover:bg-ink/5 hover:text-ink ${collapsed ? "justify-center px-0" : "px-3"}`}
+    >
+      <ArrowSquareOut className="size-5 shrink-0" />
+      <span className={collapsed ? "hidden" : ""}>{siteLabel}</span>
+    </a>
+  );
+
   return (
     <>
       <nav
-        className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-64 shrink-0 flex-col justify-between overflow-y-auto overflow-x-hidden border-e border-line p-3 transition-[width] duration-200 lg:flex lg:[html[data-admin-nav=collapsed]_&]:w-[4.75rem]"
+        className={`sticky top-16 hidden h-[calc(100dvh-4rem)] shrink-0 flex-col overflow-hidden border-e border-line transition-[width] duration-200 lg:flex ${collapsed ? "w-[4.75rem]" : "w-64"}`}
         data-testid="admin-sidebar"
+        data-collapsed={collapsed ? "1" : undefined}
       >
-        <Links items={items} />
-        <div className="flex flex-col gap-1">
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-3 pe-1.5">
+          <Links items={items} collapsed={collapsed} />
+        </div>
+        <div className={`flex shrink-0 flex-col gap-1 border-t border-line bg-bg p-3 ${collapsed ? "items-stretch" : ""}`}>
           {site}
           <button
             type="button"
             onClick={toggle}
-            aria-label={collapseLabel}
-            title={collapseLabel}
+            aria-label={railLabel}
+            aria-pressed={collapsed}
+            title={railLabel}
             data-testid="collapse-nav"
-            className="flex h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted transition hover:bg-ink/5 hover:text-ink lg:[html[data-admin-nav=collapsed]_&]:justify-center lg:[html[data-admin-nav=collapsed]_&]:px-0"
+            className={`flex h-11 items-center gap-3 rounded-xl text-sm text-muted transition hover:bg-ink/5 hover:text-ink ${collapsed ? "justify-center px-0" : "px-3"}`}
           >
-            <SidebarSimple className="size-5 shrink-0" />
-            <span className="lg:[html[data-admin-nav=collapsed]_&]:hidden">{collapseLabel}</span>
+            <SidebarSimple className="size-5 shrink-0" weight={collapsed ? "fill" : "regular"} />
+            <span className={collapsed ? "hidden" : ""}>{railLabel}</span>
           </button>
         </div>
       </nav>
@@ -202,7 +243,7 @@ export function AdminNav({ items, siteHref, siteLabel, menuLabel, collapseLabel 
               <X weight="bold" className="size-5" />
             </button>
           </div>
-          <div className="mt-4 flex flex-1 flex-col justify-between">
+          <div className="mt-4 flex flex-1 flex-col justify-between overflow-y-auto">
             <Links items={items} onNavigate={() => setOpen(false)} />
             {site}
           </div>

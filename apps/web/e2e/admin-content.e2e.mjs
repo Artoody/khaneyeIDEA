@@ -89,6 +89,13 @@ await Promise.all([p.waitForURL(/\/teachers\/[0-9a-f-]{36}$/), p.click("form:vis
 await p.goto(base + "/app/admin/teachers");
 const row = p.locator(`li:visible:has-text("مربی ${tag}")`);
 check("sample teacher shows badge", (await row.textContent()).includes("نمونه"));
+// clean up: open it and delete it
+await row.locator("a").first().click();
+await p.waitForURL(/\/teachers\/[0-9a-f-]{36}$/);
+await p.locator('[data-testid="delete-teacher"]:visible summary').click();
+await p.locator('[data-testid="delete-teacher"]:visible button').click();
+await p.waitForURL(/\/app\/admin\/teachers$/);
+check("the coach can be deleted", (await p.locator(`li:visible:has-text("مربی ${tag}")`).count()) === 0);
 
 // Achievements: search and missing-English filter.
 await p.goto(base + "/app/admin/achievements");

@@ -8,7 +8,8 @@ import { closeDb, getDb } from "../index";
 import * as s from "../schema";
 import type { Localized } from "../schema";
 import { CONTENT_FROM, DRAFT_REDIRECT, LEGACY_ARTICLES, LEGACY_REDIRECTS, readLegacyPage } from "./legacy";
-import { ALSO_IN, APPOINTMENT_TYPES, BRANCHES, COURSES, DEPARTMENTS, PAGE_BLOCKS, SAMPLE_TEACHERS } from "./data";
+import { ALSO_IN, APPOINTMENT_TYPES, BRANCHES, COURSES, DEPARTMENTS, PAGE_BLOCKS } from "./data";
+import { TEAM } from "./team";
 
 config({ path: fileURLToPath(new URL("../../../../.env", import.meta.url)) });
 
@@ -179,7 +180,7 @@ await db.transaction(async (tx) => {
   ]);
 
   await tx.insert(s.teachers).values(
-    SAMPLE_TEACHERS.map((t, i) => ({ tenantId, ...t, isSample: true, sortOrder: i })),
+    TEAM.map((t, i) => ({ tenantId, name: { ...t.name }, role: { ...t.role }, showOnSite: false, isSample: false, sortOrder: i })),
   );
 
   // Drop caption fragments and duplicates (the export lists some photos twice, thumbnail and full size).

@@ -101,6 +101,42 @@ function LinkList({ items, onNavigate, path }: { items: NavItem[]; onNavigate?: 
   );
 }
 
+const PRIMARY: NavItem["key"][] = ["dashboard", "sessions", "classes", "students", "settings"];
+
+function BottomBar({ items, onMore, menuLabel }: { items: NavItem[]; onMore: () => void; menuLabel: string }) {
+  const path = usePathname();
+  const tabs = PRIMARY.map((k) => items.find((i) => i.key === k)).filter((x): x is NavItem => !!x).slice(0, 4);
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden" aria-label="main" data-testid="bottom-nav">
+      <ul className="mx-auto grid max-w-lg grid-cols-5">
+        {tabs.map((it) => {
+          const Ico = ICONS[it.key];
+          const active = it.key === "dashboard" ? path === it.href : path === it.href || path.startsWith(`${it.href}/`);
+          return (
+            <li key={it.key}>
+              <Link href={it.href} aria-current={active ? "page" : undefined} className="relative flex h-16 flex-col items-center justify-center gap-1 text-[11px] text-muted transition aria-[current=page]:text-ink">
+                <span className={`grid h-7 w-12 place-items-center rounded-full transition ${active ? "bg-accent/20 text-accent-text" : ""}`}>
+                  <Ico weight={active ? "fill" : "regular"} className="size-5" />
+                </span>
+                <span className="max-w-full truncate px-1">{it.label}</span>
+                {!!it.badge && <span className="absolute end-[22%] top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold text-on-accent">{it.badge > 9 ? "9+" : it.badge.toLocaleString("fa-IR")}</span>}
+              </Link>
+            </li>
+          );
+        })}
+        <li className={tabs.length < 4 ? "col-start-5" : ""}>
+          <button type="button" onClick={onMore} className="flex h-16 w-full flex-col items-center justify-center gap-1 text-[11px] text-muted">
+            <span className="grid h-7 w-12 place-items-center rounded-full">
+              <List weight="bold" className="size-5" />
+            </span>
+            {menuLabel}
+          </button>
+        </li>
+      </ul>
+    </nav>
+  );
+}
+
 export function AdminNav({ items, siteHref, siteLabel, menuLabel }: { items: NavItem[]; siteHref: string; siteLabel: string; menuLabel: string }) {
   const [open, setOpen] = useState(false);
   const site = (
@@ -115,14 +151,9 @@ export function AdminNav({ items, siteHref, siteLabel, menuLabel }: { items: Nav
         <Links items={items} />
         {site}
       </nav>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label={menuLabel}
-        className="fixed bottom-4 end-4 z-40 grid size-14 place-items-center rounded-full bg-ink text-bg shadow-lg lg:hidden"
-      >
-        <List weight="bold" className="size-6" />
-      </button>
+      <Suspense fallback={null}>
+        <BottomBar items={items} onMore={() => setOpen(true)} menuLabel={menuLabel} />
+      </Suspense>
       {open && (
         <div className="fixed inset-0 z-50 flex flex-col bg-bg p-4 lg:hidden">
           <div className="flex justify-end">

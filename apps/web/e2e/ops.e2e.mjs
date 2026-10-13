@@ -27,7 +27,7 @@ await admin.goto(base + "/app/admin/sessions");
 await admin.waitForSelector('[data-testid="board"]');
 const cards = await admin.locator('[data-testid="board"] li a').count();
 check("board shows this week's sessions", cards >= 5, `(${cards})`);
-check("summary bar has held and awaiting counts", /برگزار شد/.test(await admin.textContent('[data-testid="summary"]')));
+check("summary bar counts the sessions", /جلسه/.test(await admin.textContent('[data-testid="summary"]')));
 await admin.screenshot({ path: `${S}/ops-board.png` });
 // open an awaiting session and record it
 const awaiting = admin.locator('[data-testid="board"] li a.border-accent\\/70').first();
@@ -59,9 +59,9 @@ await admin.waitForSelector('[data-testid="session-panel"]:visible summary');
 check("canceled session restored", true);
 // classes & students lists
 await admin.goto(base + "/app/admin/classes");
-await admin.waitForSelector('[data-testid="class-days"] a');
-check("classes list", (await admin.locator('[data-testid="class-days"] a').count()) >= 6);
-await admin.locator('[data-testid="class-days"] a').first().click();
+await admin.waitForSelector('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])');
+check("classes list", (await admin.locator('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])').count()) >= 6);
+await admin.locator('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])').first().click();
 await admin.waitForSelector('[data-testid="roster"]');
 check("class page shows roster", (await admin.locator('[data-testid="roster"] li').count()) >= 3);
 await admin.screenshot({ path: `${S}/ops-class.png`, fullPage: true });

@@ -4,11 +4,12 @@ import { and, count, eq, inArray } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { branches, classGroups, courses, enrollments, getDb, rooms, students, teachers } from "@khaneyeidea/db";
-import { classScheduleConflicts, syncClassSessions } from "@khaneyeidea/core";
+import { attendance, branches, classGroups, classSessions, courses, enrollments, getDb, guardians, rooms, students, teachers } from "@khaneyeidea/db";
+import { classScheduleConflicts, findOrCreateUser, grantRole, normalizeIranMobile, syncClassSessions } from "@khaneyeidea/core";
 import { requirePermission } from "@/server/auth";
 import { href, isLocale } from "@/lib/i18n";
 import { audit, bool, int, text, type ActionState } from "@/server/admin";
+import { WEEKDAYS } from "@/lib/jalali";
 
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -23,8 +24,7 @@ export async function saveClass(_: ActionState, f: FormData): Promise<ClassState
   const lang = String(f.get("lang") ?? "fa");
   const e: Record<string, string> = {};
 
-  const title = text(f, "title");
-  if (!title) e["title"] = "required";
+  let title = text(f, "title");
   const courseId = text(f, "courseId");
   const teacherId = text(f, "teacherId");
   const branchId = text(f, "branchId");
@@ -64,6 +64,11 @@ export async function saveClass(_: ActionState, f: FormData): Promise<ClassState
     if (!r.length) e["roomId"] = "invalid";
   }
   if (Object.keys(e).length) return { error: "validation", fieldErrors: e };
+  if (!title) {
+    // No name typed: "<course>، <weekday>‌ها", the same text the form shows as a placeholder.
+    const [course] = await db.select({ title: courses.title }).from(courses).where(eq(courses.id, courseId!));
+    title = `${course?.title.fa ?? ""}، ${WEEKDAYS.fa[weekday!]}`;
+  }
 
   // Same teacher or room at the same hours: warn first; the admin may save anyway.
   if (bool(f, "active") && !bool(f, "force")) {
@@ -72,7 +77,7 @@ export async function saveClass(_: ActionState, f: FormData): Promise<ClassState
   }
 
   const values = {
-    title: title!.slice(0, 120),
+    title: title.slice(0, 120),
     courseId: courseId!,
     teacherId,
     branchId: mode === "online" ? null : branchId,
@@ -162,4 +167,63 @@ export async function enrollStudents(f: FormData) {
   }
   await audit(user.tenantId, user.userId, "create", "enrollment", c.id, { count: owned.length });
   refresh();
+}
+
+/** A brand-new student (with one parent) created from the class page and put in this class right away. */
+export async function addNewStudentToClass(_: ActionState, f: FormData): Promise<ActionState & { name?: string }> {
+  const user = await requirePermission("schedule.manage");
+  await requirePermission("students.manage");
+  const db = getDb();
+  const classGroupId = z.uuid().parse(f.get("classGroupId"));
+  const e: Record<string, string> = {};
+  const firstName = text(f, "firstName");
+  if (!firstName) e["firstName"] = "required";
+  const birthYear = int(f, "birthYear");
+  if (Number.isNaN(birthYear) || (birthYear !== null && (birthYear < 1370 || birthYear > 1420))) e["birthYear"] = "number";
+  const phone = text(f, "guardianPhone");
+  if (!phone || !normalizeIranMobile(phone)) e["guardianPhone"] = "phone";
+  const [c] = await db.select().from(classGroups).where(and(eq(classGroups.id, classGroupId), eq(classGroups.tenantId, user.tenantId)));
+  if (!c) return { error: "not_found" };
+  if (Object.keys(e).length) return { error: "validation", fieldErrors: e };
+
+  const sid = await db.transaction(async (tx) => {
+    const [kid] = await tx
+      .insert(students)
+      .values({ tenantId: user.tenantId, firstName: firstName!.slice(0, 40), lastName: (text(f, "lastName") ?? "").slice(0, 60), birthYear })
+      .returning({ id: students.id });
+    const parent = (await findOrCreateUser(tx, user.tenantId, phone!, text(f, "guardianName")))!;
+    await grantRole(tx, parent.id, "parent", null);
+    await tx.insert(guardians).values({ studentId: kid!.id, userId: parent.id, relation: "other", mediaConsent: false });
+    const [{ n } = { n: 0 }] = await tx.select({ n: count() }).from(enrollments).where(and(eq(enrollments.classGroupId, c.id), eq(enrollments.status, "active")));
+    await tx.insert(enrollments).values({
+      tenantId: user.tenantId,
+      classGroupId: c.id,
+      studentId: kid!.id,
+      status: n >= c.capacity ? "waitlist" : "active",
+      startedOn: new Date().toISOString().slice(0, 10),
+    });
+    return kid!.id;
+  });
+  await audit(user.tenantId, user.userId, "create", "student", sid, { firstName, classGroupId });
+  refresh();
+  return { ok: true, savedAt: Date.now(), name: firstName! };
+}
+
+/** Deletes a class that nothing has been recorded for (no attendance, no report). Otherwise deactivate it instead. */
+export async function deleteClass(f: FormData) {
+  const user = await requirePermission("schedule.manage");
+  const id = z.uuid().parse(f.get("id"));
+  const lang = String(f.get("lang") ?? "fa");
+  const db = getDb();
+  const [c] = await db.select({ id: classGroups.id }).from(classGroups).where(and(eq(classGroups.id, id), eq(classGroups.tenantId, user.tenantId)));
+  if (!c) return;
+  const recorded = await db
+    .select({ n: count() })
+    .from(classSessions)
+    .where(and(eq(classSessions.classGroupId, id), inArray(classSessions.status, ["held", "held_incomplete", "not_held", "needs_makeup"])));
+  const hasAttendance = await db.select({ n: count() }).from(attendance).innerJoin(classSessions, eq(classSessions.id, attendance.sessionId)).where(eq(classSessions.classGroupId, id));
+  if ((recorded[0]?.n ?? 0) > 0 || (hasAttendance[0]?.n ?? 0) > 0) return; // history exists: the admin should deactivate it
+  await db.delete(classGroups).where(eq(classGroups.id, id));
+  await audit(user.tenantId, user.userId, "delete", "class_group", id);
+  redirect(href(isLocale(lang) ? lang : "fa", "/app/admin/classes"));
 }

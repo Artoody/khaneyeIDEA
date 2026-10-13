@@ -322,6 +322,12 @@ describe("session operations", () => {
     const [moved] = await db.select().from(classSessions).where(eq(classSessions.id, s!.id));
     expect(moved!.custom).toBe(true);
     expect(moved!.originalStartsAt!.getTime()).toBe(s!.startsAt.getTime());
+    // moving it back to its weekly slot makes it a regular session again
+    const back = await rescheduleSession(db, { sessionId: s!.id, startsAt: s!.startsAt, endsAt: s!.endsAt, now });
+    expect(back.ok).toBe(true);
+    const [again] = await db.select().from(classSessions).where(eq(classSessions.id, s!.id));
+    expect(again!.custom).toBe(false);
+    expect(again!.originalStartsAt).toBeNull();
     // a past or recorded session cannot be moved
     expect((await rescheduleSession(db, { sessionId: s!.id, startsAt: new Date(now.getTime() - 1000), endsAt: now, now })).ok).toBe(false);
   });

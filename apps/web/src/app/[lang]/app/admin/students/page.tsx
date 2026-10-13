@@ -1,16 +1,18 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { and, asc, eq, ilike, inArray, or, sql } from "drizzle-orm";
-import { classGroups, enrollments, getDb, guardians, students, users } from "@khaneyeidea/db";
+import { and, asc, eq, ilike, inArray, notInArray, or, sql } from "drizzle-orm";
+import { z } from "zod";
+import { classGroups, enrollments, getDb, guardians, students, teachers, users } from "@khaneyeidea/db";
 import { normalizeIranMobile } from "@khaneyeidea/core";
-import { href, isLocale, num, type Locale } from "@/lib/i18n";
+import { href, isLocale, num, pick, type Locale } from "@/lib/i18n";
+import { AutoSubmitCheckbox, AutoSubmitSelect } from "@/components/ops/auto-submit";
 import { getOpsDict } from "@/lib/ops-i18n";
 import { fill } from "@/lib/format";
 import { ageFromJalaliYear } from "@/lib/age";
 import { requirePermissionPage } from "@/server/auth";
 import { Badge, ListSkeleton, PageHeader, RowLink, RowList } from "@/components/admin/ui";
 
-async function List({ lang, q }: { lang: Locale; q: string }) {
+async function List({ lang, q, cls, tch, free }: { lang: Locale; q: string; cls: string | null; tch: string | null; free: boolean }) {
   const user = await requirePermissionPage(lang, "students.manage");
   const o = getOpsDict(lang);
   const db = getDb();
@@ -19,12 +21,26 @@ async function List({ lang, q }: { lang: Locale; q: string }) {
   const byPhone = phone
     ? db.select({ id: guardians.studentId }).from(guardians).innerJoin(users, eq(users.id, guardians.userId)).where(eq(users.phone, phone))
     : null;
+  const active = and(eq(enrollments.status, "active"));
+  // narrow by class, by coach (any of their classes), or to students in no class at all
+  const inClass = cls ? db.select({ id: enrollments.studentId }).from(enrollments).where(and(active, eq(enrollments.classGroupId, cls))) : null;
+  const ofCoach = tch
+    ? db.select({ id: enrollments.studentId }).from(enrollments).innerJoin(classGroups, eq(classGroups.id, enrollments.classGroupId)).where(and(active, eq(classGroups.teacherId, tch)))
+    : null;
+  const anyClass = free ? db.select({ id: enrollments.studentId }).from(enrollments).where(active) : null;
+  const [classList, coachList] = await Promise.all([
+    db.select({ id: classGroups.id, title: classGroups.title }).from(classGroups).where(eq(classGroups.tenantId, user.tenantId)).orderBy(asc(classGroups.weekday), asc(classGroups.startTime)),
+    db.select().from(teachers).where(eq(teachers.tenantId, user.tenantId)).orderBy(asc(teachers.sortOrder)),
+  ]);
   const rows = await db
     .select()
     .from(students)
     .where(
       and(
         eq(students.tenantId, user.tenantId),
+        inClass ? inArray(students.id, inClass) : undefined,
+        ofCoach ? inArray(students.id, ofCoach) : undefined,
+        anyClass ? notInArray(students.id, anyClass) : undefined,
         q ? or(ilike(sql`${students.firstName} || ' ' || ${students.lastName}`, like), byPhone ? inArray(students.id, byPhone) : undefined) : undefined,
       ),
     )
@@ -42,8 +58,28 @@ async function List({ lang, q }: { lang: Locale; q: string }) {
   return (
     <>
       <PageHeader title={o.nav.students} description={o.students.help} action={{ href: `${base}/new`, label: o.students.new }} />
-      <form action={base} role="search" className="mb-5 max-w-md">
-        <input name="q" defaultValue={q} placeholder={o.students.search} aria-label={o.students.search} className="h-11 w-full rounded-full border border-line bg-surface px-5 text-[15px] outline-none focus:border-accent focus:ring-4 focus:ring-accent/15" />
+      <form action={base} role="search" className="mb-5 flex flex-wrap items-center gap-2">
+        <input name="q" defaultValue={q} placeholder={o.students.search} aria-label={o.students.search} className="h-11 min-w-0 flex-1 basis-60 rounded-full border border-line bg-surface px-5 text-[15px] outline-none focus:border-accent focus:ring-4 focus:ring-accent/15" />
+        <AutoSubmitSelect name="t" defaultValue={tch ?? ""} aria-label={o.classes.teacher} className="h-11 rounded-full border border-line bg-surface px-3 text-sm">
+          <option value="">{o.classes.teacher}: {o.board.all}</option>
+          {coachList.map((t) => (
+            <option key={t.id} value={t.id}>
+              {pick(t.name, lang)}
+            </option>
+          ))}
+        </AutoSubmitSelect>
+        <AutoSubmitSelect name="c" defaultValue={cls ?? ""} aria-label={o.nav.classes} className="h-11 max-w-56 rounded-full border border-line bg-surface px-3 text-sm">
+          <option value="">{o.nav.classes}: {o.board.all}</option>
+          {classList.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.title}
+            </option>
+          ))}
+        </AutoSubmitSelect>
+        <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm">
+          <AutoSubmitCheckbox name="u" value="1" defaultChecked={free} className="size-4 accent-[var(--accent)]" />
+          {o.students.noClasses}
+        </label>
       </form>
       {rows.length === 0 ? (
         <p className="text-muted">{o.students.empty}</p>
@@ -80,8 +116,14 @@ export default async function Page({ params, searchParams }: PageProps<"/[lang]/
   if (!isLocale(lang)) notFound();
   return (
     <Suspense fallback={<ListSkeleton />}>
-      {searchParams.then(({ q }) => (
-        <List lang={lang} q={typeof q === "string" ? q.trim().slice(0, 60) : ""} />
+      {searchParams.then(({ q, c, t, u }) => (
+        <List
+          lang={lang}
+          q={typeof q === "string" ? q.trim().slice(0, 60) : ""}
+          cls={typeof c === "string" && z.uuid().safeParse(c).success ? c : null}
+          tch={typeof t === "string" && z.uuid().safeParse(t).success ? t : null}
+          free={u === "1"}
+        />
       ))}
     </Suspense>
   );

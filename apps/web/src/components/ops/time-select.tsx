@@ -10,10 +10,29 @@ const fa = (s: string) => s.replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(
  * A 24-hour time picker (hour and minute selects) that posts "HH:MM". Browsers show 12-hour AM/PM for
  * <input type="time"> on some systems, which does not suit Persian screens.
  */
-export function TimeSelect({ name, value, label, hourLabel = "ساعت", minuteLabel = "دقیقه" }: { name: string; value?: string | null; label: string; hourLabel?: string; minuteLabel?: string }) {
+export function TimeSelect({
+  name,
+  value,
+  label,
+  onChange,
+  hourLabel = "ساعت",
+  minuteLabel = "دقیقه",
+}: {
+  name: string;
+  value?: string | null;
+  label: string;
+  /** Pass it to control the picker from outside (then `value` is the source of truth). */
+  onChange?: (hhmm: string) => void;
+  hourLabel?: string;
+  minuteLabel?: string;
+}) {
   const [h0, m0] = (value && /^\d{2}:\d{2}/.test(value) ? value : "17:00").split(":").map(Number) as [number, number];
-  const [h, setH] = useState(h0);
-  const [m, setM] = useState(m0);
+  const [hs, setHs] = useState(h0);
+  const [ms, setMs] = useState(m0);
+  const h = onChange ? h0 : hs;
+  const m = onChange ? m0 : ms;
+  const setH = (n: number) => (onChange ? onChange(`${pad(n)}:${pad(m)}`) : setHs(n));
+  const setM = (n: number) => (onChange ? onChange(`${pad(h)}:${pad(n)}`) : setMs(n));
   // keep odd minutes (e.g. 17:10 -> 10 is on the 5-minute grid; 17:07 is not) selectable
   const minutes = [...new Set([...Array.from({ length: 12 }, (_, i) => i * 5), m])].sort((a, b) => a - b);
   const sel = `${inputCls} appearance-none px-3`;

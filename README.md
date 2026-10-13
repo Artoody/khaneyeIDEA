@@ -13,6 +13,7 @@ pnpm install
 cp .env.example .env          # then set SESSION_SECRET to a long random value
 pnpm db:migrate               # create / update tables (safe to run any time)
 pnpm db:seed                  # FIRST TIME ONLY: loads the old site's content (it replaces site content)
+pnpm --filter @khaneyeidea/db team   # adds the academy's coaches to an existing database (the seed already includes them)
 pnpm --filter @khaneyeidea/db grant-role 09xxxxxxxxx owner "Your name"
 pnpm dev                      # site on http://localhost:3000, panel at /app/admin
 ```

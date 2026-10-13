@@ -1,10 +1,10 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getDb, teachers } from "@khaneyeidea/db";
+import { classGroups, getDb, teachers } from "@khaneyeidea/db";
 import { requirePermission } from "@/server/auth";
 import { TAGS } from "@/server/content";
 import { href, isLocale } from "@/lib/i18n";
@@ -50,4 +50,20 @@ export async function saveTeacher(_: ActionState, f: FormData): Promise<ActionSt
   updateTag(TAGS.teachers);
   if (!id) redirect(href(isLocale(lang) ? lang : "fa", `/app/admin/teachers/${rowId}`));
   return { ok: true, savedAt: Date.now() };
+}
+
+/** Removes a coach that teaches no class. (A coach with classes must be replaced in those classes first.) */
+export async function deleteTeacher(f: FormData) {
+  const user = await requirePermission("content.edit");
+  const id = z.uuid().parse(f.get("id"));
+  const lang = String(f.get("lang") ?? "fa");
+  const db = getDb();
+  const used = await db.select({ n: count() }).from(classGroups).where(and(eq(classGroups.teacherId, id), eq(classGroups.tenantId, user.tenantId)));
+  if ((used[0]?.n ?? 0) > 0) return;
+  const res = await db.delete(teachers).where(and(eq(teachers.id, id), eq(teachers.tenantId, user.tenantId))).returning({ id: teachers.id });
+  if (res.length) {
+    await audit(user.tenantId, user.userId, "delete", "teacher", id);
+    updateTag(TAGS.teachers);
+  }
+  redirect(href(isLocale(lang) ? lang : "fa", "/app/admin/teachers"));
 }

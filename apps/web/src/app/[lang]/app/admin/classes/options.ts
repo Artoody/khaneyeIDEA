@@ -11,11 +11,11 @@ export async function classOptions(tenantId: string, lang: Locale) {
     db.select().from(branches).where(eq(branches.tenantId, tenantId)).orderBy(asc(branches.sortOrder)),
     db.select().from(rooms).where(and(eq(rooms.tenantId, tenantId), eq(rooms.active, true))).orderBy(asc(rooms.name)),
   ]);
-  const branchName = new Map(bs.map((b) => [b.id, pick(b.name, lang)]));
   return {
-    courses: cs.map((c) => ({ id: c.id, label: `${pick(c.title, lang)}${c.status === "draft" ? " *" : ""}` })),
+    // published courses first, drafts (marked *) after
+    courses: [...cs].sort((a, b) => Number(a.status === "draft") - Number(b.status === "draft")).map((c) => ({ id: c.id, label: `${pick(c.title, lang)}${c.status === "draft" ? " *" : ""}` })),
     teachers: ts.map((x) => ({ id: x.id, label: pick(x.name, lang) })),
     branches: bs.map((b) => ({ id: b.id, label: pick(b.name, lang) })),
-    rooms: rs.map((r) => ({ id: r.id, label: `${branchName.get(r.branchId) ?? ""} / ${r.name}` })),
+    rooms: rs.map((r) => ({ id: r.id, label: r.name, branchId: r.branchId })),
   };
 }

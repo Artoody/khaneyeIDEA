@@ -16,12 +16,13 @@ import { requirePermissionPage } from "@/server/auth";
 import { Badge, ListSkeleton, PageHeader } from "@/components/admin/ui";
 import { ClassForm } from "@/components/admin/class-form";
 import { RosterPicker } from "@/components/ops/roster-picker";
+import { QuickStudent } from "@/components/ops/quick-student";
 import { ClassGroups } from "@/components/ops/class-groups";
 import { MakeupForm } from "@/components/ops/session-extras";
 import { dayOptions, STATUS_DOT } from "@/components/ops/panel-data";
 import { classOptions } from "../options";
 import { jalaliYears } from "../../booking/options";
-import { setEnrollment } from "../actions";
+import { deleteClass, setEnrollment } from "../actions";
 
 async function Edit({ lang, id, tab }: { lang: Locale; id: string; tab: "overview" | "edit" }) {
   const user = await requirePermissionPage(lang, "schedule.manage");
@@ -114,6 +115,15 @@ async function Edit({ lang, id, tab }: { lang: Locale; id: string; tab: "overvie
       {tab === "edit" ? (
         <div className="max-w-3xl">
           <ClassForm c={c} a={a} o={o} lang={lang} years={jalaliYears()} options={options} />
+          <details className="mt-8 rounded-2xl border border-red-500/30 p-4" data-testid="delete-class">
+            <summary className="cursor-pointer font-medium text-red-600">{o.cf.delete}</summary>
+            <p className="mt-2 text-sm text-muted">{o.cf.deleteHelp}</p>
+            <form action={deleteClass} className="mt-3">
+              <input type="hidden" name="id" value={c.id} />
+              <input type="hidden" name="lang" value={lang} />
+              <button className="h-10 rounded-full border border-red-500/40 px-5 text-sm font-medium text-red-600 hover:bg-red-500/10">{o.cf.deleteConfirm}</button>
+            </form>
+          </details>
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
@@ -143,9 +153,7 @@ async function Edit({ lang, id, tab }: { lang: Locale; id: string; tab: "overvie
                 </ul>
               )}
               <RosterPicker classGroupId={c.id} students={pickable} seatsLeft={c.capacity - active} o={o} />
-              <Link href={href(lang, "/app/admin/students/new")} className="mt-3 inline-block text-sm text-accent-text underline-offset-4 hover:underline">
-                {o.students.new}
-              </Link>
+              <QuickStudent classGroupId={c.id} o={o} />
             </section>
           </div>
 
@@ -174,8 +182,8 @@ async function Edit({ lang, id, tab }: { lang: Locale; id: string; tab: "overvie
                             {dayLabel(tehranIso(s.startsAt), lang)} · {timeLabel(s.startsAt, lang)}
                           </span>
                           <span className="flex items-center gap-1.5 text-xs text-muted">
-                            {s.makeupOfSessionId || (s.custom && !s.originalStartsAt) ? o.move.makeupOf : s.custom ? o.move.moved_tag : ""}
-                            {o.status[st]}
+                            {(s.makeupOfSessionId || s.custom) && <span className="rounded-full bg-ink/10 px-2 py-0.5">{s.makeupOfSessionId || !s.originalStartsAt ? o.move.makeupOf : o.move.moved_tag}</span>}
+                            <span>{o.status[st]}</span>
                           </span>
                         </Link>
                       </li>

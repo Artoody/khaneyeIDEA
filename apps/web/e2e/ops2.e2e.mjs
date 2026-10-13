@@ -1,6 +1,7 @@
 // Operations e2e, round 2: access page for accounts without a role, the admin dashboard, class cards, class page
 // (bot connection codes, roster picker), moving a session with a clash warning, makeup sessions, and the whole
-// teacher cancellation request flow (teacher asks, admin approves or declines). Leaves the data as it found it.
+// teacher cancellation request flow (teacher asks, admin approves or declines). Leaves the data as it found it,
+// except one student named e2e<number> (there is no student delete yet).
 // Needs `pnpm db:demo`, OTP_DEV_CODE=1234, the dev server on :3000 and owner-state.json in <dir>. Usage:
 //   node e2e/ops2.e2e.mjs <dir>
 import { chromium } from "playwright-core";
@@ -61,20 +62,18 @@ check("connection code for the bot", /^\/start \d{6}$/.test((await admin.textCon
 // 3. Class cards by weekday
 await admin.goto(base + "/app/admin/classes");
 await admin.waitForSelector('[data-testid="class-days"]');
-const total = await admin.locator('[data-testid="class-days"] a').count();
+const total = await admin.locator('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])').count();
 check("classes grouped by weekday", total >= 6, `(${total})`);
-const sel = admin.locator('select[name="t"]');
-const opts = await sel.locator("option").evaluateAll((os) => os.map((o) => o.value).filter(Boolean));
-await sel.selectOption(opts[0]);
+await admin.locator('[data-testid="teacher-chips"] button').nth(1).click();
 await admin.waitForURL(/t=/);
-await admin.waitForSelector('[data-testid="class-days"]');
-const filtered = await admin.locator('[data-testid="class-days"] a').count();
-check("teacher filter narrows the list", filtered > 0 && filtered < total, `(${filtered}/${total})`);
+const filtered = await admin.locator('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])').count();
+check("coach filter narrows the list", filtered > 0 && filtered < total, `(${filtered}/${total})`);
 
 // 4. A class page: bot code, roster picker
 await admin.goto(base + "/app/admin/classes");
-await admin.waitForSelector('[data-testid="class-days"] a');
-const classHref = await admin.locator('[data-testid="class-days"] a').first().getAttribute("href");
+await admin.waitForSelector('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])');
+// Robotics 1 (Saturday 16:00): its coach also teaches Robotics 2 on Wednesdays at the same hour
+const classHref = await admin.locator('[data-testid="class-days"] a[href*="/classes/"]:not([href*="/classes/new"])', { hasText: "رباتیک ۱" }).first().getAttribute("href");
 await admin.goto(base + classHref);
 await admin.waitForSelector('[data-testid="groups"]');
 await admin.click('[data-testid="groups"] button:has-text("ساخت کد اتصال")');
@@ -223,6 +222,49 @@ await admin.goto(base + "/app/admin/sessions?w=" + new Date(Date.now() + 7 * 864
 await admin.waitForSelector('[data-testid="board"]');
 check("restored", (await admin.locator('[data-testid="board"] a.opacity-70').count()) === 0);
 await admin.screenshot({ path: `${S}/ops2-board.png` });
+
+// 9. Views, one coach at a time, a class made with chips, a student added on the class page, deleting the class
+await admin.goto(base + "/app/admin/classes");
+await admin.waitForSelector('[data-testid="view-switch"]');
+await admin.locator('[data-testid="view-switch"] button', { hasText: "جدول" }).click();
+check("timetable view", await admin.locator('[data-testid="timetable"]').isVisible());
+await admin.locator('[data-testid="view-switch"] button', { hasText: "مربی" }).click();
+check("grouped by coach", (await admin.locator('[data-testid="group"]').count()) === 4, `(${await admin.locator('[data-testid="group"]').count()})`);
+await admin.locator('[data-testid="teacher-chips"] button').nth(2).click();
+check("one coach at a time", (await admin.locator('[data-testid="group"]').count()) === 1 && (await admin.locator('[data-testid="focus"]').count()) === 1);
+check("the address remembers the view and the coach", /v=teacher/.test(admin.url()) && /t=/.test(admin.url()));
+await admin.locator('[data-testid="focus"] a', { hasText: "کلاس جدید" }).click();
+await admin.waitForSelector('[data-testid="teacher-pick"]');
+const picked = await admin.locator('[data-testid="teacher-pick"] [aria-checked="true"]').textContent();
+check("the coach is preselected in the form", !/بدون/.test(picked), picked);
+await admin.locator('[data-testid="weekday-pick"] button', { hasText: "جمعه" }).click();
+await setTime(admin.locator("form"), "startTime", "20:00");
+await admin.locator("button", { hasText: "۶۰ دقیقه" }).click();
+check("the length chip sets the end time", (await admin.locator('input[name="endTime"]').inputValue()) === "21:00");
+await admin.locator("form button[type=submit]").click();
+await admin.waitForURL(/\/classes\/[0-9a-f-]{36}/);
+check("saved with an automatic name", /جمعه/.test(await admin.textContent("h1:visible")), await admin.textContent("h1:visible"));
+const newClassUrl = admin.url();
+await admin.waitForSelector('[data-testid="quick-student"]');
+const before2 = await admin.locator('[data-testid="roster"] li').count().catch(() => 0);
+await admin.locator('[data-testid="quick-student"] summary').click();
+const tag = `e2e${Date.now() % 100000}`;
+await admin.fill('[data-testid="quick-student"] input[name="firstName"]', tag);
+await admin.fill('[data-testid="quick-student"] input[name="guardianPhone"]', "09190000077");
+await admin.locator('[data-testid="quick-student"] button', { hasText: "ثبت و افزودن" }).click();
+await admin.locator('[data-testid="quick-student"] [role="status"]').waitFor();
+await admin.goto(newClassUrl);
+await admin.waitForSelector('[data-testid="roster"]');
+check("new student is in the class", (await admin.locator('[data-testid="roster"] li').count()) === before2 + 1 && (await admin.textContent('[data-testid="roster"]')).includes(tag));
+await admin.goto(newClassUrl + "?tab=edit");
+await admin.locator('[data-testid="delete-class"] summary').click();
+await admin.locator('[data-testid="delete-class"] button').click();
+await admin.waitForURL(/\/app\/admin\/classes$/);
+check("the class can be deleted", true);
+// students: filter by "no class" shows the one just created
+await admin.goto(base + "/app/admin/students?u=1");
+await admin.waitForSelector("main li");
+check("students without a class are filterable", (await admin.textContent("main")).includes(tag));
 
 console.log(R.join("\n"));
 console.log("errors:", errs);

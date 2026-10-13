@@ -42,12 +42,21 @@ if (existing.length) {
   process.exit(0);
 }
 
-const coaches = await db.select().from(teachers).where(eq(teachers.tenantId, tid)).orderBy(asc(teachers.sortOrder));
+// The academy's real coaches (added when missing), each with their own classes.
+const TEAM_NAMES = ["علیرضا علیزاده‌راد", "میلاد مرادی", "بیدهندی", "امیرحسین پورقاسم"];
+const have = await db.select().from(teachers).where(eq(teachers.tenantId, tid));
+for (const [i, fa] of TEAM_NAMES.entries()) {
+  if (have.some((h) => h.name.fa === fa)) continue;
+  const en = ["Alireza Alizadeh Rad", "Milad Moradi", "Bidhendi", "Amirhossein Pourghasem"][i]!;
+  await db.insert(teachers).values({ tenantId: tid, name: { fa, en }, role: { fa: "مربی", en: "Coach" }, showOnSite: false, isSample: false, sortOrder: i });
+}
+const all = await db.select().from(teachers).where(eq(teachers.tenantId, tid)).orderBy(asc(teachers.sortOrder));
+const coaches = TEAM_NAMES.map((fa) => all.find((t) => t.name.fa === fa)!);
 const brs = await db.select().from(branches).where(eq(branches.tenantId, tid)).orderBy(asc(branches.sortOrder));
 const crs = await db.select().from(courses).where(and(eq(courses.tenantId, tid), eq(courses.status, "published"))).orderBy(asc(courses.sortOrder));
 const course = (s: string) => crs.find((c) => c.slug === s) ?? crs[0]!;
 
-// Teacher logins linked to the sample coach profiles.
+// Teacher logins linked to the coach profiles: 09120000101 .. 09120000104
 for (const [i, coach] of coaches.entries()) {
   const u = (await findOrCreateUser(db, tid, `0912000010${i + 1}`, coach.name.fa))!;
   await grantRole(db, u.id, "teacher", null);
@@ -56,15 +65,22 @@ for (const [i, coach] of coaches.entries()) {
 
 const today = tehranDay(new Date());
 const start = addDays(today, -21);
+// coach index, weekday (0 = Saturday), hours, branch index (null = online)
 const plan = [
-  { title: "رباتیک ۱، شنبه‌ها (نمونه)", course: "robotics", weekday: 0, start: "16:00", end: "17:30" },
-  { title: "پایتون نوجوانان، یکشنبه‌ها (نمونه)", course: "python", weekday: 1, start: "17:00", end: "18:30" },
-  { title: "آردوینو، دوشنبه‌ها (نمونه)", course: "arduino", weekday: 2, start: "16:30", end: "18:00" },
-  { title: "هوش مصنوعی، سه‌شنبه‌ها (نمونه)", course: "ai", weekday: 3, start: "18:00", end: "19:30" },
-  { title: "رباتیک ۲، چهارشنبه‌ها (نمونه)", course: "robotics", weekday: 4, start: "16:00", end: "17:30" },
-  { title: "بازی‌سازی آنلاین، پنجشنبه‌ها (نمونه)", course: "game-dev", weekday: 5, start: "10:00", end: "11:30" },
+  { title: "رباتیک ۱، شنبه‌ها (نمونه)", course: "robotics", coach: 0, weekday: 0, start: "16:00", end: "17:30", branch: 0 },
+  { title: "رباتیک ۲، چهارشنبه‌ها (نمونه)", course: "robotics", coach: 0, weekday: 4, start: "16:00", end: "17:30", branch: 0 },
+  { title: "آردوینو، دوشنبه‌ها (نمونه)", course: "arduino", coach: 0, weekday: 2, start: "17:00", end: "18:30", branch: 0 },
+  { title: "پایتون نوجوانان، یکشنبه‌ها (نمونه)", course: "python", coach: 1, weekday: 1, start: "17:00", end: "18:30", branch: 1 },
+  { title: "هوش مصنوعی، سه‌شنبه‌ها (نمونه)", course: "ai", coach: 1, weekday: 3, start: "18:00", end: "19:30", branch: 1 },
+  { title: "بازی‌سازی آنلاین، پنجشنبه‌ها (نمونه)", course: "game-dev", coach: 1, weekday: 5, start: "10:00", end: "11:30", branch: null },
+  { title: "آلتیوم دیزاینر، شنبه‌ها (نمونه)", course: "altium", coach: 2, weekday: 0, start: "10:00", end: "12:00", branch: 2 },
+  { title: "سالیدورکس، دوشنبه‌ها (نمونه)", course: "solidworks", coach: 2, weekday: 2, start: "18:30", end: "20:00", branch: 2 },
+  { title: "از ایده تا اختراع، پنجشنبه‌ها (نمونه)", course: "idea-to-invention", coach: 2, weekday: 5, start: "16:00", end: "17:30", branch: 2 },
+  { title: "رباتیک مسابقه‌ای، یکشنبه‌ها (نمونه)", course: "robotics", coach: 3, weekday: 1, start: "16:00", end: "17:30", branch: 0 },
+  { title: "پایتون مقدماتی، چهارشنبه‌ها (نمونه)", course: "python", coach: 3, weekday: 4, start: "17:45", end: "19:15", branch: 0 },
+  { title: "هوش مصنوعی آنلاین، جمعه‌ها (نمونه)", course: "ai", coach: 3, weekday: 6, start: "10:00", end: "11:30", branch: null },
 ];
-const names = ["آوا", "کیان", "نیلا", "آرتین", "ترانه", "بردیا", "هستی", "پارسا", "یسنا", "رادین", "ملیکا", "سام", "دلارام", "آرسام", "روژان", "ماهان"];
+const names = ["آوا", "کیان", "نیلا", "آرتین", "ترانه", "بردیا", "هستی", "پارسا", "یسنا", "رادین", "ملیکا", "سام", "دلارام", "آرسام", "روژان", "ماهان", "الینا", "نوین", "آیدین", "سارینا", "امیرعلی", "مهسا", "پویا", "نگار"];
 
 const kids = [];
 for (const [i, first] of names.entries()) {
@@ -77,14 +93,14 @@ for (const [i, first] of names.entries()) {
 
 const reports = ["ساخت شاسی ربات و آشنایی با موتورها", "برنامه‌نویسی حسگر فاصله و تست مسیر", "حلقه‌ها و شرط‌ها با مثال‌های بازی", "پروژه‌ی چراغ راهنمایی با LED"];
 for (const [i, p] of plan.entries()) {
-  const online = p.course === "game-dev";
+  const online = p.branch === null;
   const [c] = await db
     .insert(classGroups)
     .values({
       tenantId: tid,
       courseId: course(p.course).id,
-      teacherId: coaches[i % coaches.length]?.id ?? null,
-      branchId: online ? null : brs[i % brs.length]?.id ?? null,
+      teacherId: coaches[p.coach]?.id ?? null,
+      branchId: online ? null : brs[(p.branch ?? 0) % Math.max(1, brs.length)]?.id ?? null,
       title: p.title,
       weekday: p.weekday,
       startTime: p.start,
@@ -95,7 +111,7 @@ for (const [i, p] of plan.entries()) {
       startsOn: start,
     })
     .returning();
-  const roster = kids.filter((_, k) => (k + i) % 3 !== 0).slice(0, 7);
+  const roster = kids.filter((_, k) => (k + i) % 3 !== 0).slice(0, 5 + (i % 3));
   await db.insert(enrollments).values(roster.map((k) => ({ tenantId: tid, classGroupId: c!.id, studentId: k.id, status: "active" as const, startedOn: start })));
   // Past sessions: held with attendance and a report (last one left for the teacher to answer).
   const past = classDays(c!, start, addDays(today, -1));

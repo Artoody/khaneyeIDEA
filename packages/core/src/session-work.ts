@@ -190,7 +190,14 @@ export async function rescheduleSession(db: Db, p: { sessionId: string; startsAt
   try {
     await db
       .update(classSessions)
-      .set({ startsAt: p.startsAt, endsAt: p.endsAt, custom: true, originalStartsAt: s.originalStartsAt ?? s.startsAt })
+      .set({
+        startsAt: p.startsAt,
+        endsAt: p.endsAt,
+        // moved back to its weekly slot: it is a regular session again
+        ...(s.originalStartsAt && s.originalStartsAt.getTime() === p.startsAt.getTime()
+          ? { custom: false, originalStartsAt: null }
+          : { custom: true, originalStartsAt: s.originalStartsAt ?? s.startsAt }),
+      })
       .where(
         and(
           eq(classSessions.id, p.sessionId),

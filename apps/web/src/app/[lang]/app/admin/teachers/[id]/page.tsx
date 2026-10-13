@@ -8,6 +8,7 @@ import { getAdminDict } from "@/lib/admin-i18n";
 import { requirePermissionPage } from "@/server/auth";
 import { ListSkeleton, PageHeader } from "@/components/admin/ui";
 import { TeacherForm } from "@/components/admin/teacher-form";
+import { TeacherLoginFields } from "@/components/admin/teacher-login-fields";
 import { getOpsDict } from "@/lib/ops-i18n";
 import { deleteTeacher } from "../actions";
 
@@ -22,6 +23,7 @@ async function Edit({ lang, id }: { lang: Locale; id: string }) {
     <div className="max-w-4xl">
       <PageHeader title={pick(b.name, lang)} back={{ href: href(lang, "/app/admin/teachers"), label: a.nav.teachers }} />
       <TeacherForm teacher={b} a={a} lang={lang} />
+      <TeacherLoginFields teacherId={b.id} lang={lang} hasAccount={!!b.userId} />
       <details className="mt-8 rounded-2xl border border-red-500/30 p-4" data-testid="delete-teacher">
         <summary className="cursor-pointer font-medium text-red-600">{o.cf.deleteTeacher}</summary>
         <p className="mt-2 text-sm text-muted">{o.cf.deleteTeacherHelp}</p>

@@ -15,9 +15,11 @@ import {
   userRoles,
   type getDb,
 } from "@khaneyeidea/db";
+import { createAiProvider } from "@khaneyeidea/ai";
 import { tehranDay, zonedToUtc } from "./booking";
 import type { BotChannel } from "./linking";
-import { NOT_HELD_REASONS, recordHeld, recordNotHeld, type Mark } from "./session-work";
+import { NOT_HELD_REASONS, recordNotHeld, type Mark } from "./session-work";
+import { decideReport, formatClassReport, markReportPublished, polishNote, saveSessionWork } from "./reports";
 
 type Db = ReturnType<typeof getDb>;
 
@@ -47,7 +49,7 @@ const fmtDay = (d: Date) => new Intl.DateTimeFormat("fa-IR-u-ca-persian", { time
 const fmtTime = (d: Date) => new Intl.DateTimeFormat("fa-IR", { timeZone: "Asia/Tehran", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d);
 const fa = (n: number) => n.toLocaleString("fa-IR");
 
-type Draft = { absent?: string[]; report?: string; homework?: string; noHomework?: boolean; reason?: string; nudged?: boolean };
+type Draft = { absent?: string[]; report?: string; homework?: string; noHomework?: boolean; reason?: string; nudged?: boolean; aiText?: string };
 
 async function linkedChats(db: Db, ms: Messengers, userId: string) {
   const rows = await db.select().from(messengerAccounts).where(eq(messengerAccounts.userId, userId));
@@ -60,7 +62,7 @@ async function track(db: Db, tenantId: string, channel: BotChannel, chatId: stri
 
 async function rosterOf(db: Db, classGroupId: string) {
   return db
-    .select({ id: students.id, firstName: students.firstName })
+    .select({ id: students.id, firstName: students.firstName, lastName: students.lastName })
     .from(enrollments)
     .innerJoin(students, eq(students.id, enrollments.studentId))
     .where(and(eq(enrollments.classGroupId, classGroupId), eq(enrollments.status, "active")))
@@ -124,7 +126,7 @@ export async function askDueCheckins(db: Db, ms: Messengers, now = new Date(), o
 }
 
 /** Admins (owner/admin) who linked a chat and did not switch this event off. */
-async function notifyAdmins(db: Db, ms: Messengers, tenantId: string, eventKey: string, text: string) {
+async function notifyAdmins(db: Db, ms: Messengers, tenantId: string, eventKey: string, text: string, buttons?: Button[][]) {
   const admins = await db
     .selectDistinct({ userId: userRoles.userId })
     .from(userRoles)
@@ -134,7 +136,7 @@ async function notifyAdmins(db: Db, ms: Messengers, tenantId: string, eventKey: 
     const [pref] = await db.select().from(notificationPrefs).where(and(eq(notificationPrefs.userId, a.userId), eq(notificationPrefs.eventKey, eventKey)));
     if (pref?.mode === "off") continue;
     for (const ch of await linkedChats(db, ms, a.userId)) {
-      await ms[ch.channel]!.send(ch.chatId, text).catch((e) => console.error(`[followup] admin notice failed`, e instanceof Error ? e.message : e));
+      await ms[ch.channel]!.send(ch.chatId, text, buttons).catch((e) => console.error(`[followup] admin notice failed`, e instanceof Error ? e.message : e));
     }
   }
   void tenantId;
@@ -271,7 +273,23 @@ export async function handleCallback(
   const me = ms[p.channel]!;
   const actor = await actorFor(db, p.channel, p.chatId);
   const r = await sessionRow(db, sid);
-  if (!actor || !r || (!actor.isAdmin && r.teacherUserId !== actor.userId)) return { toast: "این جلسه برای شما نیست." };
+  if (!actor || !r) return { toast: "این جلسه برای شما نیست." };
+
+  if (op === "okrep" || op === "norep") {
+    if (!actor.isAdmin) return { toast: "فقط مدیر می‌تواند گزارش را تأیید کند." };
+    const decision = await decideReport(db, { sessionId: sid, adminUserId: actor.userId, action: op === "okrep" ? "approve" : "reject" });
+    if (!decision.ok) return { toast: "این گزارش قبلاً تعیین تکلیف شده." };
+    if (op === "norep") {
+      await me.edit(p.chatId, p.messageId, "گزارش رد شد. معلم باید دوباره بفرستد.");
+      return {};
+    }
+    const posted = await publishReport(db, ms, r, { report: decision.text });
+    await markReportPublished(db, sid);
+    await me.edit(p.chatId, p.messageId, posted ? "تأیید شد و در گروه کلاس منتشر شد ✓" : "تأیید شد ✓ (گروهی وصل نیست)");
+    return {};
+  }
+
+  if (!actor.isAdmin && r.teacherUserId !== actor.userId) return { toast: "این جلسه برای شما نیست." };
 
   const show = async () => {
     const v = await view(db, sid);
@@ -374,8 +392,29 @@ export async function handleCallback(
         .returning();
       if (!claim) return {};
       const marks: Record<string, Mark> = Object.fromEntries((draft.absent ?? []).map((id) => [id, "absent" as const]));
-      await recordHeld(db, { sessionId: sid, userId: actor.userId, channel: p.channel, marks, summary: draft.report ?? null, homework: draft.noHomework ? null : (draft.homework ?? null) });
+      const gate = await saveSessionWork(db, {
+        tenantId: r.s.tenantId,
+        sessionId: sid,
+        userId: actor.userId,
+        channel: p.channel,
+        marks,
+        summary: draft.report ?? null,
+        homework: draft.noHomework ? null : (draft.homework ?? null),
+        rawText: draft.report ?? null,
+      });
       await setStep(db, sid, "done");
+      if (gate === "pending") {
+        await notifyAdmins(
+          db,
+          ms,
+          r.s.tenantId,
+          "report_pending",
+          `گزارش «${r.c.title}» منتظر تأیید است.\n\n${draft.report ?? ""}`,
+          [[{ text: "تأیید و ارسال", data: `okrep:${sid}` }, { text: "رد", data: `norep:${sid}` }]],
+        );
+        await me.edit(p.chatId, p.messageId, "ثبت شد ✓ گزارش برای تأیید مدیر فرستاده شد و بعد از تأیید در گروه منتشر می‌شود.");
+        return {};
+      }
       const posted = await publishReport(db, ms, r, draft);
       await notifyAbsentParents(db, ms, r, draft.absent ?? []);
       await me.edit(p.chatId, p.messageId, posted ? "ثبت شد ✓ گزارش در گروه کلاس منتشر شد." : "ثبت شد ✓ (گروهی به این کلاس وصل نیست، گزارش فقط ذخیره شد.)");
@@ -403,8 +442,18 @@ export async function handleText(db: Db, ms: Messengers, p: { channel: BotChanne
   if (!text) return false;
   const draft = (k.k.draft ?? {}) as Draft;
   const sid = k.k.sessionId;
-  if (k.k.step === "report") await setStep(db, sid, "homework", { ...draft, report: text });
-  else await setStep(db, sid, "preview", { ...draft, homework: text, noHomework: false });
+  if (k.k.step === "report") {
+    let report = text;
+    let aiText: string | undefined;
+    const [cls] = await db.select({ ai: classGroups.aiReportEnabled }).from(classGroups).where(eq(classGroups.id, k.s.classGroupId));
+    if (cls?.ai) {
+      const names = (await rosterOf(db, k.s.classGroupId)).map((s) => s.firstName);
+      const polished = await polishNote(createAiProvider(), text, names, "report");
+      report = polished.text;
+      if (polished.usedAi) aiText = polished.text;
+    }
+    await setStep(db, sid, "homework", { ...draft, report, ...(aiText ? { aiText } : {}) });
+  } else await setStep(db, sid, "preview", { ...draft, homework: text, noHomework: false });
   const v = await view(db, sid);
   if (v) await ms[p.channel]!.send(p.chatId, v.text, v.buttons);
   return true;
@@ -418,7 +467,19 @@ async function groupChats(db: Db, ms: Messengers, classGroupId: string) {
 }
 
 async function publishReport(db: Db, ms: Messengers, r: Row, d: Draft) {
-  const text = `گزارش جلسه‌ی «${r.c.title}»، ${fmtDay(r.s.startsAt)}\n\n${d.report ?? ""}${d.noHomework || !d.homework ? "" : `\n\nتکلیف: ${d.homework}`}`;
+  const roster = await rosterOf(db, r.c.id);
+  const absentIds = new Set(d.absent ?? []);
+  const presentN = roster.filter((s) => !absentIds.has(s.id)).length;
+  const absentN = roster.filter((s) => absentIds.has(s.id)).length;
+  // Group posts never carry children's names (privacy); headcounts only.
+  const text = formatClassReport({
+    startsAt: r.s.startsAt,
+    present: presentN ? [`${presentN} نفر`] : [],
+    absent: absentN ? [`${absentN} نفر`] : [],
+    activities: d.report ?? "",
+    homework: d.noHomework ? null : (d.homework ?? null),
+    special: null,
+  });
   let ok = 0;
   for (const l of await groupChats(db, ms, r.c.id)) {
     try {
@@ -487,8 +548,10 @@ export async function sendDueAnnouncements(db: Db, ms: Messengers, now = new Dat
         }
       }
     }
-    if (delivered) sent++;
-    else {
+        if (delivered) {
+          sent++;
+          if (a.targets.kind === "report" && a.sessionId) await markReportPublished(db, a.sessionId, now);
+        } else {
       failed++;
       await db.update(scheduledAnnouncements).set({ status: "failed", sentAt: null }).where(eq(scheduledAnnouncements.id, a.id));
     }

@@ -89,10 +89,12 @@ const [sess] = await db
 const userCode = (await createLinkCode(db, tenantId, "user", u!.id)).code;
 const classCode = (await createLinkCode(db, tenantId, "class", cls!.id)).code;
 
-const bot = spawn("pnpm", ["exec", "tsx", "src/index.ts"], {
+const pnpmBin = process.platform === "win32" ? "pnpm.CMD" : "pnpm";
+const bot = spawn(pnpmBin, ["exec", "tsx", "src/index.ts"], {
   cwd: fileURLToPath(new URL("..", import.meta.url)),
   env: { ...process.env, BALE_BOT_TOKEN: "test-token", BALE_API_ROOT: `http://127.0.0.1:${port}`, TELEGRAM_BOT_TOKEN: "", BOT_JOBS_EVERY_MS: "1000" },
   stdio: ["ignore", "pipe", "pipe"],
+  shell: process.platform === "win32",
 });
 let log = "";
 bot.stdout.on("data", (d) => (log += d));

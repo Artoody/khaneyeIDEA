@@ -27,7 +27,7 @@ export function errorText(code: string | undefined, a: AdminDict): string | unde
     case "too_long":
       return "≤ 600";
     case "https_required":
-      return "https://…";
+      return "https://… یا /media/…";
     default:
       return code;
   }

@@ -1,5 +1,5 @@
 import { getDb } from "@khaneyeidea/db";
-import { askDueCheckins, remindPending, sendDueAnnouncements, type Messengers } from "@khaneyeidea/core";
+import { askDueCheckins, deliverWebPush, remindIncompleteReports, remindOpenMentions, remindPending, sendDueAnnouncements, sendEveNotices, type Messengers } from "@khaneyeidea/core";
 
 // Timed work: the post-class question, reminders, and approved notices. Every step claims its row in the database
 // first, so a restart or a second bot process never sends the same message twice.
@@ -12,10 +12,16 @@ export function startJobs(ms: Messengers) {
     busy = true;
     try {
       const db = getDb();
+      const deliver = process.env.VAPID_PUBLIC_KEY ? deliverWebPush : null;
       const a = await askDueCheckins(db, ms);
       const r = await remindPending(db, ms);
       const n = await sendDueAnnouncements(db, ms);
-      if (a.asked || r.reminded || r.escalated || n.sent || n.failed) console.log(`[jobs] asked=${a.asked} reminded=${r.reminded} escalated=${r.escalated} notices=${n.sent} failed=${n.failed}`);
+      const eve = await sendEveNotices(db, ms);
+      const mentions = await remindOpenMentions(db, ms, deliver);
+      const nudge = await remindIncompleteReports(db, ms, deliver);
+      if (a.asked || r.reminded || r.escalated || n.sent || n.failed || eve.queued || mentions.reminded || nudge.nudged) {
+        console.log(`[jobs] asked=${a.asked} reminded=${r.reminded} escalated=${r.escalated} notices=${n.sent} failed=${n.failed} eve=${eve.queued} mentions=${mentions.reminded} nudge=${nudge.nudged}`);
+      }
     } catch (e) {
       console.error("[jobs] tick failed", e instanceof Error ? e.message : e);
     } finally {

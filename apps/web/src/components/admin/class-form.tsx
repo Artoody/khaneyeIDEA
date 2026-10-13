@@ -49,7 +49,7 @@ export function ClassForm({
   o: OpsDict;
   lang: Locale;
   years: number[];
-  options: { courses: Opt[]; teachers: Opt[]; branches: Opt[]; rooms: (Opt & { branchId: string })[] };
+  options: { courses: Opt[]; teachers: Opt[]; branches: Opt[]; rooms: (Opt & { branchId: string })[]; terms: Opt[] };
   /** Prefill for a new class (from the "new class for this coach / on this day" buttons). */
   defaults?: { teacherId?: string; weekday?: number };
 }) {
@@ -57,6 +57,7 @@ export function ClassForm({
   const f = o.cf;
   const [courseId, setCourseId] = useState(c?.courseId ?? options.courses[0]?.id ?? "");
   const [teacherId, setTeacherId] = useState(c?.teacherId ?? defaults?.teacherId ?? "");
+  const [termId, setTermId] = useState(c?.termId ?? "");
   const [weekday, setWeekday] = useState(c?.weekday ?? defaults?.weekday ?? 0);
   const [start, setStart] = useState(c?.startTime.slice(0, 5) ?? "17:00");
   const [end, setEnd] = useState(c?.endTime.slice(0, 5) ?? "18:30");
@@ -89,6 +90,7 @@ export function ClassForm({
             {/* values the chips and steppers choose travel as hidden fields */}
             <input type="hidden" name="courseId" value={courseId} />
             <input type="hidden" name="teacherId" value={teacherId} />
+            <input type="hidden" name="termId" value={termId} />
             <input type="hidden" name="weekday" value={weekday} />
             <input type="hidden" name="mode" value={mode} />
             <input type="hidden" name="branchId" value={online ? "" : branchId} />
@@ -122,6 +124,16 @@ export function ClassForm({
                 ))}
               </div>
               {e("teacherId") && <p className="text-xs text-red-500">{e("teacherId")}</p>}
+              <Field label={t.term} name="termSelect" error={e("termId")}>
+                <select id="termSelect" value={termId} onChange={(ev) => setTermId(ev.target.value)} className={inputCls}>
+                  <option value="">{o.terms.none}</option>
+                  {options.terms.map((x) => (
+                    <option key={x.id} value={x.id}>
+                      {x.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
             </Block>
 
             <Block title={f.sWhen}>

@@ -14,6 +14,12 @@ import {
 type Db = ReturnType<typeof getDb>;
 export type Mark = "present" | "absent" | "excused";
 export type Channel = "bale" | "telegram" | "sms" | "web";
+export type StudentScores = { activity?: number | null; homework?: number | null; note?: string | null };
+
+function clampScore(n: number | null | undefined, max: number) {
+  if (n == null || Number.isNaN(n)) return null;
+  return Math.max(0, Math.min(max, Math.trunc(n)));
+}
 
 // What happens to a session. The admin board, the teacher panel and the bots all go through these functions so a
 // session ends up in the same state whichever door the teacher used (SESSION-LIFECYCLE.md).
@@ -24,7 +30,15 @@ export type Channel = "bale" | "telegram" | "sms" | "web";
  */
 export async function recordHeld(
   db: Db,
-  p: { sessionId: string; userId: string | null; channel: Channel; marks: Record<string, Mark>; summary: string | null; homework: string | null },
+  p: {
+    sessionId: string;
+    userId: string | null;
+    channel: Channel;
+    marks: Record<string, Mark>;
+    summary: string | null;
+    homework: string | null;
+    scores?: Record<string, StudentScores>;
+  },
 ) {
   const [s] = await db.select().from(classSessions).where(eq(classSessions.id, p.sessionId));
   if (!s) throw new Error("session not found");
@@ -35,10 +49,17 @@ export async function recordHeld(
   await db.transaction(async (tx) => {
     for (const { id } of roster) {
       const status = p.marks[id] ?? "present";
+      const sc = p.scores?.[id];
+      const activityScore = status === "present" ? clampScore(sc?.activity, 5) : null;
+      const homeworkScore = status === "present" ? clampScore(sc?.homework, 3) : null;
+      const note = sc?.note?.trim().slice(0, 500) || null;
       await tx
         .insert(attendance)
-        .values({ sessionId: p.sessionId, studentId: id, status })
-        .onConflictDoUpdate({ target: [attendance.sessionId, attendance.studentId], set: { status } });
+        .values({ sessionId: p.sessionId, studentId: id, status, activityScore, homeworkScore, note })
+        .onConflictDoUpdate({
+          target: [attendance.sessionId, attendance.studentId],
+          set: { status, activityScore, homeworkScore, note },
+        });
     }
     if (p.summary) {
       await tx

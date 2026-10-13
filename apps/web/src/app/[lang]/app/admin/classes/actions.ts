@@ -4,15 +4,69 @@ import { and, count, eq, inArray } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { attendance, branches, classGroups, classSessions, courses, enrollments, getDb, guardians, rooms, students, teachers } from "@khaneyeidea/db";
+import { attendance, branches, classGroups, classSessions, courses, enrollments, getDb, guardians, rooms, students, teachers, terms } from "@khaneyeidea/db";
 import { classScheduleConflicts, findOrCreateUser, grantRole, normalizeIranMobile, syncClassSessions } from "@khaneyeidea/core";
 import { requirePermission } from "@/server/auth";
 import { href, isLocale } from "@/lib/i18n";
 import { audit, bool, int, text, type ActionState } from "@/server/admin";
-import { WEEKDAYS } from "@/lib/jalali";
+import { WEEKDAYS, tehranIso } from "@/lib/jalali";
 
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
+const OPEN_STATUSES = ["active", "waitlist", "paused"] as const;
+const todayIso = () => tehranIso(new Date());
+
+function parsePackage(f: FormData): { plannedSessions: 6 | 7; termStartedOn: string } {
+  const n = int(f, "plannedSessions");
+  const plannedSessions = n === 6 ? 6 : 7;
+  const raw = text(f, "termStartedOn");
+  const termStartedOn = raw && ISO.test(raw) ? raw : todayIso();
+  return { plannedSessions, termStartedOn };
+}
+
+/** Insert or revive an open enrollment (history rows for finished/dropped stay untouched). */
+async function upsertOpenEnrollment(
+  db: ReturnType<typeof getDb>,
+  p: {
+    tenantId: string;
+    classGroupId: string;
+    studentId: string;
+    status: "active" | "waitlist";
+    plannedSessions?: 6 | 7;
+    termStartedOn?: string;
+  },
+) {
+  const plannedSessions = p.plannedSessions ?? 7;
+  const termStartedOn = p.termStartedOn ?? todayIso();
+  const [open] = await db
+    .select({ id: enrollments.id })
+    .from(enrollments)
+    .where(
+      and(
+        eq(enrollments.classGroupId, p.classGroupId),
+        eq(enrollments.studentId, p.studentId),
+        inArray(enrollments.status, [...OPEN_STATUSES]),
+      ),
+    )
+    .limit(1);
+  if (open) {
+    await db
+      .update(enrollments)
+      .set({ status: p.status, endedOn: null, plannedSessions, termStartedOn, startedOn: termStartedOn })
+      .where(eq(enrollments.id, open.id));
+    return;
+  }
+  await db.insert(enrollments).values({
+    tenantId: p.tenantId,
+    classGroupId: p.classGroupId,
+    studentId: p.studentId,
+    status: p.status,
+    startedOn: termStartedOn,
+    termStartedOn,
+    plannedSessions,
+    endedOn: null,
+  });
+}
 
 export type ClassState = ActionState & { synced?: { added: number; removed: number }; conflicts?: { kind: "teacher" | "room"; title: string }[] };
 
@@ -49,8 +103,9 @@ export async function saveClass(_: ActionState, f: FormData): Promise<ClassState
   const telegramInviteUrl = text(f, "telegramInviteUrl");
   if (telegramInviteUrl && !/^https:\/\//.test(telegramInviteUrl)) e["telegramInviteUrl"] = "https_required";
   const roomId = text(f, "roomId");
+  const termId = text(f, "termId");
 
-  const owned = async (table: typeof courses | typeof teachers | typeof branches, rowId: string | null, key: string, required = false) => {
+  const owned = async (table: typeof courses | typeof teachers | typeof branches | typeof terms, rowId: string | null, key: string, required = false) => {
     if (!rowId) {
       if (required) e[key] = "required";
       return;
@@ -58,7 +113,12 @@ export async function saveClass(_: ActionState, f: FormData): Promise<ClassState
     const rows = await db.select({ id: table.id }).from(table).where(and(eq(table.id, rowId), eq(table.tenantId, tid)));
     if (!rows.length) e[key] = "invalid";
   };
-  await Promise.all([owned(courses, courseId, "courseId", true), owned(teachers, teacherId, "teacherId"), owned(branches, branchId, "branchId")]);
+  await Promise.all([
+    owned(courses, courseId, "courseId", true),
+    owned(teachers, teacherId, "teacherId"),
+    owned(branches, branchId, "branchId"),
+    owned(terms, termId, "termId"),
+  ]);
   if (roomId) {
     const r = await db.select({ id: rooms.id }).from(rooms).where(and(eq(rooms.id, roomId), eq(rooms.tenantId, tid)));
     if (!r.length) e["roomId"] = "invalid";
@@ -80,6 +140,7 @@ export async function saveClass(_: ActionState, f: FormData): Promise<ClassState
     title: title.slice(0, 120),
     courseId: courseId!,
     teacherId,
+    termId,
     branchId: mode === "online" ? null : branchId,
     roomId: mode === "online" ? null : roomId,
     weekday: weekday!,
@@ -123,22 +184,36 @@ export async function enrollStudent(f: FormData) {
     .from(enrollments)
     .where(and(eq(enrollments.classGroupId, c.id), eq(enrollments.status, "active")));
   const status = n >= c.capacity ? ("waitlist" as const) : ("active" as const);
-  await db
-    .insert(enrollments)
-    .values({ tenantId: user.tenantId, classGroupId: c.id, studentId, status, startedOn: new Date().toISOString().slice(0, 10) })
-    .onConflictDoUpdate({ target: [enrollments.classGroupId, enrollments.studentId], set: { status } });
-  await audit(user.tenantId, user.userId, "create", "enrollment", c.id, { studentId, status });
+  const pack = parsePackage(f);
+  await upsertOpenEnrollment(db, { tenantId: user.tenantId, classGroupId: c.id, studentId, status, ...pack });
+  await audit(user.tenantId, user.userId, "create", "enrollment", c.id, { studentId, status, ...pack });
+  refresh();
+}
+
+/** Edit the student's session package (6 or 7) and when counting starts. */
+export async function updateEnrollmentTerm(f: FormData) {
+  const user = await requirePermission("schedule.manage");
+  const id = z.uuid().parse(f.get("id"));
+  const pack = parsePackage(f);
+  const db = getDb();
+  const res = await db
+    .update(enrollments)
+    .set({ plannedSessions: pack.plannedSessions, termStartedOn: pack.termStartedOn })
+    .where(and(eq(enrollments.id, id), eq(enrollments.tenantId, user.tenantId)))
+    .returning({ id: enrollments.id });
+  if (res.length) await audit(user.tenantId, user.userId, "update", "enrollment", id, pack);
   refresh();
 }
 
 export async function setEnrollment(f: FormData) {
   const user = await requirePermission("schedule.manage");
   const id = z.uuid().parse(f.get("id"));
-  const status = z.enum(["active", "waitlist", "dropped"]).parse(f.get("status"));
+  const status = z.enum(["active", "waitlist", "paused", "dropped", "finished"]).parse(f.get("status"));
   const db = getDb();
+  const closed = status === "dropped" || status === "finished";
   const res = await db
     .update(enrollments)
-    .set({ status })
+    .set({ status, endedOn: closed ? todayIso() : null })
     .where(and(eq(enrollments.id, id), eq(enrollments.tenantId, user.tenantId)))
     .returning({ classGroupId: enrollments.classGroupId });
   if (res.length) await audit(user.tenantId, user.userId, "update", "enrollment", id, { status });
@@ -156,16 +231,14 @@ export async function enrollStudents(f: FormData) {
   if (!c) return;
   const owned = await db.select({ id: students.id }).from(students).where(and(eq(students.tenantId, user.tenantId), inArray(students.id, ids)));
   const [{ n } = { n: 0 }] = await db.select({ n: count() }).from(enrollments).where(and(eq(enrollments.classGroupId, c.id), eq(enrollments.status, "active")));
+  const pack = parsePackage(f);
   let seats = Math.max(0, c.capacity - n);
   for (const s of owned) {
     const status = seats > 0 ? ("active" as const) : ("waitlist" as const);
     if (status === "active") seats--;
-    await db
-      .insert(enrollments)
-      .values({ tenantId: user.tenantId, classGroupId: c.id, studentId: s.id, status, startedOn: new Date().toISOString().slice(0, 10) })
-      .onConflictDoUpdate({ target: [enrollments.classGroupId, enrollments.studentId], set: { status } });
+    await upsertOpenEnrollment(db, { tenantId: user.tenantId, classGroupId: c.id, studentId: s.id, status, ...pack });
   }
-  await audit(user.tenantId, user.userId, "create", "enrollment", c.id, { count: owned.length });
+  await audit(user.tenantId, user.userId, "create", "enrollment", c.id, { count: owned.length, ...pack });
   refresh();
 }
 
@@ -195,12 +268,16 @@ export async function addNewStudentToClass(_: ActionState, f: FormData): Promise
     await grantRole(tx, parent.id, "parent", null);
     await tx.insert(guardians).values({ studentId: kid!.id, userId: parent.id, relation: "other", mediaConsent: false });
     const [{ n } = { n: 0 }] = await tx.select({ n: count() }).from(enrollments).where(and(eq(enrollments.classGroupId, c.id), eq(enrollments.status, "active")));
+    const pack = parsePackage(f);
     await tx.insert(enrollments).values({
       tenantId: user.tenantId,
       classGroupId: c.id,
       studentId: kid!.id,
       status: n >= c.capacity ? "waitlist" : "active",
-      startedOn: new Date().toISOString().slice(0, 10),
+      startedOn: pack.termStartedOn,
+      termStartedOn: pack.termStartedOn,
+      plannedSessions: pack.plannedSessions,
+      endedOn: null,
     });
     return kid!.id;
   });

@@ -68,7 +68,9 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
   const ops = {
     schedule: [
       { key: "sessions", label: o.nav.sessions, href: `${base}/sessions`, group: o.nav.group },
+      { key: "reports", label: "گزارش‌ها", href: `${base}/reports`, group: o.nav.group },
       { key: "classes", label: o.nav.classes, href: `${base}/classes`, group: o.nav.group },
+      { key: "terms", label: o.nav.terms, href: `${base}/terms`, group: o.nav.group },
       { key: "rooms", label: o.nav2.rooms, href: `${base}/rooms`, group: o.nav.group },
     ] as NavItem[],
     students: [{ key: "students", label: o.nav.students, href: `${base}/students`, group: o.nav.group }] as NavItem[],

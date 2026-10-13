@@ -41,6 +41,12 @@ export const siteSettings = pgTable("site_settings", {
   showPrices: boolean("show_prices").notNull().default(false),
   /** Show the live student count on the home page (only real numbers, never typed by hand). */
   showStudentCount: boolean("show_student_count").notNull().default(true),
+  /** Trial week: class reports wait for an admin before they go to the group. */
+  reportApprovalRequired: boolean("report_approval_required").notNull().default(true),
+  /** Tehran hour (0-23) for the day-before "class will be held" group notice. */
+  eveNoticeHour: integer("eve_notice_hour").notNull().default(21),
+  /** Tehran hour by which an unfinished report must be done; the teacher is reminded until then. */
+  eodReportDeadlineHour: integer("eod_report_deadline_hour").notNull().default(21),
   stats: jsonb("stats").$type<{ yearsActive?: number }>().notNull().default({}),
   seo: jsonb("seo").$type<SeoFields>().notNull().default({}),
   ...timestamps(),
@@ -174,6 +180,8 @@ export const teachers = pgTable("teachers", {
   bio: jsonb("bio").$type<Localized>(),
   photo: text("photo"),
   specialties: jsonb("specialties").$type<Localized[]>().notNull().default([]),
+  /** Personal online class link, used when the class itself has none. */
+  meetingUrl: text("meeting_url"),
   showOnSite: boolean("show_on_site").notNull().default(true),
   /** Placeholder profile shown with a "sample" badge in the panel until replaced with real data. */
   isSample: boolean("is_sample").notNull().default(false),

@@ -8,7 +8,7 @@ import { findLegacyRedirect } from "./server/legacy-redirects";
 const SESSION_COOKIE = "kh_session";
 const PANEL = /^(\/en)?\/app(\/|$)/;
 // First path segments that belong to this app. Anything else may be an old-site URL with a stored redirect.
-const APP_ROUTES = new Set(["", "en", "fa", "app", "login", "courses", "achievements", "book", "blog"]);
+const APP_ROUTES = new Set(["", "en", "fa", "app", "login", "courses", "achievements", "book", "blog", "teacher"]);
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -19,6 +19,21 @@ export async function proxy(request: NextRequest) {
       // Targets may carry a query or a hash (e.g. /courses?d=robotics, /#contact).
       return NextResponse.redirect(new URL(hit.to, request.nextUrl.origin), hit.permanent ? 308 : 307);
     }
+  }
+
+  if ((pathname === "/app/teacher" || pathname.startsWith("/app/teacher/") || pathname === "/en/app/teacher" || pathname.startsWith("/en/app/teacher/")) ) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.startsWith("/en") ? "/en/teacher" : "/teacher";
+    return NextResponse.redirect(url, 308);
+  }
+
+  const teacher = /^(\/en)?\/teacher(\/|$)/.exec(pathname);
+  const teacherLogin = /^(\/en)?\/teacher\/login\/?$/.test(pathname);
+  if (teacher && !teacherLogin && !request.cookies.has(SESSION_COOKIE)) {
+    const url = request.nextUrl.clone();
+    url.pathname = teacher[1] ? "/en/teacher/login" : "/teacher/login";
+    url.search = "";
+    return NextResponse.redirect(url, 307);
   }
 
   const panel = PANEL.exec(pathname);

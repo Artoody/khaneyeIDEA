@@ -56,15 +56,37 @@ async function openSession(db: Db, userId: string, now: Date, meta: { userAgent?
   return { token, expiresAt };
 }
 
+export type PasswordAudience = "teacher" | "staff";
+
 export type PasswordLogin =
   | { ok: true; userId: string; token: string; expiresAt: Date; mustChangePassword: boolean }
-  | { ok: false; reason: "invalid" | "locked" | "inactive" | "not_teacher" };
+  | { ok: false; reason: "invalid" | "locked" | "inactive" | "not_teacher" | "not_staff" };
 
-/** Username and password for the teacher app. Only accounts with the teacher role may enter. */
+const STAFF_ROLES: readonly Role[] = ["owner", "admin", "content_manager"];
+
+function roleOk(roles: { role: Role }[], audience: PasswordAudience) {
+  if (audience === "teacher") return roles.some((r) => r.role === "teacher");
+  return roles.some((r) => STAFF_ROLES.includes(r.role));
+}
+
+/**
+ * Username and password sign-in.
+ * - `audience: "teacher"` → only the teacher app (`/teacher/login`)
+ * - `audience: "staff"` → owner / admin / content_manager (`/admin/login`)
+ */
 export async function loginWithPassword(
   db: Db,
-  p: { tenantId: string; username: string; password: string; userAgent?: string | null; ip?: string | null; now?: Date },
+  p: {
+    tenantId: string;
+    username: string;
+    password: string;
+    audience?: PasswordAudience;
+    userAgent?: string | null;
+    ip?: string | null;
+    now?: Date;
+  },
 ): Promise<PasswordLogin> {
+  const audience = p.audience ?? "teacher";
   const now = p.now ?? new Date();
   const username = normalizeUsername(p.username);
   if (!username || p.password.length < 1) return { ok: false, reason: "invalid" };
@@ -74,7 +96,7 @@ export async function loginWithPassword(
   if (user.passwordLockedUntil && user.passwordLockedUntil > now) return { ok: false, reason: "locked" };
 
   const roles = await db.select({ role: userRoles.role }).from(userRoles).where(eq(userRoles.userId, user.id));
-  if (!roles.some((r) => r.role === ("teacher" satisfies Role))) return { ok: false, reason: "not_teacher" };
+  if (!roleOk(roles, audience)) return { ok: false, reason: audience === "teacher" ? "not_teacher" : "not_staff" };
 
   if (!(await verifyPassword(p.password, user.passwordHash))) {
     const fails = user.passwordFailedCount + 1;

@@ -4,9 +4,11 @@ import { and, eq, inArray, ne } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { z } from "zod";
 import { branches, getDb, teachers, userRoles, users } from "@khaneyeidea/db";
-import { findOrCreateUser, grantRole, normalizeIranMobile } from "@khaneyeidea/core";
+import { findOrCreateUser, grantRole, normalizeIranMobile, setUserPassword } from "@khaneyeidea/core";
 import { requirePermission } from "@/server/auth";
 import { audit, text, type ActionState } from "@/server/admin";
+
+const PANEL_ROLES = ["owner", "admin", "content_manager"] as const;
 
 const STAFF_ROLES = ["owner", "admin", "content_manager", "teacher"] as const;
 
@@ -72,4 +74,25 @@ export async function removeRole(f: FormData) {
   }
   await audit(me.tenantId, me.userId, "delete", "user_role", row.r.userId, { role: row.r.role, branchId: row.r.branchId });
   refresh();
+}
+
+/** Username and first password for owner / admin / content_manager panel login. */
+export async function setStaffLogin(_: ActionState, f: FormData): Promise<ActionState> {
+  const me = await requirePermission("users.manage");
+  const db = getDb();
+  const userId = text(f, "userId");
+  if (!userId) return { error: "not_found" };
+  const roles = await db
+    .select({ role: userRoles.role })
+    .from(userRoles)
+    .innerJoin(users, eq(users.id, userRoles.userId))
+    .where(and(eq(userRoles.userId, userId), eq(users.tenantId, me.tenantId)));
+  if (!roles.some((r) => (PANEL_ROLES as readonly string[]).includes(r.role))) return { error: "not_found" };
+  const username = text(f, "username") ?? "";
+  const password = text(f, "password") ?? "";
+  const result = await setUserPassword(db, { tenantId: me.tenantId, userId, username, password, mustChange: true });
+  if (!result.ok) return { error: "validation", fieldErrors: { username: result.reason } };
+  await audit(me.tenantId, me.userId, "update", "staff_login", userId, { username });
+  refresh();
+  return { ok: true, savedAt: Date.now() };
 }

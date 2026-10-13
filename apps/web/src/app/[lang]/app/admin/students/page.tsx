@@ -10,6 +10,7 @@ import { getOpsDict } from "@/lib/ops-i18n";
 import { fill } from "@/lib/format";
 import { ageFromJalaliYear } from "@/lib/age";
 import { requirePermissionPage } from "@/server/auth";
+import { byTeacherName } from "@/server/teachers-order";
 import { Badge, ListSkeleton, PageHeader, RowLink, RowList } from "@/components/admin/ui";
 
 async function List({ lang, q, cls, tch, free }: { lang: Locale; q: string; cls: string | null; tch: string | null; free: boolean }) {
@@ -30,7 +31,7 @@ async function List({ lang, q, cls, tch, free }: { lang: Locale; q: string; cls:
   const anyClass = free ? db.select({ id: enrollments.studentId }).from(enrollments).where(active) : null;
   const [classList, coachList] = await Promise.all([
     db.select({ id: classGroups.id, title: classGroups.title }).from(classGroups).where(eq(classGroups.tenantId, user.tenantId)).orderBy(asc(classGroups.weekday), asc(classGroups.startTime)),
-    db.select().from(teachers).where(eq(teachers.tenantId, user.tenantId)).orderBy(asc(teachers.sortOrder)),
+    db.select().from(teachers).where(eq(teachers.tenantId, user.tenantId)).orderBy(byTeacherName),
   ]);
   const rows = await db
     .select()

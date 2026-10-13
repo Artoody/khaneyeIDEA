@@ -8,8 +8,9 @@ import { classGroups, getDb, teachers } from "@khaneyeidea/db";
 import { findOrCreateUser, grantRole, normalizeIranMobile, setUserPassword } from "@khaneyeidea/core";
 import { requirePermission } from "@/server/auth";
 import { TAGS } from "@/server/content";
+import { saveTeacherPhotoFile } from "@/server/teacher-photo";
 import { href, isLocale } from "@/lib/i18n";
-import { audit, bool, int, json, localized, localizedSchema, optionalLocalized, text, type ActionState } from "@/server/admin";
+import { audit, bool, json, localized, localizedSchema, optionalLocalized, text, type ActionState } from "@/server/admin";
 
 export async function saveTeacher(_: ActionState, f: FormData): Promise<ActionState> {
   const user = await requirePermission("content.edit");
@@ -20,16 +21,24 @@ export async function saveTeacher(_: ActionState, f: FormData): Promise<ActionSt
 
   const name = localized(f, "name");
   if (!name.fa) errors["name"] = "fa_required";
-  const sortOrder = int(f, "sortOrder");
-  if (Number.isNaN(sortOrder)) errors["sortOrder"] = "number";
   let specialties: { fa: string; en: string }[] = [];
   try {
     specialties = json(f, "specialties", z.array(localizedSchema).max(20)).filter((s) => s.fa || s.en);
   } catch {
     errors["specialties"] = "invalid";
   }
-  const photo = text(f, "photo");
-  if (photo && !/^(https:\/\/|\/media\/)/.test(photo)) errors["photo"] = "https_required";
+
+  let photo: string | null = text(f, "photo") || null;
+  if (bool(f, "clearPhoto")) photo = null;
+  const file = f.get("photoFile");
+  if (file instanceof File && file.size > 0) {
+    const saved = await saveTeacherPhotoFile(file);
+    if (!saved.ok) errors["photo"] = saved.reason === "type" ? "photo_type" : "photo_size";
+    else photo = saved.url;
+  } else if (photo && !/^(https:\/\/|\/media\/)/.test(photo)) {
+    errors["photo"] = "https_required";
+  }
+
   const meetingUrl = text(f, "meetingUrl");
   if (meetingUrl && !/^https:\/\//.test(meetingUrl)) errors["meetingUrl"] = "https_required";
   if (Object.keys(errors).length) return { error: "validation", fieldErrors: errors };
@@ -41,9 +50,8 @@ export async function saveTeacher(_: ActionState, f: FormData): Promise<ActionSt
     specialties,
     showOnSite: bool(f, "showOnSite"),
     isSample: bool(f, "isSample"),
-    photo: photo || null,
+    photo,
     meetingUrl: meetingUrl || null,
-    sortOrder: sortOrder ?? 0,
   };
   let rowId = id;
   if (id) {

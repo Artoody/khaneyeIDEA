@@ -9,6 +9,7 @@ import { href, isLocale, pick, type Locale } from "@/lib/i18n";
 import { getOpsDict } from "@/lib/ops-i18n";
 import { tehranIso, WEEKDAYS } from "@/lib/jalali";
 import { requirePermissionPage } from "@/server/auth";
+import { byTeacherName } from "@/server/teachers-order";
 import { ClassesSkeleton, PageHeader } from "@/components/admin/ui";
 import { ClassBrowser, type ClassRow } from "@/components/ops/class-browser";
 
@@ -30,7 +31,7 @@ async function List({ lang, q }: { lang: Locale; q: Q }) {
       .groupBy(classGroups.id, courses.title, teachers.name, branches.name)
       .orderBy(asc(classGroups.weekday), asc(classGroups.startTime)),
     db.select({ classGroupId: chatLinks.classGroupId, channel: chatLinks.channel }).from(chatLinks).where(eq(chatLinks.tenantId, user.tenantId)),
-    db.select().from(teachers).where(eq(teachers.tenantId, user.tenantId)).orderBy(asc(teachers.sortOrder), asc(teachers.createdAt)),
+    db.select().from(teachers).where(eq(teachers.tenantId, user.tenantId)).orderBy(byTeacherName),
     db.select().from(branches).where(eq(branches.tenantId, user.tenantId)).orderBy(asc(branches.sortOrder)),
   ]);
   const base = href(lang, "/app/admin/classes");

@@ -18,7 +18,7 @@ import { JalaliDateInput } from "./jalali-date-input";
 type ClassGroup = typeof classGroups.$inferSelect;
 type Opt = { id: string; label: string };
 
-const DURATIONS = [45, 60, 90, 120];
+const DURATIONS = [60, 75];
 const pad = (n: number) => String(n).padStart(2, "0");
 const toMin = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
 const fromMin = (m: number) => `${pad(Math.floor(m / 60) % 24)}:${pad(m % 60)}`;
@@ -60,7 +60,7 @@ export function ClassForm({
   const [termId, setTermId] = useState(c?.termId ?? "");
   const [weekday, setWeekday] = useState(c?.weekday ?? defaults?.weekday ?? 0);
   const [start, setStart] = useState(c?.startTime.slice(0, 5) ?? "17:00");
-  const [end, setEnd] = useState(c?.endTime.slice(0, 5) ?? "18:30");
+  const [end, setEnd] = useState(c?.endTime.slice(0, 5) ?? "18:15");
   const [mode, setMode] = useState<string>(c?.mode ?? "in_person");
   const [branchId, setBranchId] = useState(c?.branchId ?? options.branches[0]?.id ?? "");
   const [roomId, setRoomId] = useState(c?.roomId ?? "");
@@ -74,7 +74,7 @@ export function ClassForm({
   const auto = fill(f.autoTitle, { course: courseLabel, day: WEEKDAYS[lang][weekday] ?? "" });
   const setDuration = (m: number) => setEnd(fromMin(toMin(start) + m));
   const setStartKeepingLength = (v: string) => {
-    const len = duration > 0 ? duration : 90;
+    const len = duration > 0 ? duration : 75;
     setStart(v);
     setEnd(fromMin(toMin(v) + len));
   };

@@ -549,7 +549,7 @@ export function ClassBrowser({
         </div>
 
         {/* one coach at a time, or everyone */}
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0" role="group" aria-label={c.allTeachers} data-testid="teacher-chips">
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:thin] sm:mx-0 sm:flex-wrap sm:px-0" role="group" aria-label={c.allTeachers} data-testid="teacher-chips">
           <button
             type="button"
             aria-pressed={!teacher}

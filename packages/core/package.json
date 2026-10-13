@@ -12,11 +12,14 @@
     "demo": "tsx scripts/demo.ts"
   },
   "dependencies": {
+    "@khaneyeidea/ai": "workspace:*",
     "@khaneyeidea/db": "workspace:*",
-    "drizzle-orm": "^0.45.3"
+    "drizzle-orm": "^0.45.3",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",
+    "@types/web-push": "^3.6.4",
     "dotenv": "^18.0.5",
     "typescript": "^7.0.2",
     "vitest": "^5.0.3",

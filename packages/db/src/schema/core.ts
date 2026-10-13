@@ -46,10 +46,20 @@ export const users = pgTable(
     fullName: text("full_name"),
     locale: text("locale").notNull().default("fa"),
     active: boolean("active").notNull().default(true),
+    /** Teacher panel login. Null for accounts that only use the phone code. */
+    username: text("username"),
+    passwordHash: text("password_hash"),
+    mustChangePassword: boolean("must_change_password").notNull().default(false),
+    passwordUpdatedAt: timestamp("password_updated_at", { withTimezone: true }),
+    passwordFailedCount: integer("password_failed_count").notNull().default(0),
+    passwordLockedUntil: timestamp("password_locked_until", { withTimezone: true }),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
     ...timestamps(),
   },
-  (t) => [uniqueIndex("users_tenant_phone_uq").on(t.tenantId, t.phone)],
+  (t) => [
+    uniqueIndex("users_tenant_phone_uq").on(t.tenantId, t.phone),
+    uniqueIndex("users_tenant_username_uq").on(t.tenantId, t.username),
+  ],
 );
 
 /** A user may hold several roles; branchId narrows admin/teacher roles to one branch (null = all branches). */

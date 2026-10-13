@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -15,7 +16,21 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { channelEnum, id, tenantId, timestamps, users } from "./core";
-import { branches, courses, deliveryModeEnum, teachers } from "./content";
+import { branches, courses, deliveryModeEnum, teachers, type Localized } from "./content";
+
+/** Academy-wide teaching term (e.g. پاییز ۱۴۰۴). Classes optionally belong to one. */
+export const terms = pgTable(
+  "terms",
+  {
+    id: id(),
+    tenantId: tenantId(),
+    name: jsonb("name").$type<Localized>().notNull(),
+    startsOn: date("starts_on").notNull(),
+    endsOn: date("ends_on").notNull(),
+    ...timestamps(),
+  },
+  (t) => [index("terms_tenant_start_idx").on(t.tenantId, t.startsOn)],
+);
 
 export const rooms = pgTable("rooms", {
   id: id(),
@@ -68,6 +83,7 @@ export const classGroups = pgTable(
     branchId: uuid("branch_id").references(() => branches.id, { onDelete: "set null" }),
     roomId: uuid("room_id").references(() => rooms.id, { onDelete: "set null" }),
     teacherId: uuid("teacher_id").references(() => teachers.id, { onDelete: "set null" }),
+    termId: uuid("term_id").references(() => terms.id, { onDelete: "set null" }),
     title: text("title").notNull(),
     /** 0 = Saturday ... 6 = Friday (Iranian week) */
     weekday: smallint("weekday").notNull(),
@@ -81,10 +97,18 @@ export const classGroups = pgTable(
     /** Invite links of the class groups (shown to staff and sent to new students); the bot-linked chat is in chat_links. */
     baleInviteUrl: text("bale_invite_url"),
     telegramInviteUrl: text("telegram_invite_url"),
+    /** Polish the teacher's notes into a report through the AI provider. Off means a fixed template. */
+    aiReportEnabled: boolean("ai_report_enabled").notNull().default(false),
+    /** Post the evening-before notice that this class will be held. */
+    eveNoticeEnabled: boolean("eve_notice_enabled").notNull().default(true),
     active: boolean("active").notNull().default(true),
     ...timestamps(),
   },
-  (t) => [index("class_groups_teacher_idx").on(t.teacherId), index("class_groups_weekday_idx").on(t.tenantId, t.weekday)],
+  (t) => [
+    index("class_groups_teacher_idx").on(t.teacherId),
+    index("class_groups_weekday_idx").on(t.tenantId, t.weekday),
+    index("class_groups_term_idx").on(t.termId),
+  ],
 );
 
 /** Bale / Telegram group linked to a class. */
@@ -119,9 +143,21 @@ export const enrollments = pgTable(
       .references(() => students.id, { onDelete: "cascade" }),
     status: enrollmentStatusEnum("status").notNull().default("active"),
     startedOn: date("started_on"),
+    /** Set when status becomes finished or dropped. */
+    endedOn: date("ended_on"),
+    /** Package size for this student's term in the class (usually 6 or 7). */
+    plannedSessions: smallint("planned_sessions").notNull().default(7),
+    /** When counting held sessions toward the package starts. Falls back to startedOn. */
+    termStartedOn: date("term_started_on"),
     ...timestamps(),
   },
-  (t) => [uniqueIndex("enrollment_uq").on(t.classGroupId, t.studentId)],
+  (t) => [
+    // One open seat per student per class; finished/dropped rows stay for history and allow re-enroll.
+    uniqueIndex("enrollment_open_uq")
+      .on(t.classGroupId, t.studentId)
+      .where(sql`status IN ('active', 'waitlist', 'paused')`),
+    index("enrollments_student_idx").on(t.studentId),
+  ],
 );
 
 // Session lifecycle, see docs/specs/SESSION-LIFECYCLE.md
@@ -175,20 +211,35 @@ export const attendance = pgTable(
       .references(() => students.id, { onDelete: "cascade" }),
     status: attendanceStatusEnum("status").notNull(),
     isMakeup: boolean("is_makeup").notNull().default(false),
+    /** Teacher mark for class engagement, 0–5. Only for present students. */
+    activityScore: smallint("activity_score"),
+    /** Teacher mark for homework / practice, 0–3. Only for present students. */
+    homeworkScore: smallint("homework_score"),
     note: text("note"),
   },
   (t) => [primaryKey({ columns: [t.sessionId, t.studentId] })],
 );
 
+export const reportStatusEnum = pgEnum("report_status", ["draft", "pending_approval", "approved", "published", "rejected"]);
+
 export const sessionReports = pgTable("session_reports", {
   sessionId: uuid("session_id")
     .primaryKey()
     .references(() => classSessions.id, { onDelete: "cascade" }),
+  /** Text that was actually posted, or the latest draft while still unpublished. */
   summary: text("summary").notNull(),
   topics: jsonb("topics").$type<string[]>().notNull().default([]),
+  status: reportStatusEnum("status").notNull().default("published"),
+  rawText: text("raw_text"),
+  voiceKey: text("voice_key"),
+  aiText: text("ai_text"),
+  finalText: text("final_text"),
   submittedByUserId: uuid("submitted_by_user_id"),
+  approvedByUserId: uuid("approved_by_user_id"),
   channel: channelEnum("channel"),
   submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().defaultNow(),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
 });
 
 export const homework = pgTable("homework", {
@@ -197,6 +248,9 @@ export const homework = pgTable("homework", {
     .notNull()
     .references(() => classSessions.id, { onDelete: "cascade" }),
   text: text("text"),
+  rawText: text("raw_text"),
+  aiText: text("ai_text"),
+  voiceKey: text("voice_key"),
   attachments: jsonb("attachments").$type<{ url: string; name: string }[]>().notNull().default([]),
   dueAt: timestamp("due_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -260,8 +314,8 @@ export const scheduledAnnouncements = pgTable("scheduled_announcements", {
   sessionId: uuid("session_id").references(() => classSessions.id, { onDelete: "cascade" }),
   text: text("text").notNull(),
   sendAt: timestamp("send_at", { withTimezone: true }).notNull(),
-  /** { group: true, parents: false } */
-  targets: jsonb("targets").$type<{ group: boolean; parents: boolean }>().notNull(),
+  /** group/parents pick the audience. kind distinguishes a class report from a cancellation or the evening notice. */
+  targets: jsonb("targets").$type<{ group: boolean; parents: boolean; kind?: "notice" | "report" | "eve" }>().notNull(),
   status: announcementStatusEnum("status").notNull().default("draft"),
   aiDrafted: boolean("ai_drafted").notNull().default(false),
   approvedByUserId: uuid("approved_by_user_id"),
@@ -303,4 +357,47 @@ export const linkCodes = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("link_codes_code_uq").on(t.code)],
+);
+
+/** Browser push subscriptions for the teacher (and admin) web app. Endpoint is the push service URL. */
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    endpoint: text("endpoint").primaryKey(),
+    tenantId: tenantId(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    platform: text("platform"),
+    standalone: boolean("standalone").notNull().default(false),
+    failCount: integer("fail_count").notNull().default(0),
+    lastOkAt: timestamp("last_ok_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("push_subscriptions_user_idx").on(t.userId)],
+);
+
+/**
+ * A question in a class group that tagged the teacher. Reminded in private until the teacher replies in that group.
+ */
+export const groupMentions = pgTable(
+  "group_mentions",
+  {
+    id: id(),
+    tenantId: tenantId(),
+    channel: channelEnum("channel").notNull(),
+    chatId: text("chat_id").notNull(),
+    messageId: text("message_id").notNull(),
+    classGroupId: uuid("class_group_id").references(() => classGroups.id, { onDelete: "set null" }),
+    teacherId: uuid("teacher_id")
+      .notNull()
+      .references(() => teachers.id, { onDelete: "cascade" }),
+    snippet: text("snippet"),
+    askedAt: timestamp("asked_at", { withTimezone: true }).notNull().defaultNow(),
+    answeredAt: timestamp("answered_at", { withTimezone: true }),
+    remindedAt: timestamp("reminded_at", { withTimezone: true }),
+  },
+  (t) => [uniqueIndex("group_mentions_msg_uq").on(t.channel, t.chatId, t.messageId), index("group_mentions_open_idx").on(t.teacherId, t.answeredAt)],
 );

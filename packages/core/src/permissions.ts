@@ -51,10 +51,10 @@ export function can(p: Principal | null, perm: Permission, scope?: { branchId?: 
 }
 
 /** Where to send a user after login, by their strongest role. */
-export function homeFor(p: Principal): "/app/admin" | "/app/teacher" | "/app/parent" | "/app" {
+export function homeFor(p: Principal): "/app/admin" | "/teacher" | "/app/parent" | "/app" {
   const roles = new Set(p.roles.map((r) => r.role));
   if (roles.has("owner") || roles.has("admin") || roles.has("content_manager")) return "/app/admin";
-  if (roles.has("teacher")) return "/app/teacher";
+  if (roles.has("teacher")) return "/teacher";
   if (roles.has("parent")) return "/app/parent";
   return "/app";
 }

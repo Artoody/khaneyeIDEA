@@ -50,6 +50,34 @@
       "when": 1791223871449,
       "tag": "0006_sad_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791909343799,
+      "tag": "0007_teacher_pwa_bot",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791911457410,
+      "tag": "0008_student_scores",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791915000000,
+      "tag": "0009_student_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791916200000,
+      "tag": "0010_enrollment_packages",
+      "breakpoints": true
     }
   ]
 }

@@ -37,6 +37,12 @@ export function TeacherForm({ teacher, a, lang }: { teacher?: Teacher; a: AdminD
             <Field label={a.common.order} name="sortOrder" error={e("sortOrder")}>
               <input id="sortOrder" name="sortOrder" inputMode="numeric" dir="ltr" defaultValue={teacher?.sortOrder ?? 0} className={`${inputCls} max-w-40`} />
             </Field>
+            <Field label={t.photo} name="photo" help={t.photoHelp} error={e("photo")}>
+              <input id="photo" name="photo" dir="ltr" defaultValue={teacher?.photo ?? ""} placeholder="https://… یا /media/…" className={inputCls} />
+            </Field>
+            <Field label={t.meetingUrl} name="meetingUrl" help={t.meetingUrlHelp} error={e("meetingUrl")}>
+              <input id="meetingUrl" name="meetingUrl" dir="ltr" defaultValue={teacher?.meetingUrl ?? ""} placeholder="https://" className={inputCls} />
+            </Field>
             <Toggle name="showOnSite" label={t.showOnSite} defaultChecked={teacher?.showOnSite ?? true} />
             <Toggle name="isSample" label={t.isSample} help={t.isSampleHelp} defaultChecked={teacher?.isSample ?? false} />
           </section>

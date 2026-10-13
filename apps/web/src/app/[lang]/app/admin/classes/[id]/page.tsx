@@ -5,7 +5,7 @@ import { and, asc, eq, gte, notInArray } from "drizzle-orm";
 import { z } from "zod";
 import { Clock, MapPin, Monitor, PencilSimple, UserCircle, UsersThree } from "@phosphor-icons/react/dist/ssr";
 import { branches, chatLinks, classGroups, classSessions, courses, enrollments, getDb, rooms, students, teachers } from "@khaneyeidea/db";
-import { effectiveStatus } from "@khaneyeidea/core";
+import { countTermSessionsUsed, effectiveStatus, effectiveTermStart } from "@khaneyeidea/core";
 import { href, isLocale, num, pick, type Locale } from "@/lib/i18n";
 import { getAdminDict } from "@/lib/admin-i18n";
 import { getOpsDict } from "@/lib/ops-i18n";
@@ -17,6 +17,7 @@ import { Badge, ListSkeleton, PageHeader } from "@/components/admin/ui";
 import { ClassForm } from "@/components/admin/class-form";
 import { RosterPicker } from "@/components/ops/roster-picker";
 import { QuickStudent } from "@/components/ops/quick-student";
+import { EnrollmentPackageEdit } from "@/components/ops/enrollment-package-edit";
 import { ClassGroups } from "@/components/ops/class-groups";
 import { MakeupForm } from "@/components/ops/session-extras";
 import { dayOptions, STATUS_DOT } from "@/components/ops/panel-data";
@@ -66,6 +67,19 @@ async function Edit({ lang, id, tab }: { lang: Locale; id: string; tab: "overvie
       return { id: s.id, name: `${s.firstName} ${s.lastName}`.trim(), age: age ? fill(o.students.age, { n: num(age, lang) }) : null };
     });
   const active = roster.filter((r) => r.e.status === "active").length;
+  const years = jalaliYears();
+  const usedByEnrollment = Object.fromEntries(
+    await Promise.all(
+      roster.map(async ({ e }) => {
+        const used = await countTermSessionsUsed(db, {
+          classGroupId: id,
+          termStartedOn: effectiveTermStart(e),
+          endedOn: e.endedOn,
+        });
+        return [e.id, used] as const;
+      }),
+    ),
+  );
   const sessionsHref = href(lang, "/app/admin/sessions");
   const base = href(lang, `/app/admin/classes/${id}`);
   const t = (s: string) => num(s.slice(0, 5), lang);
@@ -137,23 +151,45 @@ async function Edit({ lang, id, tab }: { lang: Locale; id: string; tab: "overvie
                 <p className="mt-3 text-sm text-muted">{o.classes.noStudents}</p>
               ) : (
                 <ul className="mt-3 divide-y divide-line" data-testid="roster">
-                  {roster.map(({ e, s }) => (
-                    <li key={e.id} className="flex items-center gap-2 py-2.5">
-                      <Link href={href(lang, `/app/admin/students/${s.id}`)} className="min-w-0 flex-1 truncate hover:text-accent-text">
-                        {s.firstName} {s.lastName}
-                      </Link>
-                      {e.status === "waitlist" && <Badge tone="accent">{o.classes.waitlist}</Badge>}
-                      <form action={setEnrollment}>
-                        <input type="hidden" name="id" value={e.id} />
-                        <input type="hidden" name="status" value="dropped" />
-                        <button className="rounded-full px-2.5 py-1 text-xs text-muted transition hover:bg-red-500/10 hover:text-red-500">{o.classes.remove}</button>
-                      </form>
-                    </li>
-                  ))}
+                  {roster.map(({ e, s }) => {
+                    const planned = e.plannedSessions || 7;
+                    const sessionsUsed = usedByEnrollment[e.id] ?? 0;
+                    return (
+                      <li key={e.id} className="py-2.5">
+                        <div className="flex items-center gap-2">
+                          <Link href={href(lang, `/app/admin/students/${s.id}`)} className="min-w-0 flex-1 truncate hover:text-accent-text">
+                            {s.firstName} {s.lastName}
+                          </Link>
+                          {e.status === "waitlist" && <Badge tone="accent">{o.classes.waitlist}</Badge>}
+                          {e.status === "paused" && <Badge tone="muted">{o.students.statusPaused}</Badge>}
+                          <form action={setEnrollment}>
+                            <input type="hidden" name="id" value={e.id} />
+                            <input type="hidden" name="status" value="finished" />
+                            <button className="rounded-full px-2.5 py-1 text-xs text-muted transition hover:bg-accent/15 hover:text-accent-text">{o.students.finish}</button>
+                          </form>
+                          <form action={setEnrollment}>
+                            <input type="hidden" name="id" value={e.id} />
+                            <input type="hidden" name="status" value="dropped" />
+                            <button className="rounded-full px-2.5 py-1 text-xs text-muted transition hover:bg-red-500/10 hover:text-red-500">{o.classes.remove}</button>
+                          </form>
+                        </div>
+                        <EnrollmentPackageEdit
+                          enrollmentId={e.id}
+                          plannedSessions={planned}
+                          termStartedOn={e.termStartedOn ?? e.startedOn}
+                          sessionsUsed={sessionsUsed}
+                          termComplete={sessionsUsed >= planned}
+                          o={o}
+                          lang={lang}
+                          years={years}
+                        />
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
-              <RosterPicker classGroupId={c.id} students={pickable} seatsLeft={c.capacity - active} o={o} />
-              <QuickStudent classGroupId={c.id} o={o} />
+              <RosterPicker classGroupId={c.id} students={pickable} seatsLeft={c.capacity - active} o={o} years={years} />
+              <QuickStudent classGroupId={c.id} o={o} years={years} />
             </section>
           </div>
 

@@ -1,6 +1,6 @@
 import { InlineKeyboard, Keyboard, type Bot, type Context } from "grammy";
 import { getDb } from "@khaneyeidea/db";
-import { handleCallback, handleText, redeemClassCode, redeemUserCode, type Messengers } from "@khaneyeidea/core";
+import { createAiProvider, handleCallback, handleText, ingestGroupMessage, listUnlinkedClasses, redeemClassCode, redeemUserCode, transcribeVoice, type Messengers } from "@khaneyeidea/core";
 import type { Channel } from "./config";
 import { SITE_IS_PUBLIC, SITE_URL } from "./config";
 import { getBranches, getCourses, getSettings } from "./content";
@@ -56,6 +56,14 @@ export function registerHandlers(bot: Bot, channel: Channel, ms: Messengers) {
   });
 
   // Shows the chat id: the admin uses it to connect a class group or a staff account later.
+  bot.command("groups", async (ctx) => {
+    if (!privateOnly(ctx)) return ctx.reply("این دستور را در گفتگوی خصوصی بفرستید.");
+    const titles = await listUnlinkedClasses(getDb(), { channel, chatId: String(ctx.chat.id) });
+    if (!titles) return ctx.reply("این دستور فقط برای مدیر است.");
+    if (!titles.length) return ctx.reply("همه‌ی کلاس‌های فعال به یک گروه وصل شده‌اند.");
+    await ctx.reply(`کلاس‌های بدون گروه:\n${titles.map((t) => `• ${t}`).join("\n")}\n\nدر گروه کلاس /link و کد پنل را بفرستید.`);
+  });
+
   bot.command("id", (ctx) => ctx.reply(`chat id: ${ctx.chat.id}\ntype: ${ctx.chat.type}`));
 
   bot.hears(MENU.courses, async (ctx) => {
@@ -94,12 +102,35 @@ export function registerHandlers(bot: Bot, channel: Channel, ms: Messengers) {
   });
 
   bot.on(["message:voice", "message:audio"], async (ctx) => {
-    if (privateOnly(ctx)) await ctx.reply("فعلاً پیام صوتی پشتیبانی نمی‌شود. گزارش را به‌صورت متن بنویسید.");
+    if (!privateOnly(ctx)) return;
+    try {
+      const file = await ctx.getFile();
+      if (!file.file_path) throw new Error("no file");
+      const root = (channel === "bale" ? process.env.BALE_API_ROOT?.trim() || "https://tapi.bale.ai" : process.env.TELEGRAM_API_ROOT?.trim() || "https://api.telegram.org").replace(/\/$/, "");
+      const audio = Buffer.from(await (await fetch(`${root}/file/bot${bot.token}/${file.file_path}`)).arrayBuffer());
+      const msg = ctx.message;
+      const mime = ("voice" in msg ? msg.voice?.mime_type : "audio" in msg ? msg.audio?.mime_type : undefined) || "audio/ogg";
+      const text = await transcribeVoice(createAiProvider(), audio, mime);
+      if (text && (await handleText(getDb(), ms, { channel, chatId: String(ctx.chat.id), text }))) return;
+      await ctx.reply(text ? "این ویس به گزارش وصل نشد. اول دکمه‌ی گزارش را بزنید." : "صدا خوانده نشد. گزارش را به‌صورت متن بنویسید.");
+    } catch (e) {
+      console.error(`[${channel}] voice failed`, e instanceof Error ? e.message : e);
+      await ctx.reply("صدا خوانده نشد. گزارش را به‌صورت متن بنویسید.");
+    }
   });
 
-  // Anything else in a private chat: point back to the menu. (Answering free questions comes with the AI/FAQ work.)
   bot.on("message:text", async (ctx) => {
-    if (!privateOnly(ctx)) return;
+    if (!privateOnly(ctx)) {
+      await ingestGroupMessage(getDb(), {
+        channel,
+        chatId: String(ctx.chat.id),
+        messageId: String(ctx.message.message_id),
+        fromId: String(ctx.from?.id ?? ""),
+        text: ctx.message.text,
+        username: ctx.from?.username ?? null,
+      }).catch((e) => console.error(`[${channel}] group message`, e instanceof Error ? e.message : e));
+      return;
+    }
     // A teacher's report or homework, when the post-class conversation is waiting for it.
     if (await handleText(getDb(), ms, { channel, chatId: String(ctx.chat.id), text: ctx.message.text })) return;
     await ctx.reply("پیامتان رسید. برای جواب سریع از منو استفاده کنید یا با شماره‌های بخش «تماس با ما» در ارتباط باشید.", { reply_markup: menu() });

@@ -1,6 +1,6 @@
 # Project status (handover for people and AI agents)
 
-Last updated: 2026-10-13, branch `claude/fervent-gauss-cdro10`.
+Last updated: 2026-10-14, branch `claude/fervent-gauss-cdro10` (includes the Cursor teacher PWA work).
 Read `CLAUDE.md` first (rules), then this file (what exists and what is missing), then the spec for the area you touch.
 
 ## 1. What the project is
@@ -74,27 +74,28 @@ pnpm bot:check && pnpm bot:dev     # needs BALE_BOT_TOKEN / TELEGRAM_BOT_TOKEN i
 | Phone navigation | A bottom tab bar (dashboard, session board, classes, students) plus a menu button, instead of a floating button. |
 | Auth and permissions | Done. OTP login (fixed code `OTP_DEV_CODE` in development, no rate limit then; first sign-in becomes owner when no owner exists, development only), roles, every page and action checks permission on the server. A signed-in account without permission lands on `/app/no-access` (friendly page), never a bare 404. |
 | Admin dashboard | Done. Today's sessions, unanswered sessions, teachers' cancellation requests (approve with editable notice, or decline), upcoming bookings, quick actions, bot connection card, site content health. Navigation has icons and a badge on the session board. |
-| Classes | Done. One page, four views (weekday, coach, branch, weekly timetable), search, in-person/online filter, and a coach strip to see one coach at a time (banner with that coach's classes, enrolments and hours, plus "new class for this coach"). The view and coach are kept in the address. Timetable on desktop, agenda on phones. New class form in blocks with chips (coach, weekday, length 45/60/90/120 that sets the end time), 24h time pickers, an automatic name when left empty, rooms, clash warning for coach or room, invite links. Class page: roster picker (search, tick several), a new student with one parent added right there, groups and links (bot connection code `/link CODE`), upcoming sessions, extra or makeup session, delete a class that has no history. Rooms page per branch. |
+| Classes | Done. One page, four views (weekday, coach, branch, weekly timetable), search, in-person/online filter, and a coach strip to see one coach at a time (banner with that coach's classes, enrolments and hours, plus "new class for this coach"). The view and coach are kept in the address. Timetable on desktop, agenda on phones. New class form in blocks with chips (coach, weekday, length 45/60/90/120 that sets the end time), 24h time pickers, an automatic name when left empty, rooms, clash warning for coach or room, invite links. Class page: roster picker (search, tick several), a new student with one parent added right there, groups and links (bot connection code `/link CODE`), upcoming sessions, extra or makeup session, delete a class that has no history. Rooms page per branch. Each enrollment is a 6- or 7-session package with its own term start; roster and student pages show progress (`۳ / ۷`) and let you edit the package. Academy `terms` stay as season labels on the class only. |
 | Session board | Done. Week view, filters, summary bar, drawer: attendance, report, homework, not held with makeup, cancel ahead with parent notice, restore, move one session (day chips, 24h time, clash warning, optional notice), makeup session, delete an extra session. |
 | Coaches | The four coaches (Alireza Alizadeh Rad, Milad Moradi, Bidhendi, Amirhossein Pourghasem) are in the seed and in `pnpm --filter @khaneyeidea/db team`; profiles start hidden on the public site until a photo and bio are added. The coaches list shows each coach's classes and students; a coach with no classes can be deleted. `pnpm db:demo` gives each coach three classes and 24 students, and teacher logins 09120000101 to 09120000104 in the same order. |
-| Teacher panel | Done. Week by day with expandable class cards (students, group links), waiting-for-report list across three weeks, record or request cancellation, connect card for the bots. Own sessions only. |
+| Teacher app | `/teacher` with its own username and password (set in the teacher form in admin; first login forces a change). During a class: attendance, text or voice report, homework, per-class AI switch, class link. Installable PWA with Web Push. |
+| Reports | Text or voice. AI on rewrites via `packages/ai` and the fallback proxy; AI off keeps a plain template. Trial default: admin approves in `/app/admin/reports` or with Bale buttons before the group post. |
+| Bots | Done and tested against a fake API (`pnpm bot:test`). Public menu, `/start CODE` links a chat, `/link CODE` links a class group, `/groups` lists classes with no group. Post-class conversation (first channel wins), group report without names, absent parents told privately, reminder after 2 hours, admin told after 21:00, evening-before "class is on" notice with the class link, and a daily reminder when a teacher was asked in the group and did not answer. Never run against the real Bale/Telegram servers from this environment: do it once with real tokens. |
 | Parent portal | Done. Own children only: classes, next session, reports, homework, own child's attendance, own bookings, connect card. |
-| Bots | Done and tested against a fake API (`pnpm bot:test`). Public menu, `/start CODE` links a chat, `/link CODE` links a class group, post-class conversation (first channel wins), group report without names, absent parents told privately, reminder after 2 hours, admin told after 21:00, timed notices sent. Never run against the real Bale/Telegram servers from this environment: do it once with real tokens. |
 
 Logic lives in `packages/core` (`session-work.ts`, `followup.ts`, `linking.ts`, `classes.ts`) with DB tests (`pnpm test`). Timed jobs run inside the bot process every minute (`apps/bot/src/jobs.ts`); every step claims its row first, so a restart or a second process never sends twice.
 
 ## 5. Known gaps (what is still missing)
 
-1. **Real OTP delivery** (Bale OTP or SMS). Until then development uses the fixed code.
-2. **Admins are not told in the messenger when a teacher files a cancellation request.** They see it on the dashboard and on the board.
-3. **Notification center** (PROPOSAL 4.13): per-admin choice of events, instant or digest, quiet hours. Only the `notification_prefs` table and an "off" check exist.
-4. **Voice reports** (speech to text) are not supported; the bot asks for text.
-5. **Per-student notes** after a class (step 5 of the conversation) and the parent's "request a makeup" button.
-6. **No drag and drop, live "what is happening now" view, Ctrl+K search or undo** (PROPOSAL 4.4). The week board, dashboard and drawer cover daily work.
-7. **Payments, entry assessment, AI features, SaaS tenant onboarding.**
-8. **Media** still served from `public/media`; moving to MinIO is open. Run `pnpm --filter @khaneyeidea/db legacy-media` on a machine that has the old export images and commit `public/media/legacy`.
-9. **Real-user testing** with 2 admins and 3 teachers, as PROPOSAL section 6 asks.
-10. Class and session times are picked on a 5-minute grid; the booking template form still uses the browser's time input.
+1. **Real OTP delivery** (Bale OTP or SMS). Until then development uses the fixed code. The teacher app uses a username and password instead.
+2. **Admins are not told in the messenger when a teacher files a cancellation request.** They see it on the dashboard and on the board. A pending class report does reach them in Bale and as a web push.
+3. **Notification center** (PROPOSAL 4.13): per-admin choice of events, instant or digest, quiet hours. Only the `notification_prefs` table and an "off" check exist. Teacher and admin web push is separate and is on when the browser is subscribed.
+4. **Per-student notes** after a class (step 5 of the conversation) and the parent's "request a makeup" button.
+5. **No drag and drop, Ctrl+K search or undo** (PROPOSAL 4.4). The week board, dashboard and drawer cover daily work. The teacher app does show the class that is on now.
+6. **Payments, entry assessment, SaaS tenant onboarding.**
+7. **Media** still served from `public/media`; voice notes sit in `.devdata/voices`. Moving to MinIO is open.
+8. **Real-user testing** with 2 admins and 3 teachers, as PROPOSAL section 6 asks.
+9. Class and session times are picked on a 5-minute grid; the booking template form still uses the browser's time input.
+10. **Bale must be a group admin** to see ordinary messages (the question reminder depends on that). iOS web push needs Add to Home Screen and iOS 16.4+.
 
 ## 6. Tests
 

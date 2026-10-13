@@ -5,6 +5,7 @@ import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { classGroups, getDb, teachers } from "@khaneyeidea/db";
+import { findOrCreateUser, grantRole, normalizeIranMobile, setUserPassword } from "@khaneyeidea/core";
 import { requirePermission } from "@/server/auth";
 import { TAGS } from "@/server/content";
 import { href, isLocale } from "@/lib/i18n";
@@ -27,6 +28,10 @@ export async function saveTeacher(_: ActionState, f: FormData): Promise<ActionSt
   } catch {
     errors["specialties"] = "invalid";
   }
+  const photo = text(f, "photo");
+  if (photo && !/^(https:\/\/|\/media\/)/.test(photo)) errors["photo"] = "https_required";
+  const meetingUrl = text(f, "meetingUrl");
+  if (meetingUrl && !/^https:\/\//.test(meetingUrl)) errors["meetingUrl"] = "https_required";
   if (Object.keys(errors).length) return { error: "validation", fieldErrors: errors };
 
   const values = {
@@ -36,6 +41,8 @@ export async function saveTeacher(_: ActionState, f: FormData): Promise<ActionSt
     specialties,
     showOnSite: bool(f, "showOnSite"),
     isSample: bool(f, "isSample"),
+    photo: photo || null,
+    meetingUrl: meetingUrl || null,
     sortOrder: sortOrder ?? 0,
   };
   let rowId = id;
@@ -66,4 +73,30 @@ export async function deleteTeacher(f: FormData) {
     updateTag(TAGS.teachers);
   }
   redirect(href(isLocale(lang) ? lang : "fa", "/app/admin/teachers"));
+}
+
+/** Username and first password for the teacher app. The teacher must change the password after signing in. */
+export async function setTeacherLogin(_: ActionState, f: FormData): Promise<ActionState> {
+  const admin = await requirePermission("content.edit");
+  const db = getDb();
+  const teacherId = text(f, "teacherId");
+  if (!teacherId) return { error: "not_found" };
+  const [teacher] = await db.select().from(teachers).where(and(eq(teachers.id, teacherId), eq(teachers.tenantId, admin.tenantId)));
+  if (!teacher) return { error: "not_found" };
+  let userId = teacher.userId;
+  const phone = text(f, "phone") ?? "";
+  if (!userId) {
+    if (!normalizeIranMobile(phone)) return { error: "validation", fieldErrors: { phone: "invalid_phone" } };
+    const account = await findOrCreateUser(db, admin.tenantId, phone, teacher.name.fa);
+    if (!account) return { error: "validation", fieldErrors: { phone: "invalid_phone" } };
+    userId = account.id;
+    await grantRole(db, userId, "teacher", null);
+    await db.update(teachers).set({ userId }).where(eq(teachers.id, teacher.id));
+  }
+  const username = text(f, "username") ?? "";
+  const password = text(f, "password") ?? "";
+  const result = await setUserPassword(db, { tenantId: admin.tenantId, userId, username, password, mustChange: true });
+  if (!result.ok) return { error: "validation", fieldErrors: { username: result.reason } };
+  await audit(admin.tenantId, admin.userId, "update", "teacher_login", teacher.id, { username });
+  return { ok: true, savedAt: Date.now() };
 }

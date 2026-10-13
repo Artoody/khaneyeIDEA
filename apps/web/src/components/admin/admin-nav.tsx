@@ -26,6 +26,8 @@ import {
   UsersThree,
   Door,
   SidebarSimple,
+  NotePencil,
+  CalendarBlank,
 } from "@phosphor-icons/react";
 
 const ICONS = {
@@ -39,7 +41,9 @@ const ICONS = {
   achievements: Trophy,
   posts: Newspaper,
   sessions: CalendarDots,
+  reports: NotePencil,
   classes: Chalkboard,
+  terms: CalendarBlank,
   students: Student,
   staff: UsersThree,
   rooms: Door,

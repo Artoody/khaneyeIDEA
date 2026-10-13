@@ -5,9 +5,22 @@ import { MagnifyingGlass } from "@phosphor-icons/react";
 import type { OpsDict } from "@/lib/ops-i18n";
 import { fill } from "@/lib/format";
 import { enrollStudents } from "@/app/[lang]/app/admin/classes/actions";
+import { EnrollmentPackageFields } from "./enrollment-package-fields";
 
 /** Search the academy's students, tick the ones to add, add them all at once. */
-export function RosterPicker({ classGroupId, students, seatsLeft, o }: { classGroupId: string; students: { id: string; name: string; age: string | null }[]; seatsLeft: number; o: OpsDict }) {
+export function RosterPicker({
+  classGroupId,
+  students,
+  seatsLeft,
+  o,
+  years,
+}: {
+  classGroupId: string;
+  students: { id: string; name: string; age: string | null }[];
+  seatsLeft: number;
+  o: OpsDict;
+  years: number[];
+}) {
   const [q, setQ] = useState("");
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const list = useMemo(() => {
@@ -49,6 +62,7 @@ export function RosterPicker({ classGroupId, students, seatsLeft, o }: { classGr
         ))}
         {list.length === 0 && <li className="px-2 py-3 text-sm text-muted">{o.students.empty}</li>}
       </ul>
+      <EnrollmentPackageFields o={o} years={years} compact />
       <div className="mt-2 flex items-center justify-between gap-3">
         <span className="text-xs text-muted">{picked.size > seatsLeft ? o.classes.full : fill(o.classes.seatsLeft, { n: Math.max(0, seatsLeft).toLocaleString("fa-IR") })}</span>
         <button disabled={picked.size === 0} className="h-10 shrink-0 rounded-full bg-ink px-5 text-sm font-medium text-bg transition active:scale-[0.98] disabled:opacity-40">

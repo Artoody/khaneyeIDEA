@@ -48,7 +48,7 @@ describe("permissions", () => {
   });
 
   it("routes users home by their strongest role", () => {
-    expect(homeFor(p([{ role: "parent", branchId: null }, { role: "teacher", branchId: null }]))).toBe("/app/teacher");
+    expect(homeFor(p([{ role: "parent", branchId: null }, { role: "teacher", branchId: null }]))).toBe("/teacher");
     expect(homeFor(p([{ role: "content_manager", branchId: null }]))).toBe("/app/admin");
   });
 });

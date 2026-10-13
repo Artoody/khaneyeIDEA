@@ -49,6 +49,8 @@ export const availabilityTemplates = pgTable(
     validFrom: date("valid_from"),
     validUntil: date("valid_until"),
     active: boolean("active").notNull().default(true),
+    /** Made by the calendar painter in the admin (the painter replaces only these); hand-made templates stay untouched. */
+    painted: boolean("painted").notNull().default(false),
     ...timestamps(),
   },
   (t) => [index("availability_templates_tenant_idx").on(t.tenantId, t.active)],
@@ -97,6 +99,8 @@ export const appointments = pgTable(
     childAge: smallint("child_age"),
     note: text("note"),
     canceledAt: timestamp("canceled_at", { withTimezone: true }),
+    /** When staff were told about this booking in the messenger (null = not yet). */
+    notifiedAt: timestamp("notified_at", { withTimezone: true }),
     ...timestamps(),
   },
   (t) => [

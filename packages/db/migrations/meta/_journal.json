@@ -78,6 +78,13 @@
       "when": 1791916200000,
       "tag": "0010_enrollment_packages",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791925752380,
+      "tag": "0011_booking_painter_notify",
+      "breakpoints": true
     }
   ]
 }

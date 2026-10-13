@@ -59,13 +59,14 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
   const content: NavItem[] = (["dashboard", "settings", "pages", "branches", "departments", "courses", "teachers", "achievements", "posts"] as const).map(
     (key) => ({ key, label: a.nav[key], href: key === "dashboard" ? base : `${base}/${key}`, group: key === "dashboard" ? undefined : a.nav.content }),
   );
+  const o = getOpsDict(lang);
   const booking: NavItem[] = [
     { key: "bookings", label: a.booking.navBookings, href: `${base}/booking`, group: a.nav.booking },
+    { key: "calendar", label: o.bkc.title, href: `${base}/booking/calendar`, group: a.nav.booking },
     { key: "templates", label: a.booking.navTemplates, href: `${base}/booking/templates`, group: a.nav.booking },
     { key: "closures", label: a.booking.navClosures, href: `${base}/booking/closures`, group: a.nav.booking },
     { key: "types", label: a.booking.navTypes, href: `${base}/booking/types`, group: a.nav.booking },
   ];
-  const o = getOpsDict(lang);
   const ops = {
     schedule: [
       { key: "sessions", label: o.nav.sessions, href: `${base}/sessions`, group: o.nav.group },

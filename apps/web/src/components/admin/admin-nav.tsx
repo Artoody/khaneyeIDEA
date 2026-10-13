@@ -48,6 +48,7 @@ const ICONS = {
   staff: UsersThree,
   rooms: Door,
   bookings: CalendarCheck,
+  calendar: CalendarDots,
   templates: Clock,
   closures: CalendarX,
   types: ListChecks,

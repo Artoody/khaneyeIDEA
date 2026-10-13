@@ -2,6 +2,8 @@ export * from "./phone";
 export * from "./permissions";
 export * from "./auth";
 export * from "./booking";
+export * from "./booking-calendar";
+export * from "./booking-notify";
 export * from "./classes";
 export * from "./users";
 export * from "./session-work";

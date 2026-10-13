@@ -13,6 +13,7 @@ import {
   students,
   teachers,
   userRoles,
+  users,
   type getDb,
 } from "@khaneyeidea/db";
 import { createAiProvider } from "@khaneyeidea/ai";
@@ -126,20 +127,27 @@ export async function askDueCheckins(db: Db, ms: Messengers, now = new Date(), o
 }
 
 /** Admins (owner/admin) who linked a chat and did not switch this event off. */
-async function notifyAdmins(db: Db, ms: Messengers, tenantId: string, eventKey: string, text: string, buttons?: Button[][]) {
+export async function notifyAdmins(db: Db, ms: Messengers, tenantId: string, eventKey: string, text: string, buttons?: Button[][]): Promise<number> {
   const admins = await db
     .selectDistinct({ userId: userRoles.userId })
     .from(userRoles)
     .innerJoin(messengerAccounts, eq(messengerAccounts.userId, userRoles.userId))
-    .where(inArray(userRoles.role, ["owner", "admin"]));
+    .innerJoin(users, eq(users.id, userRoles.userId))
+    .where(and(inArray(userRoles.role, ["owner", "admin"]), eq(users.tenantId, tenantId)));
+  let delivered = 0;
   for (const a of admins) {
     const [pref] = await db.select().from(notificationPrefs).where(and(eq(notificationPrefs.userId, a.userId), eq(notificationPrefs.eventKey, eventKey)));
     if (pref?.mode === "off") continue;
     for (const ch of await linkedChats(db, ms, a.userId)) {
-      await ms[ch.channel]!.send(ch.chatId, text, buttons).catch((e) => console.error(`[followup] admin notice failed`, e instanceof Error ? e.message : e));
+      const ok = await ms[ch.channel]!.send(ch.chatId, text, buttons).then(() => true, (e) => {
+        console.error(`[followup] admin notice failed`, e instanceof Error ? e.message : e);
+        return false;
+      });
+      if (ok) delivered++;
     }
   }
   void tenantId;
+  return delivered;
 }
 
 /** A reminder after two hours, and after 21:00 on the class day the admin hears about the unanswered session. */

@@ -46,3 +46,8 @@ export function timeLabel(d: Date | string, l: Locale): string {
 export function tehranIso(d: Date): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tehran" }).format(d);
 }
+
+/** 0 = Saturday ... 6 = Friday, for a "YYYY-MM-DD" day. */
+export function weekdaySat0Iso(iso: string): number {
+  return (new Date(`${iso}T12:00:00Z`).getUTCDay() + 1) % 7;
+}

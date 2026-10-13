@@ -1,6 +1,6 @@
 import { InlineKeyboard, Keyboard, type Bot, type Context } from "grammy";
 import { getDb } from "@khaneyeidea/db";
-import { createAiProvider, handleCallback, handleText, ingestGroupMessage, listUnlinkedClasses, redeemClassCode, redeemUserCode, transcribeVoice, type Messengers } from "@khaneyeidea/core";
+import { createAiProvider, handleBookingCallback, handleCallback, handleText, ingestGroupMessage, listUnlinkedClasses, redeemClassCode, redeemUserCode, transcribeVoice, type Messengers } from "@khaneyeidea/core";
 import type { Channel } from "./config";
 import { SITE_IS_PUBLIC, SITE_URL } from "./config";
 import { getBranches, getCourses, getSettings } from "./content";
@@ -47,7 +47,9 @@ export function registerHandlers(bot: Bot, channel: Channel, ms: Messengers) {
     try {
       const chatId = ctx.chat?.id ?? ctx.from.id;
       const messageId = ctx.callbackQuery.message?.message_id;
-      const r = messageId ? await handleCallback(getDb(), ms, { channel, chatId: String(chatId), messageId: String(messageId), data: ctx.callbackQuery.data }) : {};
+      const press = messageId ? { channel, chatId: String(chatId), messageId: String(messageId), data: ctx.callbackQuery.data } : null;
+      // Booking notices (confirm / cancel) first, then the post-class conversation.
+      const r = press ? ((await handleBookingCallback(getDb(), ms, press)) ?? (await handleCallback(getDb(), ms, press))) : {};
       await ctx.answerCallbackQuery(r.toast ? { text: r.toast } : undefined);
     } catch (e) {
       console.error(`[${channel}] callback failed`, e);

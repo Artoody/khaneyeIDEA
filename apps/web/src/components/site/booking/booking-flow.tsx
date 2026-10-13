@@ -10,6 +10,7 @@ import { fill } from "@/lib/format";
 import { dayLabel, tehranIso, timeLabel } from "@/lib/jalali";
 import { confirmBooking, loadSlots, sendBookingCode, type ConfirmResult, type SlotDTO } from "@/app/[lang]/book/actions";
 import { DeptIcon } from "../dept-icon";
+import { JalaliMonth, type DayInfo } from "@/components/booking/jalali-month";
 import { DevCodeNote } from "@/components/auth/login-form";
 
 type L10n = { fa: string; en: string };
@@ -212,6 +213,10 @@ export function BookingFlow({
   const days = [...new Set(visible.map((s) => s.day))];
   const activeDay = day && days.includes(day) ? day : (days.find((d) => visible.some((s) => s.day === d && s.remaining > 0)) ?? days[0] ?? null);
   const dayTimes = visible.filter((s) => s.day === activeDay);
+  const firstOpen = visible.find((s) => s.remaining > 0) ?? null;
+  const freeByDay = new Map<string, number>();
+  for (const s of visible) freeByDay.set(s.day, (freeByDay.get(s.day) ?? 0) + (s.remaining > 0 ? 1 : 0));
+  const dayInfo: Record<string, DayInfo> = Object.fromEntries([...freeByDay].map(([d, n]) => [d, n > 0 ? { tone: "open" as const, badge: num(n, lang) } : { tone: "full" as const }]));
   const placeOf = (s: SlotDTO) => (s.branchId ? (branches[s.branchId]?.name ?? "") : t.remote);
 
   const book = (withCode: string | null) => {
@@ -424,43 +429,65 @@ export function BookingFlow({
                 ))}
               </div>
             )}
-            <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:-mx-7 sm:px-7" role="tablist">
-              {days.map((d) => {
-                const open = visible.some((s) => s.day === d && s.remaining > 0);
-                return (
-                  <button
-                    key={d}
-                    type="button"
-                    role="tab"
-                    aria-selected={d === activeDay}
-                    onClick={() => setDay(d)}
-                    className={`flex min-w-24 shrink-0 flex-col items-center rounded-2xl border px-3 py-3 transition active:scale-[0.98] aria-selected:border-ink aria-selected:bg-ink aria-selected:text-bg ${open ? "border-line hover:border-ink/30" : "border-line opacity-50"}`}
-                  >
-                    <span className="text-xs opacity-80">{dayLabel(d, lang).split(/[\s,]+/)[0]}</span>
-                    <span className="mt-0.5 font-display text-lg font-extrabold">{dayLabel(d, lang, { weekday: false })}</span>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-4" role="tabpanel">
-              {dayTimes.map((s) => (
-                <button
-                  key={`${s.templateId}-${s.startsAt}`}
-                  type="button"
-                  disabled={s.remaining === 0}
-                  aria-pressed={slot?.startsAt === s.startsAt && slot.templateId === s.templateId}
-                  onClick={() => {
-                    setSlot(s);
-                    go("contact");
-                  }}
-                  className="flex flex-col items-center rounded-2xl border border-line bg-bg px-2 py-3 transition hover:border-accent/70 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:border-accent aria-pressed:bg-accent/15"
-                >
-                  <span className={`font-display text-lg font-extrabold tabular-nums ${s.remaining === 0 ? "line-through" : ""}`}>{timeLabel(s.startsAt, lang)}</span>
-                  <span className="mt-0.5 text-xs text-muted">
-                    {s.remaining === 0 ? t.full : branchFilter === "all" && branchIds.length > 1 ? placeOf(s) : s.remaining <= 2 ? fill(t.seatsLeft, { n: num(s.remaining, lang) }) : " "}
+            {firstOpen && (
+              <button
+                type="button"
+                data-testid="nearest-slot"
+                onClick={() => {
+                  setSlot(firstOpen);
+                  go("contact");
+                }}
+                className="mb-6 flex w-full items-center justify-between gap-4 rounded-2xl border border-accent/60 bg-accent/10 px-5 py-4 text-start transition hover:bg-accent/20 active:scale-[0.99]"
+              >
+                <span>
+                  <span className="block text-sm text-muted">{t.nearest}</span>
+                  <span className="mt-0.5 block font-display text-lg font-extrabold">
+                    {dayLabel(firstOpen.day, lang)}
+                    {sep}
+                    {timeLabel(firstOpen.startsAt, lang)}
                   </span>
-                </button>
-              ))}
+                </span>
+                <CalendarPlus weight="duotone" className="size-7 shrink-0 text-accent-text" />
+              </button>
+            )}
+            <div className="grid gap-7 md:grid-cols-[minmax(0,1fr)_15rem]">
+            <JalaliMonth
+              key={`${branchFilter}-${days[0]}`}
+              lang={lang}
+              value={activeDay}
+              onSelect={(d) => setDay(d)}
+              info={dayInfo}
+              today={tehranIso(new Date())}
+              min={days[0]}
+              max={days[days.length - 1]}
+              initial={activeDay ?? undefined}
+              selectable={(d) => dayInfo[d]?.tone === "open"}
+            />
+            {activeDay && (
+              <div role="tabpanel" data-testid="slot-times">
+                <h3 className="mb-3 font-display text-base font-extrabold">{fill(t.timesOn, { day: dayLabel(activeDay, lang) })}</h3>
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-2">
+                  {dayTimes.map((s) => (
+                    <button
+                      key={`${s.templateId}-${s.startsAt}`}
+                      type="button"
+                      disabled={s.remaining === 0}
+                      aria-pressed={slot?.startsAt === s.startsAt && slot.templateId === s.templateId}
+                      onClick={() => {
+                        setSlot(s);
+                        go("contact");
+                      }}
+                      className="flex flex-col items-center rounded-2xl border border-line bg-bg px-2 py-3 transition hover:border-accent/70 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:border-accent aria-pressed:bg-accent/15"
+                    >
+                      <span className={`font-display text-lg font-extrabold tabular-nums ${s.remaining === 0 ? "line-through" : ""}`}>{timeLabel(s.startsAt, lang)}</span>
+                      <span className="mt-0.5 text-xs text-muted">
+                        {s.remaining === 0 ? t.full : branchFilter === "all" && branchIds.length > 1 ? placeOf(s) : s.remaining <= 2 ? fill(t.seatsLeft, { n: num(s.remaining, lang) }) : " "}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             </div>
           </>
         )}

@@ -38,7 +38,9 @@ export async function teacherLoginAction(_prev: TeacherLoginState, form: FormDat
       audience: "teacher",
       ...meta,
     });
-    if (!result.ok) return { error: result.reason };
+    if (!result.ok) {
+      return { error: result.reason === "not_staff" ? "invalid" : result.reason };
+    }
     await setSessionCookie(result.token);
     redirect(href(locale, result.mustChangePassword ? "/teacher/password" : "/teacher"));
   } catch (e) {

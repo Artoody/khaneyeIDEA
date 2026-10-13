@@ -4,61 +4,19 @@ import { notFound } from "next/navigation";
 import { and, asc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { classGroups, getDb, guardians, students, users } from "@khaneyeidea/db";
-import { getStudentHistory, type StudentHistoryItem } from "@khaneyeidea/core";
+import { getEnrollmentTermDetail, getStudentHistory } from "@khaneyeidea/core";
 import { href, isLocale, num, pick, type Locale } from "@/lib/i18n";
 import { getAdminDict } from "@/lib/admin-i18n";
 import { getOpsDict } from "@/lib/ops-i18n";
-import { fill } from "@/lib/format";
 import { requirePermissionPage } from "@/server/auth";
-import { Badge, ListSkeleton, PageHeader } from "@/components/admin/ui";
+import { ListSkeleton, PageHeader } from "@/components/admin/ui";
 import { StudentForm, type GuardianRow } from "@/components/admin/student-form";
-import { EnrollmentPackageEdit } from "@/components/ops/enrollment-package-edit";
 import { EnrollmentPackageFields } from "@/components/ops/enrollment-package-fields";
+import { StudentTermCard } from "@/components/ops/student-term-card";
 import { jalaliYears } from "../../booking/options";
 import { enrollStudent } from "../../classes/actions";
 
-function statusLabel(o: ReturnType<typeof getOpsDict>, status: StudentHistoryItem["status"]) {
-  switch (status) {
-    case "waitlist":
-      return o.students.statusWaitlist;
-    case "paused":
-      return o.students.statusPaused;
-    case "finished":
-      return o.students.statusFinished;
-    case "dropped":
-      return o.students.statusDropped;
-    default:
-      return o.students.statusActive;
-  }
-}
-
-function HistoryRow({ item, lang, o }: { item: StudentHistoryItem; lang: Locale; o: ReturnType<typeof getOpsDict> }) {
-  return (
-    <li className="rounded-xl border border-line/80 px-3 py-2.5 text-sm">
-      <Link href={href(lang, `/app/admin/classes/${item.classGroupId}`)} className="font-medium hover:text-accent-text">
-        {item.classTitle}
-      </Link>
-      <p className="mt-1 text-xs text-muted">
-        {[
-          item.termName ? `${o.students.term}: ${pick(item.termName, lang)}` : null,
-          item.teacherName ? `${o.students.teacher}: ${pick(item.teacherName, lang)}` : null,
-          statusLabel(o, item.status),
-          fill(o.students.packageProgress, { u: num(item.sessionsUsed, lang), p: num(item.plannedSessions, lang) }),
-          item.termComplete ? o.students.packageDone : null,
-        ]
-          .filter(Boolean)
-          .join(" · ")}
-      </p>
-      <p className="mt-0.5 text-xs text-muted">
-        {fill(o.students.sessionsHeld, { n: num(item.sessionsHeld, lang) })}
-        {" · "}
-        {fill(o.students.presentAbsent, { p: num(item.present, lang), a: num(item.absent, lang) })}
-      </p>
-    </li>
-  );
-}
-
-async function Edit({ lang, id }: { lang: Locale; id: string }) {
+async function Edit({ lang, id, openEnrollmentId }: { lang: Locale; id: string; openEnrollmentId: string | null }) {
   const user = await requirePermissionPage(lang, "students.manage");
   const a = getAdminDict(lang);
   const o = getOpsDict(lang);
@@ -71,6 +29,13 @@ async function Edit({ lang, id }: { lang: Locale; id: string }) {
     getStudentHistory(db, { tenantId: user.tenantId, studentId: id }),
     db.select().from(classGroups).where(and(eq(classGroups.tenantId, user.tenantId), eq(classGroups.active, true))).orderBy(asc(classGroups.title)),
   ]);
+
+  const allItems = [...history.current, ...history.past];
+  const details = (
+    await Promise.all(allItems.map((item) => getEnrollmentTermDetail(db, { tenantId: user.tenantId, studentId: id, enrollmentId: item.enrollmentId })))
+  ).filter((d): d is NonNullable<typeof d> => !!d);
+  const detailOf = new Map(details.map((d) => [d.item.enrollmentId, d]));
+
   const rows: GuardianRow[] = gs.map(({ g, u }) => ({
     phone: `0${u.phone.slice(2)}`,
     name: u.fullName ?? "",
@@ -80,8 +45,10 @@ async function Edit({ lang, id }: { lang: Locale; id: string }) {
   const inClass = new Set(history.current.map((x) => x.classGroupId));
   const open = allClasses.filter((c) => !inClass.has(c.id));
   const years = jalaliYears();
+  const defaultOpen = openEnrollmentId && detailOf.has(openEnrollmentId) ? openEnrollmentId : (history.current[0]?.enrollmentId ?? null);
+
   return (
-    <div className="grid max-w-6xl gap-8 xl:grid-cols-[1fr_20rem]">
+    <div className="grid max-w-6xl gap-8 xl:grid-cols-[1fr_minmax(20rem,26rem)]">
       <div>
         <PageHeader title={`${s.firstName} ${s.lastName}`} back={{ href: href(lang, "/app/admin/students"), label: o.nav.students }} />
         <StudentForm s={s} guardians={rows} a={a} o={o} lang={lang} />
@@ -93,28 +60,15 @@ async function Edit({ lang, id }: { lang: Locale; id: string }) {
             <p className="mt-3 text-sm text-muted">{o.students.noClasses}</p>
           ) : (
             <ul className="mt-3 flex flex-col gap-2">
-              {history.current.map((item) => (
-                <li key={item.enrollmentId} className="rounded-xl px-2 py-1.5">
-                  <div className="flex items-center justify-between gap-2 text-sm">
-                    <Link href={href(lang, `/app/admin/classes/${item.classGroupId}`)} className="min-w-0 truncate transition hover:text-accent-text">
-                      {item.classTitle}
-                      {item.teacherName && <span className="text-muted"> · {pick(item.teacherName, lang)}</span>}
-                    </Link>
-                    {item.status === "waitlist" && <Badge tone="accent">{o.classes.waitlist}</Badge>}
-                    {item.status === "paused" && <Badge tone="muted">{o.students.statusPaused}</Badge>}
-                  </div>
-                  <EnrollmentPackageEdit
-                    enrollmentId={item.enrollmentId}
-                    plannedSessions={item.plannedSessions}
-                    termStartedOn={item.termStartedOn}
-                    sessionsUsed={item.sessionsUsed}
-                    termComplete={item.termComplete}
-                    o={o}
-                    lang={lang}
-                    years={years}
-                  />
-                </li>
-              ))}
+              {history.current.map((item) => {
+                const detail = detailOf.get(item.enrollmentId);
+                if (!detail) return null;
+                return (
+                  <li key={item.enrollmentId}>
+                    <StudentTermCard detail={detail} lang={lang} o={o} years={years} open={item.enrollmentId === defaultOpen} editable />
+                  </li>
+                );
+              })}
             </ul>
           )}
           {open.length > 0 && (
@@ -155,9 +109,21 @@ async function Edit({ lang, id }: { lang: Locale; id: string }) {
             <p className="mt-3 text-sm text-muted">{o.students.noHistory}</p>
           ) : (
             <ul className="mt-3 flex flex-col gap-2">
-              {history.past.map((item) => (
-                <HistoryRow key={item.enrollmentId} item={item} lang={lang} o={o} />
-              ))}
+              {history.past.map((item) => {
+                const detail = detailOf.get(item.enrollmentId);
+                if (!detail) return null;
+                return (
+                  <li key={item.enrollmentId}>
+                    <StudentTermCard
+                      detail={detail}
+                      lang={lang}
+                      o={o}
+                      years={years}
+                      open={item.enrollmentId === openEnrollmentId && !history.current.some((c) => c.enrollmentId === openEnrollmentId)}
+                    />
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>
@@ -166,10 +132,14 @@ async function Edit({ lang, id }: { lang: Locale; id: string }) {
   );
 }
 
-export default async function Page({ params }: PageProps<"/[lang]/app/admin/students/[id]">) {
+export default async function Page({ params, searchParams }: PageProps<"/[lang]/app/admin/students/[id]">) {
   return (
     <Suspense fallback={<ListSkeleton />}>
-      {params.then(({ lang, id }) => (isLocale(lang) ? <Edit lang={lang} id={id} /> : notFound()))}
+      {Promise.all([params, searchParams]).then(([{ lang, id }, sp]) => {
+        if (!isLocale(lang)) notFound();
+        const e = typeof sp.e === "string" && z.uuid().safeParse(sp.e).success ? sp.e : null;
+        return <Edit lang={lang} id={id} openEnrollmentId={e} />;
+      })}
     </Suspense>
   );
 }

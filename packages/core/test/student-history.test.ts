@@ -2,8 +2,20 @@ import { config } from "dotenv";
 import { fileURLToPath } from "node:url";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { classGroups, classSessions, closeDb, courses, enrollments, getDb, students, tenants } from "@khaneyeidea/db";
-import { countTermSessionsUsed, effectiveTermStart, getStudentHistory, sessionTimes } from "../src";
+import {
+  attendance,
+  classGroups,
+  classSessions,
+  closeDb,
+  courses,
+  enrollments,
+  getDb,
+  homework,
+  sessionReports,
+  students,
+  tenants,
+} from "@khaneyeidea/db";
+import { countTermSessionsUsed, effectiveTermStart, getEnrollmentTermDetail, getStudentHistory, sessionTimes } from "../src";
 
 config({ path: fileURLToPath(new URL("../../../.env", import.meta.url)) });
 
@@ -102,5 +114,39 @@ describe("enrollment session packages", () => {
     const done = await getStudentHistory(getDb(), { tenantId, studentId });
     expect(done.current[0]!.termComplete).toBe(true);
     expect(done.current[0]!.sessionsRemaining).toBe(0);
+  });
+
+  it("getEnrollmentTermDetail lists package-window sessions with attendance and report", async () => {
+    const db = getDb();
+    const sess = await db.select().from(classSessions).where(eq(classSessions.classGroupId, classId));
+    const inTerm = sess.filter((s) => s.startsAt >= new Date("2026-10-01T00:00:00+03:30"));
+    expect(inTerm.length).toBeGreaterThanOrEqual(2);
+    const present = inTerm[0]!;
+    const absent = inTerm[1]!;
+    await db.insert(attendance).values([
+      { sessionId: present.id, studentId, status: "present", activityScore: 4, homeworkScore: 2, note: "خوب کار کرد" },
+      { sessionId: absent.id, studentId, status: "absent" },
+    ]);
+    await db.insert(sessionReports).values({
+      sessionId: present.id,
+      summary: "کار با سنسورها",
+      status: "published",
+    });
+    await db.insert(homework).values({ sessionId: present.id, text: "تمرین سنسور در خانه" });
+
+    const detail = await getEnrollmentTermDetail(db, { tenantId, studentId, enrollmentId });
+    expect(detail).not.toBeNull();
+    // Sep 26 is before term start — only Oct sessions
+    expect(detail!.sessions.every((s) => s.startsAt >= new Date("2026-10-01T00:00:00+03:30"))).toBe(true);
+    expect(detail!.item.present).toBe(1);
+    expect(detail!.item.absent).toBe(1);
+    expect(detail!.item.avgActivity).toBe(4);
+
+    const row = detail!.sessions.find((s) => s.sessionId === present.id)!;
+    expect(row.attendanceStatus).toBe("present");
+    expect(row.activityScore).toBe(4);
+    expect(row.note).toBe("خوب کار کرد");
+    expect(row.reportSummary).toBe("کار با سنسورها");
+    expect(row.homeworkText).toBe("تمرین سنسور در خانه");
   });
 });

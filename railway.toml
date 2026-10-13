@@ -1,0 +1,8 @@
+# Staging / Railway deploy for the Next.js web app (pnpm monorepo).
+[build]
+builder = "RAILPACK"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @khaneyeidea/web build"
+
+[deploy]
+startCommand = "pnpm --filter @khaneyeidea/web start"
+preDeployCommand = ["pnpm --filter @khaneyeidea/db migrate"]

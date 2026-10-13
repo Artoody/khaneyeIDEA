@@ -266,6 +266,24 @@ await admin.goto(base + "/app/admin/students?u=1");
 await admin.waitForSelector("main li");
 check("students without a class are filterable", (await admin.textContent("main")).includes(tag));
 
+// 10. The menu collapses to an icon rail (remembered) and the timetable copes with overlapping classes
+await admin.goto(base + "/app/admin/classes");
+await admin.waitForSelector('[data-testid="admin-sidebar"]:visible');
+const wOpen = (await admin.locator('[data-testid="admin-sidebar"]:visible').boundingBox()).width;
+await admin.click('[data-testid="collapse-nav"]:visible');
+await admin.waitForTimeout(400);
+const wRail = (await admin.locator('[data-testid="admin-sidebar"]:visible').boundingBox()).width;
+check("the menu collapses to an icon rail", wRail < wOpen / 2, `(${wOpen} -> ${wRail})`);
+await admin.reload();
+await admin.waitForTimeout(500);
+check("and stays collapsed after a reload", (await admin.locator('[data-testid="admin-sidebar"]:visible').boundingBox()).width === wRail);
+await admin.goto(base + "/app/admin/classes?v=grid");
+await admin.waitForSelector('[data-testid="timetable"]');
+const blocks = await admin.locator('[data-testid="timetable"] a[href*="/classes/"]:not([href*="/classes/new"])').count();
+check("timetable shows every class, overlapping ones side by side", blocks >= 15, `(${blocks})`);
+await admin.click('[data-testid="collapse-nav"]:visible'); // leave the menu open again
+await admin.waitForTimeout(300);
+
 console.log(R.join("\n"));
 console.log("errors:", errs);
 await b.close();

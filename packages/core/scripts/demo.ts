@@ -52,7 +52,7 @@ for (const [i, fa] of TEAM_NAMES.entries()) {
 }
 const all = await db.select().from(teachers).where(eq(teachers.tenantId, tid)).orderBy(asc(teachers.sortOrder));
 const coaches = TEAM_NAMES.map((fa) => all.find((t) => t.name.fa === fa)!);
-const brs = await db.select().from(branches).where(eq(branches.tenantId, tid)).orderBy(asc(branches.sortOrder));
+const brs = await db.select().from(branches).where(and(eq(branches.tenantId, tid), eq(branches.active, true))).orderBy(asc(branches.sortOrder));
 const crs = await db.select().from(courses).where(and(eq(courses.tenantId, tid), eq(courses.status, "published"))).orderBy(asc(courses.sortOrder));
 const course = (s: string) => crs.find((c) => c.slug === s) ?? crs[0]!;
 
@@ -79,6 +79,10 @@ const plan = [
   { title: "رباتیک مسابقه‌ای، یکشنبه‌ها (نمونه)", course: "robotics", coach: 3, weekday: 1, start: "16:00", end: "17:30", branch: 0 },
   { title: "پایتون مقدماتی، چهارشنبه‌ها (نمونه)", course: "python", coach: 3, weekday: 4, start: "17:45", end: "19:15", branch: 0 },
   { title: "هوش مصنوعی آنلاین، جمعه‌ها (نمونه)", course: "ai", coach: 3, weekday: 6, start: "10:00", end: "11:30", branch: null },
+  // a busy Saturday afternoon: all four coaches teach at the same time (shows how overlaps look in the timetable)
+  { title: "پایتون پیشرفته، شنبه‌ها (نمونه)", course: "python", coach: 1, weekday: 0, start: "16:00", end: "17:30", branch: 1 },
+  { title: "طراحی سه‌بعدی، شنبه‌ها (نمونه)", course: "solidworks", coach: 2, weekday: 0, start: "16:00", end: "17:30", branch: 2 },
+  { title: "رباتیک کودکان، شنبه‌ها (نمونه)", course: "robotics", coach: 3, weekday: 0, start: "16:30", end: "18:00", branch: 0 },
 ];
 const names = ["آوا", "کیان", "نیلا", "آرتین", "ترانه", "بردیا", "هستی", "پارسا", "یسنا", "رادین", "ملیکا", "سام", "دلارام", "آرسام", "روژان", "ماهان", "الینا", "نوین", "آیدین", "سارینا", "امیرعلی", "مهسا", "پویا", "نگار"];
 

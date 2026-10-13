@@ -25,6 +25,7 @@ import {
   Student,
   UsersThree,
   Door,
+  SidebarSimple,
 } from "@phosphor-icons/react";
 
 const ICONS = {
@@ -75,21 +76,31 @@ function LinkList({ items, onNavigate, path }: { items: NavItem[]; onNavigate?: 
         const heading = it.group && it.group !== items[i - 1]?.group ? it.group : null;
         return (
           <li key={it.key}>
-            {heading && <p className="px-3 pb-1.5 pt-5 text-xs font-semibold text-muted first:pt-1">{heading}</p>}
+            {heading && (
+              <>
+                <p className="px-3 pb-1.5 pt-5 text-xs font-semibold text-muted first:pt-1 lg:[html[data-admin-nav=collapsed]_&]:hidden">{heading}</p>
+                {/* in the icon-only rail a thin line separates the groups instead of the heading */}
+                {i > 0 && <span className="mx-3 my-2 hidden border-t border-line lg:[html[data-admin-nav=collapsed]_&]:block" aria-hidden />}
+              </>
+            )}
             <Link
               href={it.href}
               onClick={onNavigate}
               aria-current={active ? "page" : undefined}
-              className="group flex h-12 items-center gap-3 rounded-xl px-2 text-[15px] text-muted transition hover:bg-ink/5 hover:text-ink aria-[current=page]:bg-accent/12 aria-[current=page]:font-medium aria-[current=page]:text-ink"
+              title={it.label}
+              className="group relative flex h-12 items-center gap-3 rounded-xl px-2 text-[15px] text-muted transition hover:bg-ink/5 hover:text-ink aria-[current=page]:bg-accent/12 aria-[current=page]:font-medium aria-[current=page]:text-ink lg:[html[data-admin-nav=collapsed]_&]:justify-center"
             >
               <span
                 className={`grid size-8 shrink-0 place-items-center rounded-lg transition ${active ? "bg-accent text-on-accent" : "bg-ink/5 text-muted group-hover:text-ink"}`}
               >
                 <Ico weight={active ? "fill" : "regular"} className="size-[18px]" />
               </span>
-              <span className="min-w-0 flex-1 truncate">{it.label}</span>
+              <span className="min-w-0 flex-1 truncate lg:[html[data-admin-nav=collapsed]_&]:hidden">{it.label}</span>
               {!!it.badge && (
-                <span className="grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1.5 text-[11px] font-bold tabular-nums text-on-accent" aria-label={String(it.badge)}>
+                <span
+                  className="grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1.5 text-[11px] font-bold tabular-nums text-on-accent lg:[html[data-admin-nav=collapsed]_&]:absolute lg:[html[data-admin-nav=collapsed]_&]:end-1 lg:[html[data-admin-nav=collapsed]_&]:top-1 lg:[html[data-admin-nav=collapsed]_&]:h-3 lg:[html[data-admin-nav=collapsed]_&]:min-w-3 lg:[html[data-admin-nav=collapsed]_&]:p-0 lg:[html[data-admin-nav=collapsed]_&]:text-[0px]"
+                  aria-label={String(it.badge)}
+                >
                   {it.badge > 99 ? "99+" : it.badge.toLocaleString("fa-IR")}
                 </span>
               )}
@@ -137,19 +148,45 @@ function BottomBar({ items, onMore, menuLabel }: { items: NavItem[]; onMore: () 
   );
 }
 
-export function AdminNav({ items, siteHref, siteLabel, menuLabel }: { items: NavItem[]; siteHref: string; siteLabel: string; menuLabel: string }) {
+export function AdminNav({ items, siteHref, siteLabel, menuLabel, collapseLabel }: { items: NavItem[]; siteHref: string; siteLabel: string; menuLabel: string; collapseLabel: string }) {
   const [open, setOpen] = useState(false);
   const site = (
-    <a href={siteHref} target="_blank" rel="noopener" className="flex h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted transition hover:bg-ink/5 hover:text-ink">
-      <ArrowSquareOut className="size-5" />
-      {siteLabel}
+    <a href={siteHref} target="_blank" rel="noopener" title={siteLabel} className="flex h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted transition hover:bg-ink/5 hover:text-ink lg:[html[data-admin-nav=collapsed]_&]:justify-center lg:[html[data-admin-nav=collapsed]_&]:px-0">
+      <ArrowSquareOut className="size-5 shrink-0" />
+      <span className="lg:[html[data-admin-nav=collapsed]_&]:hidden">{siteLabel}</span>
     </a>
   );
+  // Collapse the menu to an icon rail (the choice is remembered; the layout script restores it before first paint).
+  const toggle = () => {
+    const html = document.documentElement;
+    const next = html.dataset.adminNav === "collapsed" ? "" : "collapsed";
+    if (next) html.dataset.adminNav = next;
+    else delete html.dataset.adminNav;
+    try {
+      localStorage.setItem("admin-nav", next || "open");
+    } catch {}
+  };
   return (
     <>
-      <nav className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-64 shrink-0 flex-col justify-between overflow-y-auto border-e border-line p-3 lg:flex">
+      <nav
+        className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-64 shrink-0 flex-col justify-between overflow-y-auto overflow-x-hidden border-e border-line p-3 transition-[width] duration-200 lg:flex lg:[html[data-admin-nav=collapsed]_&]:w-[4.75rem]"
+        data-testid="admin-sidebar"
+      >
         <Links items={items} />
-        {site}
+        <div className="flex flex-col gap-1">
+          {site}
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label={collapseLabel}
+            title={collapseLabel}
+            data-testid="collapse-nav"
+            className="flex h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted transition hover:bg-ink/5 hover:text-ink lg:[html[data-admin-nav=collapsed]_&]:justify-center lg:[html[data-admin-nav=collapsed]_&]:px-0"
+          >
+            <SidebarSimple className="size-5 shrink-0" />
+            <span className="lg:[html[data-admin-nav=collapsed]_&]:hidden">{collapseLabel}</span>
+          </button>
+        </div>
       </nav>
       <Suspense fallback={null}>
         <BottomBar items={items} onMore={() => setOpen(true)} menuLabel={menuLabel} />

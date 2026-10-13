@@ -12,6 +12,7 @@ import { logoutAction } from "@/app/[lang]/login/actions";
 import { LogoMark } from "@/components/site/logo-mark";
 import { AdminNav, type NavItem } from "@/components/admin/admin-nav";
 import { ThemeToggle } from "@/components/site/header-client";
+import { InlineScript } from "@/components/inline-script";
 
 // Layout only draws the frame. Authorization happens in every page and every action (never here).
 async function UserChip({ lang }: { lang: Locale }) {
@@ -33,6 +34,7 @@ async function PermittedNav({
   siteHref: string;
   siteLabel: string;
   menuLabel: string;
+  collapseLabel: string;
 }) {
   const user = await getUser();
   const counts = user && can(user, "schedule.manage") ? await navCounts(user.tenantId) : { requests: 0, waiting: 0 };
@@ -72,10 +74,12 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
     students: [{ key: "students", label: o.nav.students, href: `${base}/students`, group: o.nav.group }] as NavItem[],
     staff: [{ key: "staff", label: o.nav.staff, href: `${base}/staff`, group: o.nav.group }] as NavItem[],
   };
-  const navProps = { siteHref: href(lang), siteLabel: a.nav.viewSite, menuLabel: t.menu };
+  const navProps = { siteHref: href(lang), siteLabel: a.nav.viewSite, menuLabel: t.menu, collapseLabel: o.nav2.collapse };
 
   return (
     <div className="min-h-[100dvh]">
+      {/* restores the icon-only menu before first paint */}
+      <InlineScript html={`try{if(localStorage.getItem("admin-nav")==="collapsed")document.documentElement.dataset.adminNav="collapsed"}catch(e){}`} />
       <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-bg/85 px-4 backdrop-blur-xl sm:px-6">
         <Link href={base} className="flex items-center gap-2.5">
           <LogoMark className="h-7 w-auto" />

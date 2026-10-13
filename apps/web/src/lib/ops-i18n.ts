@@ -306,7 +306,7 @@ const fa = {
     deleteTeacher: "حذف این مربی",
     deleteTeacherHelp: "فقط مربی‌ای که هیچ کلاسی ندارد حذف می‌شود. اول کلاس‌هایش را به مربی دیگری بدهید.",
   },
-  nav2: { rooms: "اتاق‌ها" },
+  nav2: { rooms: "اتاق‌ها", collapse: "جمع کردن منو" },
   teacherWeek: { details: "جزئیات کلاس", roster: "دانش‌آموزان", record: "ثبت حضور و گزارش", open: "باز کردن", links: "گروه‌ها" },
 };
 
@@ -616,7 +616,7 @@ const en: OpsDict = {
     deleteTeacher: "Delete this coach",
     deleteTeacherHelp: "Only a coach with no classes can be deleted. Give their classes to another coach first.",
   },
-  nav2: { rooms: "Rooms" },
+  nav2: { rooms: "Rooms", collapse: "Collapse menu" },
   teacherWeek: { details: "Class details", roster: "Students", record: "Record attendance and report", open: "Open", links: "Groups" },
 };
 

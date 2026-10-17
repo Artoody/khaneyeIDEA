@@ -7,7 +7,7 @@ import { motion, useReducedMotion } from "motion/react";
 
 export type NavLink = { href: string; label: string; /** page path that marks it active */ page?: string; /** home-page section id */ section: string };
 
-const linkCls = "relative rounded-full px-3.5 py-2 text-[15px] transition-colors";
+const linkCls = "relative whitespace-nowrap rounded-full px-3 py-2 text-[15px] transition-colors 2xl:px-3.5";
 
 /** Which home-page section is in the reading zone (middle band of the viewport). */
 function useSectionSpy(ids: string[], enabled: boolean) {
@@ -60,9 +60,9 @@ function ActiveLinks({ links }: { links: NavLink[] }) {
   );
 }
 
-export function NavLinks({ links }: { links: NavLink[] }) {
+export function NavLinks({ links, show = "xl" }: { links: NavLink[]; show?: "xl" | "2xl" }) {
   return (
-    <nav className="relative isolate hidden items-center gap-1 lg:flex">
+    <nav className={`relative isolate hidden items-center gap-0.5 ${show === "2xl" ? "2xl:flex" : "xl:flex"}`}>
       <Suspense
         fallback={links.map((l) => (
           <Link key={l.href} href={l.href} className={`${linkCls} text-muted hover:text-ink`}>

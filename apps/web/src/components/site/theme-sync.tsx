@@ -21,16 +21,15 @@ export function ThemeSync({ lang }: { lang: string }) {
       } catch {}
       d.dataset.theme = valid(saved) ? saved : systemDark() ? "dark" : "light";
     }
+    // The dimming that the language switch started stays on <body> (it is the same element): end it as the new page arrives.
+    for (const a of document.getAnimations()) if (a.id === "lang-fade-out") a.cancel();
     try {
       if (sessionStorage.getItem("lang-fade")) {
         sessionStorage.removeItem("lang-fade");
         if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
           document.body.animate(
-            [
-              { opacity: 0, transform: "translateY(10px)" },
-              { opacity: 1, transform: "none" },
-            ],
-            { duration: 420, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
+            [{ opacity: 0.6 }, { opacity: 1 }],
+            { duration: 320, easing: "ease-out" },
           );
         }
       }

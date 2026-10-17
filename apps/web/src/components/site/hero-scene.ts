@@ -217,7 +217,8 @@ export class HeroScene {
     const cx = this.w / 2,
       cy = this.h / 2,
       s = this.logoScale();
-    const traceA = this.dark ? 0.22 : 0.5;
+    const traceA = this.dark ? 0.22 : 0.85;
+    const thick = this.dark ? 1 : 1.9; // on a light page the circuit around the logo needs real weight to read
     const traceC = this.dark ? AMBER : DEEP;
 
     // background circuit, slight parallax against the pointer
@@ -229,16 +230,16 @@ export class HeroScene {
       const k = eOutCubic(prog(t, tr.delay, tr.delay + tr.dur));
       if (k <= 0) continue;
       g.strokeStyle = rgba(traceC, traceA);
-      g.lineWidth = tr.w;
+      g.lineWidth = tr.w * thick;
       g.beginPath();
       subPath(g, tr.P, 0, k * tr.P.total);
       g.stroke();
       const padK = spring(prog(t, tr.delay + tr.dur * 0.92, tr.delay + tr.dur * 0.92 + 0.6));
       if (padK > 0) {
-        g.strokeStyle = rgba(traceC, traceA * 2);
-        g.lineWidth = 1.6;
+        g.strokeStyle = rgba(traceC, Math.min(1, traceA * 2));
+        g.lineWidth = 1.6 * (this.dark ? 1 : 1.5);
         g.beginPath();
-        g.arc(tr.pad[0], tr.pad[1], 4.5 * padK, 0, Math.PI * 2);
+        g.arc(tr.pad[0], tr.pad[1], (this.dark ? 4.5 : 6) * padK, 0, Math.PI * 2);
         g.stroke();
       }
       const ek = prog(t, tr.eDelay, tr.eDelay + tr.eDur);
@@ -246,7 +247,7 @@ export class HeroScene {
       if (t > tr.out) {
         const cyc = tr.P.total + 400;
         const sOut = tr.P.total - (((t - tr.out) * tr.speed) % cyc);
-        if (sOut > 0) this.comet(g, tr.P, sOut, 70, 1.8, this.dark ? 0.55 : 0.85, true);
+        if (sOut > 0) this.comet(g, tr.P, sOut, 70, this.dark ? 1.8 : 3, this.dark ? 0.55 : 1, true);
       }
     }
     g.restore();

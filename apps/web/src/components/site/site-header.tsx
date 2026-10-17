@@ -35,19 +35,21 @@ export async function SiteHeader({ lang }: { lang: Locale }) {
     { href: href(lang, "/#contact"), label: t.nav.contact, section: "contact" },
   ];
   const cta = pick(blocks["home.hero.cta"], lang);
+  // English words are longer: the inline menu needs a wider screen there, below it the menu button takes over.
+  const wide = lang === "en" ? "2xl" : "xl";
 
   const actions = (
     <>
       <Link
         href={href(lang, "/login")}
-        className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-line px-5 text-sm font-medium text-ink transition hover:border-ink/30 active:scale-[0.98]"
+        className="inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-line px-4 text-sm font-medium text-ink transition hover:border-ink/30 active:scale-[0.98] lg:px-5"
       >
         <SignIn weight="bold" className="size-4 rtl:-scale-x-100" />
         {t.login}
       </Link>
       <Link
         href={href(lang, "/book")}
-        className="inline-flex h-11 items-center justify-center rounded-full bg-accent px-5 text-sm font-semibold text-on-accent transition hover:bg-accent-strong active:scale-[0.98]"
+        className="inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-accent px-4 text-sm font-semibold text-on-accent transition hover:bg-accent-strong active:scale-[0.98] lg:px-5"
       >
         {cta}
       </Link>
@@ -59,40 +61,41 @@ export async function SiteHeader({ lang }: { lang: Locale }) {
       {/* Every public page has this header, so the scroll backdrop is mounted here once. */}
       <ScrollBackdrop />
       <HeaderShell>
-        <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-6 px-4 sm:px-6">
+        <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-3 px-4 sm:px-6 xl:gap-6">
           <Link
             href={href(lang)}
-            className="flex items-center gap-3"
+            className="flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3"
             aria-label={pick(settings.name, lang)}
           >
             <LogoMark
               className="h-8 w-auto"
               title={pick(settings.name, lang)}
             />
-            <span className="font-display text-[17px] font-extrabold tracking-tight">
+            <span className="whitespace-nowrap font-display text-base font-extrabold tracking-tight sm:text-[17px]">
               {pick(settings.name, lang)}
             </span>
           </Link>
 
-          <NavLinks links={links} />
+          <NavLinks links={links} show={wide} />
 
           <div className="ms-auto flex items-center gap-1.5">
             <div className="hidden sm:block">
               <LangSwitch lang={lang} />
             </div>
             <ThemeToggle label={t.theme.toggle} />
-            <div className="ms-2 hidden items-center gap-2 lg:flex">
+            <div className="ms-2 hidden items-center gap-2 md:flex">
               {actions}
             </div>
             <MobileMenu
               links={links}
+              show={wide}
               labels={{ menu: t.menu, close: t.close }}
               extra={
                 <>
                   <div className="flex justify-center">
                     <LangSwitch lang={lang} />
                   </div>
-                  {actions}
+                  <div className="flex flex-col gap-3 md:hidden">{actions}</div>
                 </>
               }
             />

@@ -6,6 +6,7 @@ import { dirOf, isLocale, LOCALES, pick, type Locale } from "@/lib/i18n";
 import { getSettings } from "@/server/content";
 import { InlineScript } from "@/components/inline-script";
 import { ThemeSync } from "@/components/site/theme-sync";
+import { NavProgress } from "@/components/site/nav-progress";
 import { siteUrl } from "@/lib/site-url";
 import "../globals.css";
 
@@ -73,6 +74,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       </head>
       <body className="min-h-[100dvh] text-ink">
         <ThemeSync lang={l} />
+        <NavProgress />
         {children}
       </body>
     </html>

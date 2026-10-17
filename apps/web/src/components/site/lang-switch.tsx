@@ -11,14 +11,14 @@ function pathFor(path: string, target: Locale) {
   return target === "en" ? `/en${bare === "/" ? "" : bare}` : bare;
 }
 
-/** The page fades out as the other language loads; ThemeSync fades the new one in (and keeps the theme). */
+/** The page dims a little as the other language loads (the progress bar shows it is working); ThemeSync fades the new one in and keeps the theme. */
 function fadeOut(e: React.MouseEvent, same: boolean) {
   if (same || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
   try {
     sessionStorage.setItem("lang-fade", "1");
   } catch {}
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const a = document.body.animate([{ opacity: 1 }, { opacity: 0.15 }], { duration: 220, easing: "ease-out", fill: "forwards" });
+  const a = document.body.animate([{ opacity: 1 }, { opacity: 0.6 }], { duration: 160, easing: "ease-out", fill: "forwards", id: "lang-fade-out" });
   setTimeout(() => a.cancel(), 4000); // if the navigation never happens, the page comes back
 }
 

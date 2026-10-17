@@ -242,7 +242,7 @@ export async function Reviews({ lang }: { lang: Locale }) {
   return (
     <section id="reviews" className="relative scroll-mt-20">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-16">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-16">
           <div>
             <h2 className="font-display text-3xl font-extrabold tracking-tight text-balance sm:text-5xl">{pick(blocks["home.reviews.title"], lang)}</h2>
             <p className="mt-4 max-w-[40ch] text-lg leading-relaxed text-muted">{pick(blocks["home.reviews.subtitle"], lang)}</p>

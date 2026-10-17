@@ -1,13 +1,12 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { href, isLocale } from "@/lib/i18n";
+import { href, isLocale, type Locale } from "@/lib/i18n";
 import { getAdminDict } from "@/lib/admin-i18n";
 import { requirePermissionPage } from "@/server/auth";
-import { PageHeader } from "@/components/admin/ui";
+import { ListSkeleton, PageHeader } from "@/components/admin/ui";
 import { PartnerForm } from "@/components/admin/partner-form";
 
-export default async function Page({ params }: { params: Promise<{ lang: string }> }) {
-  const { lang } = await params;
-  if (!isLocale(lang)) notFound();
+async function New({ lang }: { lang: Locale }) {
   await requirePermissionPage(lang, "content.edit");
   const a = getAdminDict(lang);
   return (
@@ -15,5 +14,13 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
       <PageHeader title={a.partner.new} back={{ href: href(lang, "/app/admin/partners"), label: a.nav.partners }} />
       <PartnerForm a={a} lang={lang} />
     </>
+  );
+}
+
+export default function Page({ params }: PageProps<"/[lang]/app/admin/partners/new">) {
+  return (
+    <Suspense fallback={<ListSkeleton />}>
+      {params.then(({ lang }) => (isLocale(lang) ? <New lang={lang} /> : notFound()))}
+    </Suspense>
   );
 }

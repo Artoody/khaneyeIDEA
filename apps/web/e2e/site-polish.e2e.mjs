@@ -35,7 +35,8 @@ for (const mode of ["dark", "light"]) {
   await p.waitForURL((u) => !u.pathname.startsWith("/en"));
   await p.waitForTimeout(300);
   check(`${mode}: and back in Persian`, (await theme(p)) === mode);
-  check(`${mode}: the page is visible after the fade`, (await p.evaluate(() => getComputedStyle(document.body).opacity)) !== "0");
+  await p.waitForTimeout(700);
+  check(`${mode}: the page is fully visible again after the switch (no leftover dimming)`, (await p.evaluate(() => getComputedStyle(document.body).opacity)) === "1");
   // an explicit choice wins over the system
   await p.evaluate(() => localStorage.setItem("theme", "dark"));
   await p.locator('a[hreflang="en"]').first().click();
@@ -80,6 +81,34 @@ check("Escape closes the dialog", (await p.locator('[data-testid="review-dialog"
 const logos = await p.locator("#partners img").evaluateAll((els) => els.map((e) => ({ w: e.getBoundingClientRect().width, h: e.getBoundingClientRect().height, ok: e.complete && e.naturalWidth > 0 })));
 check("partner logos are shown", logos.length >= 6, `(${logos.length})`);
 check("every logo fits its tile", logos.every((l) => l.w <= 170 && l.h <= 100 && l.w > 10));
+// 3. the header never wraps and the page never scrolls sideways, in both languages
+for (const [lang, path] of [["fa", "/"], ["en", "/en"]]) {
+  const c = await b.newContext({ viewport: { width: 1280, height: 800 } });
+  await c.addInitScript(() => sessionStorage.setItem("intro-seen", "1"));
+  const q = await c.newPage();
+  await q.goto(base + path, { timeout: 120000 });
+  await q.waitForSelector("header");
+  for (const w of [360, 390, 768, 1024, 1180, 1280, 1440, 1600]) {
+    await q.setViewportSize({ width: w, height: 800 });
+    await q.waitForTimeout(250);
+    const r = await q.evaluate(() => {
+      const bad = [];
+      const de = document.documentElement;
+      if (de.scrollWidth > de.clientWidth + 1) bad.push("sideways scroll " + de.scrollWidth + ">" + de.clientWidth);
+      for (const el of document.querySelectorAll("header a, header button")) {
+        const r = el.getBoundingClientRect();
+        if (!r.width) continue;
+        const cs = getComputedStyle(el);
+        const text = (el.textContent || "").trim();
+        if (text && r.height > parseFloat(cs.fontSize) * 2.4 && r.height > 46) bad.push("wrapped: " + text);
+        if (r.right > innerWidth + 1 || r.left < -1) bad.push("off screen: " + (text || el.getAttribute("aria-label")));
+      }
+      return bad;
+    });
+    check(`${lang} @${w}: header and page fit`, r.length === 0, r.join(" | "));
+  }
+  await c.close();
+}
 console.log(R.join("\n"));
 console.log("review left pending: e2e-" + tag);
 await b.close();

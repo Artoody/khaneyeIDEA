@@ -76,7 +76,9 @@ export function MobileMenu({
   links,
   labels,
   extra,
+  show = "xl",
 }: {
+  show?: "xl" | "2xl";
   links: { href: string; label: string }[];
   labels: { menu: string; close: string };
   extra: React.ReactNode;
@@ -89,7 +91,7 @@ export function MobileMenu({
     };
   }, [open]);
   return (
-    <div className="lg:hidden">
+    <div className={show === "2xl" ? "2xl:hidden" : "xl:hidden"}>
       <button
         type="button"
         aria-label={labels.menu}

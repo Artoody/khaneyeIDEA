@@ -417,3 +417,9 @@ html[data-intro="reveal"] .hero-enter-canvas { transition-delay: 150ms; transiti
 @keyframes dialog-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
 @keyframes rv-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @media (prefers-reduced-motion: reduce) { .dialog-card[open], .dialog-card[open]::backdrop { animation: none; } }
+
+/* Page and language transitions */
+@keyframes page-enter { from { opacity: 0; } to { opacity: 1; } }
+.page-enter { animation: page-enter 0.28s ease-out both; }
+@keyframes nav-trickle { from { transform: scaleX(0.04); } to { transform: scaleX(0.92); } }
+@media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }

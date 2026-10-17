@@ -95,19 +95,11 @@ async function List({ lang, status }: { lang: Locale; status: string }) {
   );
 }
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ lang: string }>;
-  searchParams: Promise<{ status?: string }>;
-}) {
-  const { lang } = await params;
-  if (!isLocale(lang)) notFound();
-  const { status = "all" } = await searchParams;
+export default function Page({ params, searchParams }: PageProps<"/[lang]/app/admin/reviews">) {
+  // searchParams is request data: it is read inside the Suspense boundary.
   return (
     <Suspense fallback={<ListSkeleton />}>
-      <List lang={lang} status={status} />
+      {Promise.all([params, searchParams]).then(([{ lang }, sp]) => (isLocale(lang) ? <List lang={lang} status={typeof sp.status === "string" ? sp.status : "all"} /> : notFound()))}
     </Suspense>
   );
 }

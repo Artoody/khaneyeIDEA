@@ -8,7 +8,17 @@ import { closeDb, getDb } from "../index";
 import * as s from "../schema";
 import type { Localized } from "../schema";
 import { CONTENT_FROM, DRAFT_REDIRECT, LEGACY_ARTICLES, LEGACY_REDIRECTS, readLegacyPage } from "./legacy";
-import { ALSO_IN, APPOINTMENT_TYPES, BRANCHES, COURSES, DEPARTMENTS, PAGE_BLOCKS } from "./data";
+import {
+  ALSO_IN,
+  APPOINTMENT_TYPES,
+  BRANCHES,
+  COURSES,
+  DEPARTMENTS,
+  PAGE_BLOCKS,
+  SITE_FAQS,
+  SITE_PARTNERS,
+  SITE_REVIEWS,
+} from "./data";
 import { TEAM } from "./team";
 
 config({ path: fileURLToPath(new URL("../../../../.env", import.meta.url)) });
@@ -73,7 +83,20 @@ if (!tenant) [tenant] = await db.insert(s.tenants).values({ slug, name: "Idea Ho
 const tenantId = tenant!.id;
 
 await db.transaction(async (tx) => {
-  for (const table of [s.posts, s.achievements, s.studentProjects, s.faqs, s.redirects, s.pageBlocks, s.teachers, s.courses, s.departments, s.branches]) {
+  for (const table of [
+    s.posts,
+    s.achievements,
+    s.studentProjects,
+    s.faqs,
+    s.siteReviews,
+    s.partners,
+    s.redirects,
+    s.pageBlocks,
+    s.teachers,
+    s.courses,
+    s.departments,
+    s.branches,
+  ]) {
     await tx.delete(table).where(eq(table.tenantId, tenantId));
   }
   await tx.delete(s.siteSettings).where(eq(s.siteSettings.tenantId, tenantId));
@@ -109,6 +132,34 @@ await db.transaction(async (tx) => {
   });
 
   await tx.insert(s.pageBlocks).values(Object.entries(PAGE_BLOCKS).map(([key, value]) => ({ tenantId, key, value })));
+  await tx.insert(s.faqs).values(
+    SITE_FAQS.map((f, i) => ({
+      tenantId,
+      category: "about",
+      question: f.question,
+      answer: f.answer,
+      sortOrder: i,
+    })),
+  );
+  await tx.insert(s.siteReviews).values(
+    SITE_REVIEWS.map((r, i) => ({
+      tenantId,
+      authorName: r.authorName,
+      body: r.body,
+      status: "published" as const,
+      featured: true,
+      sortOrder: i,
+    })),
+  );
+  await tx.insert(s.partners).values(
+    SITE_PARTNERS.map((p, i) => ({
+      tenantId,
+      name: p.name,
+      logoUrl: p.logoUrl,
+      url: p.url ?? null,
+      sortOrder: i,
+    })),
+  );
 
   const branchRows = await tx.insert(s.branches).values(BRANCHES.map((b, i) => ({ tenantId, ...b, sortOrder: i }))).returning({ id: s.branches.id });
 

@@ -16,6 +16,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     both("/courses", { changeFrequency: "weekly", priority: 0.9 }),
     ...courses.map((c) => both(`/courses/${c.slug}`, { lastModified: c.updatedAt, changeFrequency: "monthly", priority: 0.8 })),
     both("/achievements", { changeFrequency: "monthly", priority: 0.6 }),
+    both("/about", { changeFrequency: "monthly", priority: 0.7 }),
+    both("/tinkercad", { changeFrequency: "monthly", priority: 0.5 }),
     both("/book", { changeFrequency: "monthly", priority: 0.7 }),
     both("/blog", { changeFrequency: "weekly", priority: 0.6 }),
     ...posts.map((p) => ({ url: `${base}/blog/${p.slug}`, lastModified: p.publishedAt ?? undefined, changeFrequency: "yearly" as const, priority: 0.6 })),

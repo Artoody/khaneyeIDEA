@@ -125,6 +125,8 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   "/افتخارات-خانهی-ایده/": "/achievements",
   "/پروژههای-دانشپژوهان/": "/achievements",
   "/تماس-با-ما/": "/#contact",
+  "/tinkercad/": "/tinkercad",
+  "/tinkercad": "/tinkercad",
   "/مراحل-ثبت-نام/": "/book",
   "/ثبت-نام/": "/book",
   "/مجله-خانهی-ایده/": "/blog",

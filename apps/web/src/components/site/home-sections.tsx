@@ -22,12 +22,15 @@ import {
   getBranches,
   getDepartmentsWithCounts,
   getFeaturedAchievements,
+  getPartners,
+  getPublishedReviews,
   getSettings,
   getStats,
 } from "@/server/content";
 import { HeroCanvas } from "./hero-canvas";
 import { LogoMark } from "./logo-mark";
 import { DeptScene } from "./dept-scenes";
+import { ReviewForm } from "./review-form";
 
 const DEPT_ICON: Record<DeptIconKey, Icon> & Record<string, Icon | undefined> = {
   robot: Robot,
@@ -227,6 +230,100 @@ export async function Branches({ lang }: { lang: Locale }) {
   );
 }
 
+export async function Reviews({ lang }: { lang: Locale }) {
+  const t = getDict(lang);
+  const [blocks, rows] = await Promise.all([getBlocks(), getPublishedReviews()]);
+  const shown = lang === "en" ? rows.filter((r) => r.body.en) : rows;
+  return (
+    <section id="reviews" className="scroll-mt-20 border-y border-line bg-elevated/40">
+      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
+        <div className="max-w-2xl">
+          <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-5xl">
+            {pick(blocks["home.reviews.title"], lang)}
+          </h2>
+          <p className="mt-4 text-lg leading-relaxed text-muted">{pick(blocks["home.reviews.subtitle"], lang)}</p>
+        </div>
+        {shown.length > 0 && (
+          <ul className="mt-12 grid gap-4 md:grid-cols-3">
+            {shown.map((r) => (
+              <li key={r.id} className="flex flex-col border-s-2 border-accent bg-surface/80 ps-5 pe-4 py-5 sm:ps-6">
+                <p className="flex-1 text-base leading-relaxed text-ink/90">&ldquo;{pick(r.body, lang)}&rdquo;</p>
+                <p className="mt-5 text-sm font-semibold text-ink">{pick(r.authorName, lang)}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-14 grid gap-8 border-t border-line pt-12 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+          <div>
+            <h3 className="font-display text-xl font-extrabold tracking-tight sm:text-2xl">
+              {pick(blocks["home.reviews.formTitle"], lang)}
+            </h3>
+            <p className="mt-2 max-w-[42ch] text-sm leading-relaxed text-muted">
+              {pick(blocks["home.reviews.formHint"], lang)}
+            </p>
+          </div>
+          <ReviewForm
+            labels={{
+              name: t.reviews.name,
+              body: t.reviews.body,
+              submit: t.reviews.submit,
+              thanks: t.reviews.thanks,
+              errors: t.reviews.errors,
+            }}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export async function Partners({ lang }: { lang: Locale }) {
+  const blocks = await getBlocks();
+  const rows = await getPartners();
+  if (!rows.length) return null;
+  const title = pick(blocks["home.partners.title"], lang);
+  const loop = rows.length < 6 ? [...rows, ...rows] : rows;
+  return (
+    <section id="partners" className="scroll-mt-20" aria-label={title}>
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
+        <h2 className="mx-auto max-w-3xl text-center font-display text-2xl font-extrabold tracking-tight text-balance sm:text-3xl">
+          {title}
+        </h2>
+      </div>
+      <div className="marquee relative overflow-hidden border-y border-line py-8 [mask-image:linear-gradient(90deg,transparent,black_6%,black_94%,transparent)]">
+        <div className="marquee-track flex w-max items-center gap-10 px-6 sm:gap-14">
+          {[...loop, ...loop].map((p, i) => {
+            const label = pick(p.name, lang);
+            const inner = (
+              <img
+                src={p.logoUrl}
+                alt={label}
+                width={120}
+                height={80}
+                loading="lazy"
+                className="h-14 w-auto max-w-[140px] object-contain opacity-80 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0 sm:h-16"
+              />
+            );
+            return (
+              <div key={`${p.id}-${i}`} aria-hidden={i >= loop.length} className="flex shrink-0 items-center justify-center">
+                {p.url ? (
+                  <a href={p.url} target="_blank" rel="noopener noreferrer" title={label} className="block">
+                    {inner}
+                  </a>
+                ) : (
+                  <span title={label} className="block">
+                    {inner}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const SOCIAL_ICON = { instagram: InstagramLogo, whatsapp: WhatsappLogo } as Record<string, Icon>;
 
 export async function SiteFooter({ lang }: { lang: Locale }) {
@@ -291,6 +388,19 @@ export async function SiteFooter({ lang }: { lang: Locale }) {
                 {pick(b.name, lang)}
               </li>
             ))}
+          </ul>
+          <h3 className="mt-8 text-sm font-semibold text-muted">{t.footer.more}</h3>
+          <ul className="mt-4 space-y-3">
+            <li>
+              <Link href={href(lang, "/about")} className="text-ink/90 transition hover:text-accent-text">
+                {t.nav.about}
+              </Link>
+            </li>
+            <li>
+              <Link href={href(lang, "/tinkercad")} className="text-ink/90 transition hover:text-accent-text">
+                {t.nav.tinkercad}
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

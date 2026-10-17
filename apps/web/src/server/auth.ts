@@ -32,6 +32,8 @@ function sessionSecret(): string {
 }
 
 function otpSender(): OtpSender {
+  // Staging can set ALLOW_OTP_DEV=1 + OTP_DEV_CODE; nothing is SMS'd then.
+  if (devOtpCode()) return { send: async () => {} };
   const provider = process.env.OTP_PROVIDER ?? "console";
   if (provider === "console") {
     if (process.env.NODE_ENV === "production") throw new Error("OTP_PROVIDER=console is not allowed in production");
@@ -42,12 +44,12 @@ function otpSender(): OtpSender {
 }
 
 /**
- * Development-only fixed sign-in code (OTP_DEV_CODE, e.g. 1234) while no SMS/Bale delivery is set up.
- * Never active in production or with a real OTP provider.
+ * Fixed sign-in code (OTP_DEV_CODE, e.g. 1234) while no SMS/Bale delivery is set up.
+ * Off in production unless ALLOW_OTP_DEV=1 (staging only). Never with a real OTP provider.
  */
 export function devOtpCode(): string | null {
-  if (process.env.NODE_ENV === "production") return null;
   if ((process.env.OTP_PROVIDER ?? "console") !== "console") return null;
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_OTP_DEV !== "1") return null;
   const c = process.env.OTP_DEV_CODE?.trim();
   return c && /^\d{4}$/.test(c) ? c : null;
 }

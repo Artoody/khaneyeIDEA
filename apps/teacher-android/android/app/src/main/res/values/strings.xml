@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">&#x062f;&#x0628;&#x06cc;&#x0631; &#x062e;&#x0627;&#x0646;&#x0647; &#x0627;&#x06cc;&#x062f;&#x0647;</string>
+    <string name="title_activity_main">&#x062f;&#x0628;&#x06cc;&#x0631; &#x062e;&#x0627;&#x0646;&#x0647; &#x0627;&#x06cc;&#x062f;&#x0647;</string>
+    <string name="package_name">academy.khaneyeidea.teacher</string>
+    <string name="custom_url_scheme">academy.khaneyeidea.teacher</string>
+</resources>

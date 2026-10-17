@@ -8,9 +8,12 @@ import {
   courseDepartments,
   courses,
   departments,
+  faqs,
   getDb,
   pageBlocks,
+  partners,
   posts,
+  siteReviews,
   siteSettings,
   students,
   teachers,
@@ -29,6 +32,9 @@ export const TAGS = {
   teachers: "content:teachers",
   stats: "content:stats",
   posts: "content:posts",
+  faqs: "content:faqs",
+  reviews: "content:reviews",
+  partners: "content:partners",
 } as const;
 
 export async function tenantId(): Promise<string> {
@@ -265,4 +271,37 @@ export async function getPost(slug: string) {
     .from(posts)
     .where(and(eq(posts.tenantId, await tenantId()), eq(posts.slug, slug), eq(posts.status, "published")));
   return p ?? null;
+}
+
+export async function getFaqs() {
+  "use cache";
+  cacheTag(TAGS.faqs);
+  cacheLife("days");
+  return getDb()
+    .select()
+    .from(faqs)
+    .where(and(eq(faqs.tenantId, await tenantId()), eq(faqs.active, true)))
+    .orderBy(asc(faqs.sortOrder));
+}
+
+export async function getPublishedReviews() {
+  "use cache";
+  cacheTag(TAGS.reviews);
+  cacheLife("days");
+  return getDb()
+    .select()
+    .from(siteReviews)
+    .where(and(eq(siteReviews.tenantId, await tenantId()), eq(siteReviews.status, "published")))
+    .orderBy(desc(siteReviews.featured), asc(siteReviews.sortOrder), desc(siteReviews.createdAt));
+}
+
+export async function getPartners() {
+  "use cache";
+  cacheTag(TAGS.partners);
+  cacheLife("days");
+  return getDb()
+    .select()
+    .from(partners)
+    .where(and(eq(partners.tenantId, await tenantId()), eq(partners.active, true)))
+    .orderBy(asc(partners.sortOrder));
 }

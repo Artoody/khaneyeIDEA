@@ -85,6 +85,13 @@
       "when": 1791925752380,
       "tag": "0011_booking_painter_notify",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791932000000,
+      "tag": "0012_site_reviews_partners",
+      "breakpoints": true
     }
   ]
 }

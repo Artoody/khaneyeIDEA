@@ -253,6 +253,36 @@ export const faqs = pgTable("faqs", {
   ...timestamps(),
 });
 
+/** Parent/student site testimonials. Public submits land as pending until an admin publishes. */
+export const reviewStatusEnum = pgEnum("review_status", ["pending", "published", "rejected"]);
+
+export const siteReviews = pgTable(
+  "site_reviews",
+  {
+    id: id(),
+    tenantId: tenantId(),
+    authorName: jsonb("author_name").$type<Localized>().notNull(),
+    body: jsonb("body").$type<Localized>().notNull(),
+    status: reviewStatusEnum("status").notNull().default("pending"),
+    featured: boolean("featured").notNull().default(false),
+    sortOrder: integer("sort_order").notNull().default(0),
+    ...timestamps(),
+  },
+  (t) => [index("site_reviews_tenant_status_idx").on(t.tenantId, t.status)],
+);
+
+/** Partner / contracted orgs shown on the home and about pages. */
+export const partners = pgTable("partners", {
+  id: id(),
+  tenantId: tenantId(),
+  name: jsonb("name").$type<Localized>().notNull(),
+  logoUrl: text("logo_url").notNull(),
+  url: text("url"),
+  active: boolean("active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  ...timestamps(),
+});
+
 export const redirects = pgTable(
   "redirects",
   {

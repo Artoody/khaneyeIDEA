@@ -8,7 +8,16 @@ import { AdminForm, LocalizedInput } from "./fields";
 import { errorText } from "./errors";
 
 export function PagesForm({ blocks, a }: { blocks: Record<string, Localized>; a: AdminDict }) {
-  const titles = { home: a.pages.groupHome, portal: a.pages.groupPortal, courses: a.pages.groupCourses, achievements: a.pages.groupAchievements };
+  const titles = {
+    home: a.pages.groupHome,
+    portal: a.pages.groupPortal,
+    reviews: a.pages.groupReviews,
+    partners: a.pages.groupPartners,
+    courses: a.pages.groupCourses,
+    achievements: a.pages.groupAchievements,
+    about: a.pages.groupAbout,
+    tinkercad: a.pages.groupTinkercad,
+  };
   const groups = PAGE_BLOCK_GROUPS.map((g) => ({ title: titles[g.id], keys: PAGE_BLOCK_KEYS.filter((k) => k.startsWith(g.prefix)) }));
   return (
     <AdminForm action={savePageBlocks} labels={{ save: a.common.save, saved: a.common.saved, error: a.common.error }}>

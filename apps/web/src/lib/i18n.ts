@@ -29,7 +29,16 @@ export function num(n: number | string, l: Locale): string {
 // Interface chrome only. Business content (courses, contacts, page copy...) comes from the database.
 const dict = {
   fa: {
-    nav: { courses: "دوره‌ها", achievements: "افتخارات", blog: "مجله", projects: "پروژه‌ها", branches: "شعبه‌ها", contact: "تماس" },
+    nav: {
+      courses: "دوره‌ها",
+      achievements: "افتخارات",
+      blog: "مجله",
+      projects: "پروژه‌ها",
+      branches: "شعبه‌ها",
+      contact: "تماس",
+      about: "درباره‌ی ما",
+      tinkercad: "تینکرکد",
+    },
     login: "ورود",
     menu: "منو",
     close: "بستن",
@@ -47,7 +56,18 @@ const dict = {
     departments: { title: "هفت مسیر برای ساختن", courses: "دوره", explore: "دیدن دوره‌ها" },
     branches: { title: "نزدیک شما، در چهار نقطه‌ی تهران", appointment: "مراجعه با هماهنگی" },
     portal: { cta: "ورود والدین" },
-    footer: { rights: "همه‌ی حقوق محفوظ است.", follow: "ما را دنبال کنید", call: "تماس" },
+    reviews: {
+      name: "نام شما",
+      body: "متن نظر",
+      submit: "ارسال نظر",
+      thanks: "متشکریم. نظر شما دریافت شد و پس از بررسی نمایش داده می‌شود.",
+      errors: {
+        name: "نام را کامل وارد کنید.",
+        body: "متن نظر باید حداقل حدود یک جمله باشد.",
+        unknown: "مشکلی پیش آمد. دوباره تلاش کنید.",
+      },
+    },
+    footer: { rights: "همه‌ی حقوق محفوظ است.", follow: "ما را دنبال کنید", call: "تماس", more: "بیشتر" },
     auth: {
       title: "ورود به خانه ایده",
       subtitle: "والدین، مربی‌ها و همکاران با شماره‌ی موبایل وارد می‌شوند.",
@@ -193,7 +213,16 @@ const dict = {
     panel: { welcome: "خوش آمدید", logout: "خروج", roles: "نقش‌های شما", soon: "این بخش در حال ساخت است." },
   },
   en: {
-    nav: { courses: "Courses", achievements: "Achievements", blog: "Magazine", projects: "Projects", branches: "Branches", contact: "Contact" },
+    nav: {
+      courses: "Courses",
+      achievements: "Achievements",
+      blog: "Magazine",
+      projects: "Projects",
+      branches: "Branches",
+      contact: "Contact",
+      about: "About",
+      tinkercad: "Tinkercad",
+    },
     login: "Sign in",
     menu: "Menu",
     close: "Close",
@@ -211,7 +240,18 @@ const dict = {
     departments: { title: "Seven ways to build", courses: "courses", explore: "See courses" },
     branches: { title: "Close to you, across Tehran", appointment: "By appointment" },
     portal: { cta: "Parent sign in" },
-    footer: { rights: "All rights reserved.", follow: "Follow us", call: "Call" },
+    reviews: {
+      name: "Your name",
+      body: "Your feedback",
+      submit: "Send feedback",
+      thanks: "Thank you. We received your note and will show it after review.",
+      errors: {
+        name: "Please enter your full name.",
+        body: "Please write at least a short sentence.",
+        unknown: "Something went wrong. Please try again.",
+      },
+    },
+    footer: { rights: "All rights reserved.", follow: "Follow us", call: "Call", more: "More" },
     auth: {
       title: "Sign in to Idea House",
       subtitle: "Parents, coaches and staff sign in with their mobile number.",

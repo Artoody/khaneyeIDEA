@@ -5,7 +5,7 @@ import { siteUrl } from "@/lib/site-url";
 import { getBranches, getSettings } from "@/server/content";
 import { IntroSplash } from "@/components/site/intro-splash";
 import { SiteHeader } from "@/components/site/site-header";
-import { Branches, Departments, Hero, Portal, Proof, SiteFooter } from "@/components/site/home-sections";
+import { Branches, Departments, Hero, Partners, Portal, Proof, Reviews, SiteFooter } from "@/components/site/home-sections";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]">): Promise<Metadata> {
   const { lang } = await params;
@@ -52,6 +52,8 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         <Proof lang={lang} />
         <Departments lang={lang} />
         <Portal lang={lang} />
+        <Reviews lang={lang} />
+        <Partners lang={lang} />
         <Branches lang={lang} />
       </main>
       <SiteFooter lang={lang} />

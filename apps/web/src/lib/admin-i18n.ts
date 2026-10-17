@@ -13,6 +13,8 @@ const fa = {
     teachers: "مربی‌ها",
     achievements: "افتخارات",
     posts: "مجله",
+    reviews: "نظرات",
+    partners: "طرف قراردادها",
     viewSite: "مشاهده‌ی سایت",
     content: "محتوای سایت",
     booking: "رزرو وقت",
@@ -253,16 +255,69 @@ const fa = {
     groupPortal: "بخش پرتال والدین",
     groupCourses: "صفحه‌ی دوره‌ها",
     groupAchievements: "صفحه‌ی افتخارات",
+    groupAbout: "صفحه‌ی درباره‌ی ما",
+    groupTinkercad: "صفحه‌ی تینکرکد / ClassBridge",
+    groupReviews: "بخش نظرات",
+    groupPartners: "بخش طرف قراردادها",
     "home.hero.title": "تیتر اصلی صفحه‌ی اول",
     "home.hero.subtitle": "زیرتیتر صفحه‌ی اول",
     "home.hero.cta": "متن دکمه‌ی اصلی",
     "home.portal.title": "تیتر بخش پرتال والدین",
     "home.portal.body": "متن بخش پرتال والدین",
+    "home.reviews.title": "تیتر نظرات",
+    "home.reviews.subtitle": "زیرتیتر نظرات",
+    "home.reviews.formTitle": "تیتر فرم ثبت نظر",
+    "home.reviews.formHint": "راهنمای فرم ثبت نظر",
+    "home.partners.title": "تیتر طرف قراردادها",
     "courses.title": "تیتر صفحه‌ی دوره‌ها",
     "courses.subtitle": "زیرتیتر صفحه‌ی دوره‌ها",
     "achievements.title": "تیتر صفحه‌ی افتخارات",
     "achievements.subtitle": "زیرتیتر صفحه‌ی افتخارات",
-  } as { help: string; groupHome: string; groupPortal: string; groupCourses: string; groupAchievements: string } & Record<string, string>,
+    "about.hero": "تیتر درباره‌ی ما",
+    "about.lead": "خلاصه‌ی کوتاه",
+    "about.body": "متن اصلی",
+    "about.whyTitle": "تیتر بخش چرا خانه ایده",
+    "about.faqTitle": "تیتر سؤالات متداول",
+    "tinkercad.hero": "تیتر تینکرکد",
+    "tinkercad.lead": "خلاصه‌ی کوتاه",
+    "tinkercad.body": "متن اصلی",
+    "tinkercad.stepsTitle": "تیتر مراحل",
+    "tinkercad.step1": "مرحله ۱",
+    "tinkercad.step2": "مرحله ۲",
+    "tinkercad.step3": "مرحله ۳",
+    "tinkercad.downloadLabel": "متن دکمه‌ی دانلود",
+    "tinkercad.downloadUrl": "آدرس فایل دانلود (GitHub Release)",
+    "tinkercad.teacherNote": "یادداشت برای معلم / اپراتور",
+  } as {
+    help: string;
+    groupHome: string;
+    groupPortal: string;
+    groupCourses: string;
+    groupAchievements: string;
+    groupAbout: string;
+    groupTinkercad: string;
+    groupReviews: string;
+    groupPartners: string;
+  } & Record<string, string>,
+  review: {
+    pending: "در انتظار تأیید";
+    published: "منتشرشده";
+    rejected: "ردشده";
+    approve: "انتشار";
+    reject: "رد";
+    author: "نام نویسنده";
+    body: "متن نظر";
+    status: "وضعیت";
+    featured: "شاخص";
+    new: "نظر جدید";
+  },
+  partner: {
+    new: "طرف قرارداد جدید";
+    name: "نام";
+    logoUrl: "آدرس لوگو";
+    url: "لینک (اختیاری)";
+    logoHelp: "مثل /partners/azad-park.png یا نشانی کامل عکس.";
+  },
 };
 
 type AdminDict = typeof fa;
@@ -279,6 +334,8 @@ const en: AdminDict = {
     teachers: "Coaches",
     achievements: "Achievements",
     posts: "Magazine",
+    reviews: "Reviews",
+    partners: "Partners",
     viewSite: "View site",
     content: "Site content",
     booking: "Booking",
@@ -519,15 +576,58 @@ const en: AdminDict = {
     groupPortal: "Parent portal section",
     groupCourses: "Courses page",
     groupAchievements: "Achievements page",
+    groupAbout: "About page",
+    groupTinkercad: "Tinkercad / ClassBridge page",
+    groupReviews: "Reviews section",
+    groupPartners: "Partners section",
     "home.hero.title": "Home page headline",
     "home.hero.subtitle": "Home page subheadline",
     "home.hero.cta": "Main button text",
     "home.portal.title": "Parent portal section title",
     "home.portal.body": "Parent portal section text",
+    "home.reviews.title": "Reviews headline",
+    "home.reviews.subtitle": "Reviews subheadline",
+    "home.reviews.formTitle": "Review form title",
+    "home.reviews.formHint": "Review form hint",
+    "home.partners.title": "Partners headline",
     "courses.title": "Courses page headline",
     "courses.subtitle": "Courses page subheadline",
     "achievements.title": "Achievements page headline",
     "achievements.subtitle": "Achievements page subheadline",
+    "about.hero": "About page headline",
+    "about.lead": "Short lead",
+    "about.body": "Main body",
+    "about.whyTitle": "Why Idea House heading",
+    "about.faqTitle": "FAQ heading",
+    "tinkercad.hero": "Tinkercad headline",
+    "tinkercad.lead": "Short lead",
+    "tinkercad.body": "Main body",
+    "tinkercad.stepsTitle": "Steps heading",
+    "tinkercad.step1": "Step 1",
+    "tinkercad.step2": "Step 2",
+    "tinkercad.step3": "Step 3",
+    "tinkercad.downloadLabel": "Download button label",
+    "tinkercad.downloadUrl": "Download file URL (GitHub Release)",
+    "tinkercad.teacherNote": "Note for teachers / operators",
+  },
+  review: {
+    pending: "Pending",
+    published: "Published",
+    rejected: "Rejected",
+    approve: "Publish",
+    reject: "Reject",
+    author: "Author name",
+    body: "Review text",
+    status: "Status",
+    featured: "Featured",
+    new: "New review",
+  },
+  partner: {
+    new: "New partner",
+    name: "Name",
+    logoUrl: "Logo URL",
+    url: "Link (optional)",
+    logoHelp: "e.g. /partners/azad-park.png or a full image URL.",
   },
 };
 

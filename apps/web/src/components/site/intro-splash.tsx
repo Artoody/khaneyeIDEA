@@ -14,12 +14,13 @@ import { InlineScript } from "../inline-script";
 const LOGO = { x: 0.31, y: 0.5 };
 const REVEAL_MS = 1300;
 
-const startScript = `(function(){var v=document.getElementById("intro-video");if(!v||!document.documentElement.dataset.intro)return;v.muted=true;v.preload="auto";var p=v.play();if(p&&p.catch)p.catch(function(){})})()`;
+// Prefer sound on; if the browser blocks unmuted autoplay, fall back to muted so the intro still starts.
+const startScript = `(function(){var v=document.getElementById("intro-video");if(!v||!document.documentElement.dataset.intro)return;v.muted=false;v.preload="auto";var p=v.play();if(p&&p.catch)p.catch(function(){v.muted=true;v.play().catch(function(){})})})()`;
 
 export function IntroSplash({ labels }: { labels: { skip: string; soundOn: string; soundOff: string } }) {
   const root = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   // The browser refused to start the video by itself (autoplay policy, power saver): offer a play button.
   const [blocked, setBlocked] = useState(false);
   const done = useRef(false);
@@ -33,6 +34,7 @@ export function IntroSplash({ labels }: { labels: { skip: string; soundOn: strin
       sessionStorage.setItem("intro-seen", "1");
     } catch {}
     document.body.style.overflow = "hidden";
+    setMuted(v.muted);
 
     const reveal = () => {
       if (done.current) return;
@@ -64,11 +66,24 @@ export function IntroSplash({ labels }: { labels: { skip: string; soundOn: strin
       reveal();
     };
     v.addEventListener("error", onError);
-    if (v.paused)
-      v.play().catch((e) => {
-        console.warn("[intro] autoplay blocked", e);
-        setBlocked(true);
-      });
+    const tryPlay = () => {
+      if (!v.paused) {
+        setMuted(v.muted);
+        return;
+      }
+      v.muted = false;
+      v.play()
+        .then(() => setMuted(false))
+        .catch(() => {
+          v.muted = true;
+          setMuted(true);
+          v.play().catch((e) => {
+            console.warn("[intro] autoplay blocked", e);
+            setBlocked(true);
+          });
+        });
+    };
+    tryPlay();
     if (v.ended) reveal();
     const safety = setTimeout(reveal, 9000);
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && reveal();
@@ -88,11 +103,10 @@ export function IntroSplash({ labels }: { labels: { skip: string; soundOn: strin
       <video
         id="intro-video"
         ref={video}
-        // The inline start script sets preload/muted before React attaches; the DOM is right, keep it.
+        // The inline start script starts playback (with sound when the browser allows) before React attaches.
         suppressHydrationWarning
         className="intro-video h-full w-full object-contain sm:object-cover"
         playsInline
-        muted
         preload="auto"
         // First visible frame of the film (not the end frame): something is on screen before the video has buffered.
         poster="/media/intro/start.jpg"
@@ -108,8 +122,12 @@ export function IntroSplash({ labels }: { labels: { skip: string; soundOn: strin
         <button
           type="button"
           onClick={() => {
+            const v = video.current;
+            if (!v) return;
             setBlocked(false);
-            void video.current?.play();
+            v.muted = false;
+            setMuted(false);
+            void v.play();
           }}
           aria-label="Play"
           className="absolute left-1/2 top-1/2 grid size-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur transition hover:bg-white/20"

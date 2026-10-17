@@ -28,6 +28,8 @@ import {
   SidebarSimple,
   NotePencil,
   CalendarBlank,
+  ChatCircleDots,
+  Handshake,
 } from "@phosphor-icons/react";
 
 const ICONS = {
@@ -40,6 +42,8 @@ const ICONS = {
   teachers: ChalkboardTeacher,
   achievements: Trophy,
   posts: Newspaper,
+  reviews: ChatCircleDots,
+  partners: Handshake,
   sessions: CalendarDots,
   reports: NotePencil,
   classes: Chalkboard,

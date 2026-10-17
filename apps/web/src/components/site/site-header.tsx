@@ -25,6 +25,8 @@ export async function SiteHeader({ lang }: { lang: Locale }) {
       section: "achievements",
     },
     { href: href(lang, "/blog"), label: t.nav.blog, page: "/blog", section: "blog" },
+    { href: href(lang, "/about"), label: t.nav.about, page: "/about", section: "about" },
+    { href: href(lang, "/tinkercad"), label: t.nav.tinkercad, page: "/tinkercad", section: "tinkercad" },
     {
       href: href(lang, "/#branches"),
       label: t.nav.branches,

@@ -1,0 +1,11 @@
+﻿.tmp
+.git
+node_modules
+**/.next
+**/dist
+docs/site-export
+design
+apps/teacher-android/android
+apps/teacher-android/dist
+apps/teacher-android/node_modules
+agent-transcripts

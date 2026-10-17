@@ -1,6 +1,6 @@
 # Project status (handover for people and AI agents)
 
-Last updated: 2026-10-15, branch `claude/fervent-gauss-cdro10` (includes the Cursor teacher PWA work).
+Last updated: 2026-10-17 — public `/about` + FAQ + `/tinkercad` (ClassBridge); home reviews + partner logos; teacher APK at `apps/teacher-android/dist/teacher-debug.apk`.
 Read `CLAUDE.md` first (rules), skim `docs/PROJECT-GUIDE.md` (the complete guide, Persian, with the go-live checklist), then this file (what exists and what is missing), then the spec for the area you touch.
 
 ## 1. What the project is

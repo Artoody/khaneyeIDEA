@@ -15,7 +15,8 @@
     "test": "vitest run --passWithNoTests",
     "grant-role": "tsx src/grant-role.ts",
     "legacy-media": "tsx src/legacy-media.ts",
-    "team": "tsx src/team.ts"
+    "team": "tsx src/team.ts",
+    "upsert-site-copy": "tsx src/upsert-site-copy.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",

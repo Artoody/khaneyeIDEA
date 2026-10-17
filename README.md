@@ -1,7 +1,7 @@
 # khaneyeIDEA
 
 Platform for Idea House Academy (خانه ایده): public site (fa/en), admin panel, booking, and Bale/Telegram bots.
-Project rules: `CLAUDE.md`. Product and specs: `docs/`.
+Project rules: `CLAUDE.md`. Product and specs: `docs/`. **Full guide (what exists, how to run and deploy, what must be done before going live): `docs/PROJECT-GUIDE.md`** (Persian).
 
 ## Run locally
 

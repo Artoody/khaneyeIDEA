@@ -1,7 +1,7 @@
 # Project status (handover for people and AI agents)
 
 Last updated: 2026-10-15, branch `claude/fervent-gauss-cdro10` (includes the Cursor teacher PWA work).
-Read `CLAUDE.md` first (rules), then this file (what exists and what is missing), then the spec for the area you touch.
+Read `CLAUDE.md` first (rules), skim `docs/PROJECT-GUIDE.md` (the complete guide, Persian, with the go-live checklist), then this file (what exists and what is missing), then the spec for the area you touch.
 
 ## 1. What the project is
 

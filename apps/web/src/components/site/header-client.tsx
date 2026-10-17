@@ -56,11 +56,23 @@ export function ThemeToggle({ label }: { label: string }) {
 export function HeaderShell({ children }: { children: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const sentinel = document.getElementById("top-sentinel");
-    if (!sentinel) return;
+    // The home page has its own sentinel; every other page gets one here, or the header would stay transparent over the text.
+    let sentinel = document.getElementById("top-sentinel");
+    let made = false;
+    if (!sentinel) {
+      sentinel = document.createElement("div");
+      sentinel.id = "top-sentinel";
+      sentinel.setAttribute("aria-hidden", "true");
+      sentinel.style.cssText = "position:absolute;top:0;left:0;width:1px;height:1px;pointer-events:none";
+      document.body.prepend(sentinel);
+      made = true;
+    }
     const io = new IntersectionObserver(([e]) => setScrolled(!e?.isIntersecting));
     io.observe(sentinel);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      if (made) sentinel.remove();
+    };
   }, []);
   return (
     <header

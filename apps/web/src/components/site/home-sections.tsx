@@ -96,7 +96,7 @@ export async function Proof({ lang }: { lang: Locale }) {
   return (
     <section id="achievements" className="glass scroll-mt-20 border-y border-line">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
-        <h2 className="max-w-2xl font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
+        <h2 className="max-w-5xl font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
           {t.proof.title}
         </h2>
         <dl className="mt-14 grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
@@ -210,7 +210,7 @@ export async function Branches({ lang }: { lang: Locale }) {
   return (
     <section id="branches" className="scroll-mt-20">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
-        <h2 className="max-w-2xl font-display text-3xl font-extrabold tracking-tight sm:text-5xl">{t.branches.title}</h2>
+        <h2 className="max-w-5xl font-display text-3xl font-extrabold tracking-tight sm:text-5xl">{t.branches.title}</h2>
         <div className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
           {branches.map((b) => (
             <article key={b.id} className="flex flex-col bg-surface p-6 sm:p-7">
@@ -274,7 +274,7 @@ export async function Partners({ lang }: { lang: Locale }) {
   return (
     <section id="partners" className="relative scroll-mt-20" aria-label={title}>
       <div className="mx-auto max-w-7xl px-4 pb-10 pt-8 sm:px-6 lg:pb-12">
-        <h2 className="mx-auto max-w-2xl text-center font-display text-2xl font-extrabold tracking-tight text-balance sm:text-3xl">{title}</h2>
+        <h2 className="mx-auto max-w-4xl text-center font-display text-2xl font-extrabold tracking-tight text-balance sm:text-3xl">{title}</h2>
       </div>
       <div className="marquee relative overflow-hidden py-4 [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
         <div className="marquee-track flex w-max items-center gap-4 px-4 sm:gap-5">

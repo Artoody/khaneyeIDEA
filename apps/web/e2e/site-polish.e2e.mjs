@@ -109,6 +109,20 @@ for (const [lang, path] of [["fa", "/"], ["en", "/en"]]) {
   }
   await c.close();
 }
+// 4. on a wide screen the section headings use the width they have (one line), and a heading never ends in a lone word
+{
+  const c = await b.newContext({ viewport: { width: 1920, height: 1000 } });
+  await c.addInitScript(() => sessionStorage.setItem("intro-seen", "1"));
+  const q = await c.newPage();
+  await q.goto(base + "/", { timeout: 120000 });
+  await q.waitForSelector("main h2");
+  await q.waitForTimeout(1200);
+  const heads = await q.evaluate(() =>
+    [...document.querySelectorAll("main h2")].map((h) => ({ t: (h.textContent || "").trim().slice(0, 40), lines: Math.round(h.getBoundingClientRect().height / parseFloat(getComputedStyle(h).lineHeight || "1") || 1) })),
+  );
+  check("home headings fit on one line at 1920 px", heads.every((h) => h.lines <= 1), heads.filter((h) => h.lines > 1).map((h) => h.t).join("|"));
+  await c.close();
+}
 console.log(R.join("\n"));
 console.log("review left pending: e2e-" + tag);
 await b.close();

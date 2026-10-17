@@ -423,3 +423,9 @@ html[data-intro="reveal"] .hero-enter-canvas { transition-delay: 150ms; transiti
 .page-enter { animation: page-enter 0.28s ease-out both; }
 @keyframes nav-trickle { from { transform: scaleX(0.04); } to { transform: scaleX(0.92); } }
 @media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
+
+/* Line breaks: headings split evenly (no lonely last word), running text avoids a short last line. */
+@layer base {
+  h1, h2, h3, h4 { text-wrap: balance; }
+  p, li, blockquote, figcaption, dd { text-wrap: pretty; }
+}

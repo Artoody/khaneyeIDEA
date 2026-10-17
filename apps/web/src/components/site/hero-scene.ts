@@ -7,6 +7,8 @@ type Pt = [number, number];
 
 const AMBER: [number, number, number] = [255, 179, 71];
 const HOT: [number, number, number] = [255, 243, 222];
+/** On a light page amber needs to be deeper to read: the same lines, darker and a little stronger. */
+const DEEP: [number, number, number] = [196, 108, 0];
 const rgba = (c: number[], a: number) => `rgba(${c[0]! | 0},${c[1]! | 0},${c[2]! | 0},${a})`;
 const mix = (a: number[], b: number[], k: number) => a.map((v, i) => v + (b[i]! - v) * k);
 const clamp = (x: number, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -215,8 +217,8 @@ export class HeroScene {
     const cx = this.w / 2,
       cy = this.h / 2,
       s = this.logoScale();
-    const traceA = this.dark ? 0.22 : 0.3;
-    const traceC = this.dark ? AMBER : [154, 88, 0];
+    const traceA = this.dark ? 0.22 : 0.5;
+    const traceC = this.dark ? AMBER : DEEP;
 
     // background circuit, slight parallax against the pointer
     g.save();
@@ -244,7 +246,7 @@ export class HeroScene {
       if (t > tr.out) {
         const cyc = tr.P.total + 400;
         const sOut = tr.P.total - (((t - tr.out) * tr.speed) % cyc);
-        if (sOut > 0) this.comet(g, tr.P, sOut, 70, 1.8, this.dark ? 0.55 : 0.45, true);
+        if (sOut > 0) this.comet(g, tr.P, sOut, 70, 1.8, this.dark ? 0.55 : 0.85, true);
       }
     }
     g.restore();
@@ -343,7 +345,7 @@ export class HeroScene {
       const a = reverse ? s + tail * (i / n) : s - tail * (1 - i / n);
       const b = reverse ? s + tail * ((i + 1) / n) : s - tail * (1 - (i + 1) / n);
       const k = reverse ? 1 - (i + 1) / n : (i + 1) / n;
-      g.strokeStyle = rgba(mix(AMBER, HOT, this.dark ? k : k * 0.3), alpha * k * k);
+      g.strokeStyle = rgba(this.dark ? mix(AMBER, HOT, k) : mix(DEEP, AMBER, k * 0.4), alpha * k * k);
       g.lineWidth = w * (0.6 + k);
       g.beginPath();
       if (subPath(g, P, Math.min(a, b), Math.max(a, b))) g.stroke();
@@ -405,7 +407,7 @@ export class HeroScene {
         g.lineWidth = STROKE * 0.26;
         for (let j = 0; j < 2; j++) {
           const ss = ((t - 2.7) * 120 + (j * p.P.total) / 2 + p.P.total * 0.37 * PATHS.indexOf(p)) % (p.P.total + 60);
-          g.strokeStyle = rgba(HOT, (this.dark ? 0.32 : 0.5) * idle);
+          g.strokeStyle = this.dark ? rgba(HOT, 0.32 * idle) : rgba(DEEP, 0.75 * idle);
           g.beginPath();
           if (subPath(g, p.P, ss - 34, ss)) g.stroke();
         }

@@ -300,23 +300,23 @@ const fa = {
     groupPartners: string;
   } & Record<string, string>,
   review: {
-    pending: "در انتظار تأیید";
-    published: "منتشرشده";
-    rejected: "ردشده";
-    approve: "انتشار";
-    reject: "رد";
-    author: "نام نویسنده";
-    body: "متن نظر";
-    status: "وضعیت";
-    featured: "شاخص";
-    new: "نظر جدید";
+    pending: "در انتظار تأیید",
+    published: "منتشرشده",
+    rejected: "ردشده",
+    approve: "انتشار",
+    reject: "رد",
+    author: "نام نویسنده",
+    body: "متن نظر",
+    status: "وضعیت",
+    featured: "شاخص",
+    new: "نظر جدید",
   },
   partner: {
-    new: "طرف قرارداد جدید";
-    name: "نام";
-    logoUrl: "آدرس لوگو";
-    url: "لینک (اختیاری)";
-    logoHelp: "مثل /partners/azad-park.png یا نشانی کامل عکس.";
+    new: "طرف قرارداد جدید",
+    name: "نام",
+    logoUrl: "آدرس لوگو",
+    url: "لینک (اختیاری)",
+    logoHelp: "مثل /partners/azad-park.png یا نشانی کامل عکس.",
   },
 };
 

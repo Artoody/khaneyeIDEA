@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { dirOf, isLocale, LOCALES, pick, type Locale } from "@/lib/i18n";
 import { getSettings } from "@/server/content";
 import { InlineScript } from "@/components/inline-script";
+import { ThemeSync } from "@/components/site/theme-sync";
 import { siteUrl } from "@/lib/site-url";
 import "../globals.css";
 
@@ -70,7 +71,10 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       <head>
         <InlineScript html={themeScript} />
       </head>
-      <body className="min-h-[100dvh] text-ink">{children}</body>
+      <body className="min-h-[100dvh] text-ink">
+        <ThemeSync lang={l} />
+        {children}
+      </body>
     </html>
   );
 }

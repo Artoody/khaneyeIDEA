@@ -19,6 +19,12 @@
   --on-accent: #1a1206;
   --grid-dot: rgb(14 17 22 / 0.07);
   --trace: rgb(154 88 0 / 0.16);
+  /* scroll backdrop: deeper amber and firmer ink so the circuit reads on a light page */
+  --bd-base: color-mix(in oklab, var(--ink) 18%, transparent);
+  --bd-trace: color-mix(in oklab, #c46c00 72%, transparent);
+  --bd-line: color-mix(in oklab, var(--ink) 36%, transparent);
+  --bd-node: color-mix(in oklab, var(--ink) 40%, transparent);
+  --bd-glow: color-mix(in oklab, #c46c00 80%, transparent);
   color-scheme: light;
 }
 
@@ -35,6 +41,11 @@
   --on-accent: #1a1206;
   --grid-dot: rgb(238 239 242 / 0.06);
   --trace: rgb(255 179 71 / 0.18);
+  --bd-base: color-mix(in oklab, var(--ink) 9%, transparent);
+  --bd-trace: color-mix(in oklab, var(--accent) 60%, transparent);
+  --bd-line: color-mix(in oklab, var(--ink) 22%, transparent);
+  --bd-node: color-mix(in oklab, var(--ink) 14%, transparent);
+  --bd-glow: color-mix(in oklab, var(--accent) 70%, transparent);
   color-scheme: dark;
 }
 
@@ -222,7 +233,7 @@ html[data-intro="reveal"] .hero-enter-canvas { transition-delay: 150ms; transiti
 .scroll-backdrop { transition: opacity 0.2s linear; }
 .backdrop-line {
   fill: none;
-  stroke: color-mix(in oklab, var(--ink) 22%, transparent);
+  stroke: var(--bd-line);
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
   stroke-linecap: round;
@@ -230,25 +241,25 @@ html[data-intro="reveal"] .hero-enter-canvas { transition-delay: 150ms; transiti
 }
 .backdrop-node {
   fill: var(--bg);
-  stroke: color-mix(in oklab, var(--ink) 14%, transparent);
+  stroke: var(--bd-node);
   stroke-width: 2;
   transition: fill 0.5s, stroke 0.5s;
 }
-.backdrop-node[data-on="true"] { fill: color-mix(in oklab, var(--accent) 70%, transparent); stroke: var(--accent); }
+.backdrop-node[data-on="true"] { fill: var(--bd-glow); stroke: var(--bd-trace); }
 .backdrop-chip rect,
 .backdrop-chip line {
   fill: none;
-  stroke: color-mix(in oklab, var(--ink) 14%, transparent);
+  stroke: var(--bd-node);
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
   transition: stroke 0.8s;
 }
 .backdrop-chip-led { fill: color-mix(in oklab, var(--ink) 10%, transparent); transition: fill 0.8s, filter 0.8s; }
 .backdrop-chip[data-on="true"] rect,
-.backdrop-chip[data-on="true"] line { stroke: color-mix(in oklab, var(--accent) 70%, transparent); }
+.backdrop-chip[data-on="true"] line { stroke: var(--bd-trace); }
 .backdrop-chip[data-on="true"] .backdrop-chip-led { fill: var(--accent); filter: drop-shadow(0 0 18px var(--accent)); }
-.backdrop-trace-base { stroke: color-mix(in oklab, var(--ink) 9%, transparent); }
-.backdrop-trace { stroke: color-mix(in oklab, var(--accent) 60%, transparent); }
+.backdrop-trace-base { stroke: var(--bd-base); }
+.backdrop-trace { stroke: var(--bd-trace); }
 
 /* Panels over the scroll backdrop: translucent, with a soft blur where it is cheap (larger screens). */
 .glass {
@@ -397,3 +408,12 @@ html[data-intro="reveal"] .hero-enter-canvas { transition-delay: 150ms; transiti
 @media (prefers-reduced-motion: reduce) {
   .sheet, .live-dot { animation: none; }
 }
+
+/* Review composer: a native dialog with a soft blurred backdrop. */
+.dialog-card { border: 0; padding: 0; background: transparent; max-width: none; max-height: none; margin: auto; }
+.dialog-card::backdrop { background: rgb(8 10 14 / 0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.dialog-card[open] { animation: dialog-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.dialog-card[open]::backdrop { animation: fade-in 0.25s ease-out both; }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes rv-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .dialog-card[open], .dialog-card[open]::backdrop { animation: none; } }

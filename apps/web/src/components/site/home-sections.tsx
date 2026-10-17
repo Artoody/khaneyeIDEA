@@ -30,7 +30,8 @@ import {
 import { HeroCanvas } from "./hero-canvas";
 import { LogoMark } from "./logo-mark";
 import { DeptScene } from "./dept-scenes";
-import { ReviewForm } from "./review-form";
+import { ReviewCarousel } from "./review-carousel";
+import { ReviewComposer } from "./review-composer";
 
 const DEPT_ICON: Record<DeptIconKey, Icon> & Record<string, Icon | undefined> = {
   robot: Robot,
@@ -234,43 +235,30 @@ export async function Reviews({ lang }: { lang: Locale }) {
   const t = getDict(lang);
   const [blocks, rows] = await Promise.all([getBlocks(), getPublishedReviews()]);
   const shown = lang === "en" ? rows.filter((r) => r.body.en) : rows;
+  const labels = { name: t.reviews.name, body: t.reviews.body, submit: t.reviews.submit, thanks: t.reviews.thanks, chars: t.reviews.chars, errors: t.reviews.errors };
+  const composer = (
+    <ReviewComposer lang={lang} title={pick(blocks["home.reviews.formTitle"], lang)} hint={pick(blocks["home.reviews.formHint"], lang)} closeLabel={t.reviews.close} labels={labels} />
+  );
   return (
-    <section id="reviews" className="scroll-mt-20 border-y border-line bg-elevated/40">
+    <section id="reviews" className="relative scroll-mt-20">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
-        <div className="max-w-2xl">
-          <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-5xl">
-            {pick(blocks["home.reviews.title"], lang)}
-          </h2>
-          <p className="mt-4 text-lg leading-relaxed text-muted">{pick(blocks["home.reviews.subtitle"], lang)}</p>
-        </div>
-        {shown.length > 0 && (
-          <ul className="mt-12 grid gap-4 md:grid-cols-3">
-            {shown.map((r) => (
-              <li key={r.id} className="flex flex-col border-s-2 border-accent bg-surface/80 ps-5 pe-4 py-5 sm:ps-6">
-                <p className="flex-1 text-base leading-relaxed text-ink/90">&ldquo;{pick(r.body, lang)}&rdquo;</p>
-                <p className="mt-5 text-sm font-semibold text-ink">{pick(r.authorName, lang)}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-        <div className="mt-14 grid gap-8 border-t border-line pt-12 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-16">
           <div>
-            <h3 className="font-display text-xl font-extrabold tracking-tight sm:text-2xl">
-              {pick(blocks["home.reviews.formTitle"], lang)}
-            </h3>
-            <p className="mt-2 max-w-[42ch] text-sm leading-relaxed text-muted">
-              {pick(blocks["home.reviews.formHint"], lang)}
-            </p>
+            <h2 className="font-display text-3xl font-extrabold tracking-tight text-balance sm:text-5xl">{pick(blocks["home.reviews.title"], lang)}</h2>
+            <p className="mt-4 max-w-[40ch] text-lg leading-relaxed text-muted">{pick(blocks["home.reviews.subtitle"], lang)}</p>
+            <div className="mt-8">{composer}</div>
           </div>
-          <ReviewForm
-            labels={{
-              name: t.reviews.name,
-              body: t.reviews.body,
-              submit: t.reviews.submit,
-              thanks: t.reviews.thanks,
-              errors: t.reviews.errors,
-            }}
-          />
+          {shown.length > 0 ? (
+            <ReviewCarousel
+              lang={lang}
+              items={shown.map((r) => ({ id: r.id, body: pick(r.body, lang), author: pick(r.authorName, lang) }))}
+              labels={{ prev: t.reviews.prev, next: t.reviews.next, count: t.reviews.count }}
+            />
+          ) : (
+            <div className="rounded-[var(--radius-card)] border border-dashed border-line p-8 text-muted sm:p-10">
+              <p className="text-lg leading-relaxed">{t.reviews.empty}</p>
+            </div>
+          )}
         </div>
       </div>
     </section>
@@ -282,37 +270,31 @@ export async function Partners({ lang }: { lang: Locale }) {
   const rows = await getPartners();
   if (!rows.length) return null;
   const title = pick(blocks["home.partners.title"], lang);
-  const loop = rows.length < 6 ? [...rows, ...rows] : rows;
+  const loop = rows.length < 8 ? [...rows, ...rows] : rows;
   return (
-    <section id="partners" className="scroll-mt-20" aria-label={title}>
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
-        <h2 className="mx-auto max-w-3xl text-center font-display text-2xl font-extrabold tracking-tight text-balance sm:text-3xl">
-          {title}
-        </h2>
+    <section id="partners" className="relative scroll-mt-20" aria-label={title}>
+      <div className="mx-auto max-w-7xl px-4 pb-10 pt-8 sm:px-6 lg:pb-12">
+        <h2 className="mx-auto max-w-2xl text-center font-display text-2xl font-extrabold tracking-tight text-balance sm:text-3xl">{title}</h2>
       </div>
-      <div className="marquee relative overflow-hidden border-y border-line py-8 [mask-image:linear-gradient(90deg,transparent,black_6%,black_94%,transparent)]">
-        <div className="marquee-track flex w-max items-center gap-10 px-6 sm:gap-14">
+      <div className="marquee relative overflow-hidden py-4 [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
+        <div className="marquee-track flex w-max items-center gap-4 px-4 sm:gap-5">
           {[...loop, ...loop].map((p, i) => {
             const label = pick(p.name, lang);
-            const inner = (
-              <img
-                src={p.logoUrl}
-                alt={label}
-                width={120}
-                height={80}
-                loading="lazy"
-                className="h-14 w-auto max-w-[140px] object-contain opacity-80 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0 sm:h-16"
-              />
+            const tile = (
+              <span className="group/logo block h-24 w-40 rounded-2xl border border-line bg-white p-4 shadow-[0_8px_24px_-18px_rgb(0_0_0/0.4)] transition duration-300 hover:-translate-y-1 hover:border-accent/60 hover:shadow-[0_16px_34px_-18px_rgb(0_0_0/0.5)] sm:h-28 sm:w-48">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.logoUrl} alt={label} width={160} height={96} loading="lazy" className="size-full object-contain opacity-80 grayscale transition duration-300 group-hover/logo:opacity-100 group-hover/logo:grayscale-0" />
+              </span>
             );
             return (
-              <div key={`${p.id}-${i}`} aria-hidden={i >= loop.length} className="flex shrink-0 items-center justify-center">
+              <div key={`${p.id}-${i}`} aria-hidden={i >= loop.length} className="shrink-0">
                 {p.url ? (
-                  <a href={p.url} target="_blank" rel="noopener noreferrer" title={label} className="block">
-                    {inner}
+                  <a href={p.url} target="_blank" rel="noopener noreferrer" title={label} className="block rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/40">
+                    {tile}
                   </a>
                 ) : (
                   <span title={label} className="block">
-                    {inner}
+                    {tile}
                   </span>
                 )}
               </div>

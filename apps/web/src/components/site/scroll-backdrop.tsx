@@ -109,7 +109,7 @@ export function ScrollBackdrop() {
       // 3. 3D model: in (0.45-0.6), out (0.85-0.97); rotation follows scroll plus a slow idle spin.
       const mIn = seg(p, 0.45, 0.6) - seg(p, 0.85, 0.97);
       model.style.opacity = String(mIn);
-      model.setAttribute("transform", `translate(${vw - (vw > 1200 ? 230 : 170) + (1 - mIn) * 220} 260) scale(${vw > 1200 ? 1 : 0.75})`);
+      model.setAttribute("transform", `translate(${vw - (vw > 1200 ? 230 : vw > 700 ? 170 : 90) + (1 - mIn) * 220} 260) scale(${vw > 1200 ? 1 : vw > 700 ? 0.75 : 0.5})`);
       if (mIn > 0) {
         const ay = p * 7 + idle * 0.25;
         const ax = 0.5 + p * 3;

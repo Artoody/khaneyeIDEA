@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { and, count, eq, gte } from "drizzle-orm";
 import { getDb, siteReviews } from "@khaneyeidea/db";
 import { tenantId } from "@/server/content";
 
@@ -28,6 +29,12 @@ export async function submitSiteReview(_: ReviewSubmitState, form: FormData): Pr
   if (parsed.data.website) return { ok: true };
 
   const tid = await tenantId();
+  // A flood guard: more than 20 waiting reviews in the last hour means a bot, not families.
+  const [{ n } = { n: 0 }] = await getDb()
+    .select({ n: count() })
+    .from(siteReviews)
+    .where(and(eq(siteReviews.tenantId, tid), eq(siteReviews.status, "pending"), gte(siteReviews.createdAt, new Date(Date.now() - 3_600_000))));
+  if (n >= 20) return { error: "unknown" };
   await getDb().insert(siteReviews).values({
     tenantId: tid,
     authorName: { fa: parsed.data.name, en: "" },
